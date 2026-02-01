@@ -335,32 +335,35 @@
                     </div>
                 </div>
 
-                <div id="section-history" class="view-section hidden fade-in">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-header-title">Historial y Reportes</h3>
-                            <div class="header-actions">
-                                <button class="btn-clean" data-action="clean-filters" title="Limpiar Filtros">Limpiar filtros</button>
-                                <button class="btn-report-red" onclick="app.printReport('view')">Exportar Vista</button>
-                                <button class="btn-report-dark" onclick="app.printReport('all')">Exportar Todo</button>
-                            </div>
-                        </div>
-                        <div class="filter-grid">
-                            <div><label class="filter-label">Búsqueda General</label><input type="text" id="filter-text" placeholder="Buscar..."></div>
-                            <div><label class="filter-label">Código</label><select id="filter-code"></select></div>
-                            <div><label class="filter-label">Ubicación</label><select id="filter-loc"></select></div>
-                            <div><label class="filter-label">Estado</label><select id="filter-status"><option value="">Todos</option><option value="Reparado">Reparado</option><option value="No Reparado">No Reparado</option><option value="Pendiente">Pendiente</option></select></div>
-                            <div><label class="filter-label">Después de:</label><input type="date" id="filter-date-start"></div>
-                            <div><label class="filter-label">Antes de:</label><input type="date" id="filter-date-end"></div>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead><tr><th>Estado</th><th>Código</th><th>Tipo</th><th>Ubicación</th><th>Entrada</th><th>Salida</th><th>Detalles</th></tr></thead>
-                                <tbody data-js="tbody-history"></tbody>
-                            </table>
+            <div id="section-history" class="view-section hidden fade-in">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-header-title">Historial y Reportes</h3>
+                        <div class="header-actions">
+                            <button class="btn-clean" data-action="clean-filters" title="Limpiar Filtros">Limpiar filtros</button>
+                            <button class="btn-report-red" onclick="app.printReport('view')">Generar reporte con filtros</button>
+                            <button class="btn-report-dark" onclick="app.printReport('all')">Generar reporte completo</button>
                         </div>
                     </div>
+                    <div class="filter-grid">
+                        <div><label class="filter-label">Búsqueda General</label><input type="text" id="filter-text" placeholder="Buscar en todos los campos..."></div>
+                        <div><label class="filter-label">Tipo de Equipo</label><select id="filter-type"></select></div>
+                        <div><label class="filter-label">Marca</label><select id="filter-brand"></select></div>
+                        <div><label class="filter-label">Estado</label><select id="filter-status"><option value="">Todos</option><option value="Reparado">Reparado</option><option value="No Reparado">No Reparado</option><option value="Pendiente">Pendiente</option></select></div>
+                        <div><label class="filter-label">Edificio</label><select id="filter-building"></select></div>
+                        <div><label class="filter-label">Piso</label><select id="filter-floor-h"></select></div>
+                        <div><label class="filter-label">Área</label><select id="filter-area-h"></select></div>
+                        <div><label class="filter-label">Después de (dd/mm/aaaa)</label><input type="date" id="filter-date-start" placeholder="dd/mm/aaaa"></div>
+                        <div><label class="filter-label">Antes de (dd/mm/aaaa)</label><input type="date" id="filter-date-end" placeholder="dd/mm/aaaa"></div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead><tr><th>Estado</th><th>Código</th><th>Tipo</th><th>Ubicación</th><th>Entrada</th><th>Salida</th><th>Detalles</th></tr></thead>
+                            <tbody data-js="tbody-history"></tbody>
+                        </table>
+                    </div>
                 </div>
+            </div>
 
                 <div id="section-data" class="view-section hidden fade-in">
                     <div class="card">
@@ -474,21 +477,167 @@
     <div id="modal-finish" class="modal-overlay hidden"><div class="modal-container"><div class="modal-header"><strong class="font-bold">Finalizar Servicio</strong><button data-action="close-modal-finish" class="btn-icon text-white"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div><div class="modal-body"><form data-js="form-finish"><input type="hidden" name="id"><div class="ticket-info-box"><span class="filter-label">Equipo</span><span class="font-bold text-primary block" data-js="modal-code-display">PC-00X</span><span class="text-secondary text-sm" data-js="modal-desc-display">...</span></div><div class="mb-2"><label class="filter-label">Estatus Final</label><select name="status"><option value="Reparado">Reparado</option><option value="No Reparado">No Reparado</option></select></div><div class="mb-2"><label class="filter-label">Fecha de Salida</label><input type="date" name="date_out" required></div><div class="mb-2"><label class="filter-label">Solución / Observaciones</label><textarea name="solution" rows="3" maxlength="300" required></textarea></div><div class="modal-footer"><button type="button" class="btn-secondary" data-action="close-modal-finish">Cancelar</button><button type="submit" class="btn-success">Finalizar</button></div></form></div></div></div>
 
     <!-- MODAL NUEVA UBICACIÓN -->
-    <div id="modal-location" class="modal-overlay hidden"><div class="modal-container"><div class="modal-header"><strong>Nueva Ubicación</strong><button data-action="close-modals" style="background:none; border:none; color:white; font-size:1.5rem;">&times;</button></div><div class="modal-body"><form data-js="form-location">
-        <div class="grid-2 mb-2"><div><label class="filter-label">Edificio</label><input type="text" name="building" required placeholder="Ej. Edificio 01"></div><div><label class="filter-label">Piso</label><input type="text" name="floor" required placeholder="Ej. Piso 02"></div></div>
-        <div class="grid-2 mb-2"><div><label class="filter-label">Área</label><input type="text" name="area" required placeholder="Ej. Laboratorio"></div><div><label class="filter-label">Habitación (Opcional)</label><input type="text" name="room" placeholder="Ej. Lab A"></div></div>
-        <div class="modal-footer"><button type="submit" class="btn-primary">Crear Ubicación</button></div>
-    </form></div></div></div>
+            <div id="modal-location" class="modal-overlay hidden">
+                <div class="modal-container">
+                    <div class="modal-header">
+                        <strong>Nueva Ubicación</strong>
+                        <button data-action="close-modal-location" class="btn-icon text-white"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                    </div>
+                    <div class="modal-body">
+                        <form data-js="form-location">
+                            <div class="mb-2">
+                                <label class="filter-label">Edificio (Especial)</label>
+                                <select name="building" id="loc-building" required class="w-full"><option value="">-- Seleccione --</option></select>
+                                <small style="color:#f59e0b; display:block; margin-top:4px;">+ <a href="#" onclick="document.getElementById('input-loc-building').style.display='block'; return false;" style="color:#f59e0b; text-decoration:underline;">Agregar edificio</a></small>
+                                <input type="text" id="input-loc-building" style="display:none; margin-top:4px;" placeholder="Nuevo edificio" class="w-full">
+                            </div>
+                            <div class="mb-2">
+                                <label class="filter-label">Piso (Especial)</label>
+                                <select name="floor" id="loc-floor" required class="w-full"><option value="">-- Seleccione --</option></select>
+                                <small style="color:#f59e0b; display:block; margin-top:4px;">+ <a href="#" onclick="document.getElementById('input-loc-floor').style.display='block'; return false;" style="color:#f59e0b; text-decoration:underline;">Agregar piso</a></small>
+                                <input type="text" id="input-loc-floor" style="display:none; margin-top:4px;" placeholder="Nuevo piso" class="w-full">
+                            </div>
+                            <div class="mb-2">
+                                <label class="filter-label">Área (Especial)</label>
+                                <select name="area" id="loc-area" required class="w-full"><option value="">-- Seleccione --</option></select>
+                                <small style="color:#f59e0b; display:block; margin-top:4px;">+ <a href="#" onclick="document.getElementById('input-loc-area').style.display='block'; return false;" style="color:#f59e0b; text-decoration:underline;">Agregar área</a></small>
+                                <input type="text" id="input-loc-area" style="display:none; margin-top:4px;" placeholder="Nueva área" class="w-full">
+                            </div>
+                            <div class="mb-2">
+                                <label class="filter-label">Habitación (Especial, Opcional)</label>
+                                <select name="room" id="loc-room" class="w-full"><option value="">-- Seleccione --</option></select>
+                                <small style="color:#f59e0b; display:block; margin-top:4px;">+ <a href="#" onclick="document.getElementById('input-loc-room').style.display='block'; return false;" style="color:#f59e0b; text-decoration:underline;">Agregar habitación</a></small>
+                                <input type="text" id="input-loc-room" style="display:none; margin-top:4px;" placeholder="Nueva habitación" class="w-full">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn-secondary" data-action="close-modal-location">Cancelar</button>
+                                <button type="submit" class="btn-primary">Crear Ubicación</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
 
-    <!-- MODAL NUEVO DISPOSITIVO -->
-    <div id="modal-device" class="modal-overlay hidden"><div class="modal-container"><div class="modal-header"><strong>Nuevo Dispositivo</strong><button data-action="close-modals" style="background:none; border:none; color:white; font-size:1.5rem;">&times;</button></div><div class="modal-body"><form data-js="form-device">
-        <div class="mb-2"><label class="filter-label">Ubicación (Obligatorio)</label><select name="locationId" id="new-dev-location" required class="w-full"><option value="">Cargando...</option></select></div>
-        <div class="grid-2 mb-2"><div><label class="filter-label">Tipo (Obligatorio)</label><input type="text" name="type" required list="list-types"></div><div><label class="filter-label">Código</label><input type="text" name="code"></div></div>
-        <div class="grid-2 mb-2"><div><label class="filter-label">Marca</label><input type="text" name="brand"></div><div><label class="filter-label">Modelo</label><input type="text" name="model"></div></div>
-        <div class="grid-2 mb-2"><div><label class="filter-label">Serial</label><input type="text" name="serial"></div><div><label class="filter-label">S.O.</label><input type="text" name="os"></div></div>
-        <datalist id="list-types"></datalist>
-        <div class="modal-footer"><button type="submit" class="btn-primary">Crear Dispositivo</button></div>
-    </form></div></div></div>
+            <!-- MODAL NUEVO DISPOSITIVO -->
+            <div id="modal-device" class="modal-overlay hidden">
+                <div class="modal-container">
+                    <div class="modal-header">
+                        <strong>Nuevo Dispositivo</strong>
+                        <button data-action="close-modal-device" class="btn-icon text-white"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                    </div>
+                    <div class="modal-body">
+                        <form data-js="form-device">
+                            <!-- Ubicación Jerárquica -->
+                            <div class="mb-3 p-2 border rounded" style="background:#f9fafb;">
+                                <span class="filter-label text-primary mb-1">Seleccionar Ubicación</span>
+                                <div class="grid-2 gap-2 mb-2">
+                                    <div>
+                                        <label class="filter-label">Edificio (Obligatorio)</label>
+                                        <select id="new-dev-building" required class="w-full"><option value="">-- Seleccione --</option></select>
+                                    </div>
+                                    <div>
+                                        <label class="filter-label">Piso</label>
+                                        <select id="new-dev-floor" class="w-full"><option value="">-- Seleccione --</option></select>
+                                    </div>
+                                </div>
+                                <div class="grid-2 gap-2 mb-2">
+                                    <div>
+                                        <label class="filter-label">Área</label>
+                                        <select id="new-dev-area" class="w-full"><option value="">-- Seleccione --</option></select>
+                                    </div>
+                                    <div>
+                                        <label class="filter-label">Habitación</label>
+                                        <input type="text" name="room" id="new-dev-room" class="w-full">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Campos Principales -->
+                            <div class="mb-3 p-2 border rounded" style="background:#f9fafb;">
+                                <span class="filter-label text-primary mb-1">Datos del Dispositivo</span>
+                                <div class="grid-2 gap-2 mb-2">
+                                    <div>
+                                        <label class="filter-label">Tipo (Obligatorio)</label>
+                                        <select name="type" id="new-dev-type" required class="w-full"><option value="">-- Seleccione --</option></select>
+                                        <small style="color:#f59e0b; display:block; margin-top:4px;">+ <a href="#" onclick="document.getElementById('input-new-type').style.display='block'; return false;" style="color:#f59e0b; text-decoration:underline;">Agregar tipo</a></small>
+                                        <input type="text" id="input-new-type" style="display:none; margin-top:4px;" placeholder="Nuevo tipo" class="w-full">
+                                    </div>
+                                    <div>
+                                        <label class="filter-label">Código</label>
+                                        <input type="text" name="code" class="w-full">
+                                    </div>
+                                </div>
+                                <div class="grid-2 gap-2 mb-2">
+                                    <div>
+                                        <label class="filter-label">Marca (Especial)</label>
+                                        <select name="brand" id="new-dev-brand" class="w-full"><option value="">-- Seleccione --</option></select>
+                                        <small style="color:#f59e0b; display:block; margin-top:4px;">+ <a href="#" onclick="document.getElementById('input-new-brand').style.display='block'; return false;" style="color:#f59e0b; text-decoration:underline;">Agregar marca</a></small>
+                                        <input type="text" id="input-new-brand" style="display:none; margin-top:4px;" placeholder="Nueva marca" class="w-full">
+                                    </div>
+                                    <div>
+                                        <label class="filter-label">Modelo</label>
+                                        <input type="text" name="model" class="w-full">
+                                    </div>
+                                </div>
+                                <div class="grid-2 gap-2 mb-2">
+                                    <div>
+                                        <label class="filter-label">Serial</label>
+                                        <input type="text" name="serial" class="w-full">
+                                    </div>
+                                    <div>
+                                        <label class="filter-label">S.O. (Especial)</label>
+                                        <select name="os" id="new-dev-os" class="w-full"><option value="">-- Seleccione --</option></select>
+                                        <small style="color:#f59e0b; display:block; margin-top:4px;">+ <a href="#" onclick="document.getElementById('input-new-os').style.display='block'; return false;" style="color:#f59e0b; text-decoration:underline;">Agregar S.O.</a></small>
+                                        <input type="text" id="input-new-os" style="display:none; margin-top:4px;" placeholder="Nuevo S.O." class="w-full">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Campos Avanzados -->
+                            <div class="mb-3 p-2 border rounded" style="background:#f9fafb;">
+                                <span class="filter-label text-primary mb-1">Especificaciones Técnicas</span>
+                                <div class="grid-2 gap-2 mb-2">
+                                    <div>
+                                        <label class="filter-label">RAM (Especial)</label>
+                                        <select name="ram" id="new-dev-ram" class="w-full"><option value="">-- Seleccione --</option></select>
+                                        <small style="color:#f59e0b; display:block; margin-top:4px;">+ <a href="#" onclick="document.getElementById('input-new-ram').style.display='block'; return false;" style="color:#f59e0b; text-decoration:underline;">Agregar RAM</a></small>
+                                        <input type="text" id="input-new-ram" style="display:none; margin-top:4px;" placeholder="Nueva RAM" class="w-full">
+                                    </div>
+                                    <div>
+                                        <label class="filter-label">Procesador (Especial)</label>
+                                        <select name="processor" id="new-dev-processor" class="w-full"><option value="">-- Seleccione --</option></select>
+                                        <small style="color:#f59e0b; display:block; margin-top:4px;">+ <a href="#" onclick="document.getElementById('input-new-processor').style.display='block'; return false;" style="color:#f59e0b; text-decoration:underline;">Agregar procesador</a></small>
+                                        <input type="text" id="input-new-processor" style="display:none; margin-top:4px;" placeholder="Nuevo procesador" class="w-full">
+                                    </div>
+                                </div>
+                                <div class="grid-2 gap-2 mb-2">
+                                    <div>
+                                        <label class="filter-label">Arquitectura (Especial)</label>
+                                        <select name="architecture" id="new-dev-architecture" class="w-full"><option value="">-- Seleccione --</option></select>
+                                        <small style="color:#f59e0b; display:block; margin-top:4px;">+ <a href="#" onclick="document.getElementById('input-new-architecture').style.display='block'; return false;" style="color:#f59e0b; text-decoration:underline;">Agregar arquitectura</a></small>
+                                        <input type="text" id="input-new-architecture" style="display:none; margin-top:4px;" placeholder="Nueva arquitectura" class="w-full">
+                                    </div>
+                                    <div>
+                                        <label class="filter-label">Almacenamiento (Especial)</label>
+                                        <select name="storage" id="new-dev-storage" class="w-full"><option value="">-- Seleccione --</option></select>
+                                        <small style="color:#f59e0b; display:block; margin-top:4px;">+ <a href="#" onclick="document.getElementById('input-new-storage').style.display='block'; return false;" style="color:#f59e0b; text-decoration:underline;">Agregar almacenamiento</a></small>
+                                        <input type="text" id="input-new-storage" style="display:none; margin-top:4px;" placeholder="Nuevo almacenamiento" class="w-full">
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="filter-label">Detalles / Notas</label>
+                                    <textarea name="details" class="w-full" maxlength="500" placeholder="Notas adicionales del dispositivo"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn-secondary" data-action="close-modal-device">Cancelar</button>
+                                <button type="submit" class="btn-primary">Crear Dispositivo</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => { app.init(); });
@@ -505,9 +654,33 @@
                 
                 // Intentar restaurar sesión
                 if(!this.checkSession()) {
-                    this.dom.viewApp.classList.add('hidden'); 
-                    this.dom.viewLogin.classList.remove('hidden');
+                    if(this.dom.viewApp) this.dom.viewApp.classList.add('hidden'); 
+                    if(this.dom.viewLogin) this.dom.viewLogin.classList.remove('hidden');
                 }
+            },
+            cacheDOM() {
+                const els = ['view-login', 'view-app', 'login-form', 'login-error', 'sidebar', 'user-role', 'modal-ticket', 'form-ticket', 'modal-finish', 'form-finish', 'modal-location', 'form-location', 'modal-device', 'form-device', 'tbody-workshop', 'tbody-history', 'tbody-devices', 'tbody-periods', 'dev-filter-q', 'dev-pagination-info', 'ticket-device-select', 'new-dev-location', 'form-settings-admin', 'form-settings-user'];
+                els.forEach(id => { const el = document.getElementById(id) || document.querySelector(`[data-js="${id}"]`); if(el) this.dom[id] = el; });
+                this.dom.navLinks = document.querySelectorAll('.nav-link');
+                this.dom.ticketFilterBuild = document.getElementById('ticket-filter-build');
+                this.dom.ticketFilterFloor = document.getElementById('ticket-filter-floor');
+                this.dom.ticketFilterArea = document.getElementById('ticket-filter-area');
+                this.dom.devFilterType = document.getElementById('dev-filter-type');
+                this.dom.devFilterBrand = document.getElementById('dev-filter-brand');
+                this.dom.devFilterOS = document.getElementById('dev-filter-os');
+                this.dom.devPrevBtn = document.getElementById('dev-prev-btn');
+                this.dom.devNextBtn = document.getElementById('dev-next-btn');
+                this.dom.filterText = document.getElementById('filter-text');
+                this.dom.filterCode = document.getElementById('filter-code');
+                this.dom.filterLoc = document.getElementById('filter-loc');
+                this.dom.filterType = document.getElementById('filter-type');
+                this.dom.filterBrand = document.getElementById('filter-brand');
+                this.dom.filterBuilding = document.getElementById('filter-building');
+                this.dom.filterFloorH = document.getElementById('filter-floor-h');
+                this.dom.filterAreaH = document.getElementById('filter-area-h');
+                this.dom.filterStatus = document.getElementById('filter-status');
+                this.dom.filterDateStart = document.getElementById('filter-date-start');
+                this.dom.filterDateEnd = document.getElementById('filter-date-end');
             },
             cacheDOM() {
                 const els = ['view-login', 'view-app', 'login-form', 'login-error', 'sidebar', 'user-role', 'modal-ticket', 'form-ticket', 'modal-finish', 'form-finish', 'modal-location', 'form-location', 'modal-device', 'form-device', 'tbody-workshop', 'tbody-history', 'tbody-devices', 'tbody-periods', 'dev-filter-q', 'dev-pagination-info', 'ticket-device-select', 'new-dev-location', 'form-settings-admin', 'form-settings-user'];
@@ -549,22 +722,82 @@
                 }));
                 
                 // Botones específicos para cerrar modales
-                document.querySelector('[data-action="close-modal-ticket"]').addEventListener('click', () => {
-                    console.log("[v0] Cerrando modal ticket");
-                    this.dom['modal-ticket'].classList.add('hidden');
+                document.querySelectorAll('[data-action="close-modal-ticket"]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log("[v0] Cerrando modal ticket");
+                        if(this.dom['modal-ticket']) this.dom['modal-ticket'].classList.add('hidden');
+                    });
                 });
-                document.querySelector('[data-action="close-modal-finish"]').addEventListener('click', () => {
-                    console.log("[v0] Cerrando modal finish");
-                    this.dom['modal-finish'].classList.add('hidden');
+                document.querySelectorAll('[data-action="close-modal-finish"]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log("[v0] Cerrando modal finish");
+                        if(this.dom['modal-finish']) this.dom['modal-finish'].classList.add('hidden');
+                    });
+                });
+                document.querySelectorAll('[data-action="close-modal-device"]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log("[v0] Cerrando modal device");
+                        if(this.dom['modal-device']) this.dom['modal-device'].classList.add('hidden');
+                    });
+                });
+                document.querySelectorAll('[data-action="close-modal-location"]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log("[v0] Cerrando modal location");
+                        if(this.dom['modal-location']) this.dom['modal-location'].classList.add('hidden');
+                    });
                 });
                 
+                // Cerrar modales haciendo click en el backdrop
+                document.querySelectorAll('.modal-overlay').forEach(overlay => {
+                    overlay.addEventListener('click', (e) => {
+                        if(e.target === overlay) {
+                            console.log("[v0] Cerrando modal por backdrop");
+                            overlay.classList.add('hidden');
+                        }
+                    });
+                });
+
                 document.querySelector('[data-action="open-create-modal"]').addEventListener('click', () => { 
                     console.log("[v0] Abriendo modal ticket");
-                    this.dom['modal-ticket'].classList.remove('hidden'); 
+                    if(this.dom['modal-ticket']) this.dom['modal-ticket'].classList.remove('hidden'); 
                     this.fetchModalDevices(); 
                 });
-                document.querySelector('[data-action="open-loc-modal"]').addEventListener('click', () => this.dom['modal-location'].classList.remove('hidden'));
-                document.querySelector('[data-action="open-dev-modal"]').addEventListener('click', () => { this.dom['modal-device'].classList.remove('hidden'); this.loadLocationsForSelect(); });
+                document.querySelector('[data-action="open-loc-modal"]').addEventListener('click', () => {
+                    if(this.dom['modal-location']) this.dom['modal-location'].classList.remove('hidden');
+                });
+                document.querySelector('[data-action="open-dev-modal"]').addEventListener('click', () => { 
+                    if(this.dom['modal-device']) this.dom['modal-device'].classList.remove('hidden'); 
+                    this.loadLocationsForSelect();
+                    this.initSpecialSelects();
+                    this.initDeviceHierarchy();
+                });
+                
+                // Event listeners para jerarquía de dispositivo
+                const buildingSelect = document.getElementById('new-dev-building');
+                if(buildingSelect) {
+                    buildingSelect.addEventListener('change', () => {
+                        const building = buildingSelect.value;
+                        const floorSelect = document.getElementById('new-dev-floor');
+                        const areaSelect = document.getElementById('new-dev-area');
+                        if(!building) {
+                            floorSelect.innerHTML = '<option value="">-- Seleccione --</option>';
+                            areaSelect.innerHTML = '<option value="">-- Seleccione --</option>';
+                            return;
+                        }
+                        
+                        // Cargar pisos para este edificio
+                        const floors = this.state.config.floors || [];
+                        floorSelect.innerHTML = '<option value="">-- Seleccione --</option>' + floors.map(f => `<option value="${f}">${f}</option>`).join('');
+                    });
+                }
 
                 this.dom['form-ticket'].addEventListener('submit', e => { e.preventDefault(); this.saveTicket(new FormData(e.target)); });
                 this.dom['form-finish'].addEventListener('submit', e => { e.preventDefault(); this.finishTicket(new FormData(e.target)); });
@@ -609,13 +842,30 @@
                 // History Filters
                 document.querySelector('[data-js="search-workshop"]').addEventListener('keyup', (e) => this.renderWorkshop(e.target.value));
                 const triggerHistory = () => { this.validateDates(); this.renderHistory(); };
-                this.dom.filterText.addEventListener('keyup', triggerHistory); this.dom.filterCode.addEventListener('change', triggerHistory);
-                this.dom.filterLoc.addEventListener('change', triggerHistory); this.dom.filterStatus.addEventListener('change', triggerHistory);
-                this.dom.filterDateStart.addEventListener('change', triggerHistory); this.dom.filterDateEnd.addEventListener('change', triggerHistory);
-                document.querySelector('[data-action="clean-filters"]').addEventListener('click', () => { 
-                    this.dom.filterText.value = ''; this.dom.filterCode.value = ''; this.dom.filterLoc.value = ''; 
-                    this.dom.filterStatus.value = ''; this.dom.filterDateStart.value = ''; this.dom.filterDateEnd.value = ''; 
-                    this.renderHistory(); 
+                if(this.dom.filterText) this.dom.filterText.addEventListener('keyup', triggerHistory);
+                if(this.dom.filterCode) this.dom.filterCode.addEventListener('change', triggerHistory);
+                if(this.dom.filterLoc) this.dom.filterLoc.addEventListener('change', triggerHistory);
+                if(this.dom.filterType) this.dom.filterType.addEventListener('change', triggerHistory);
+                if(this.dom.filterBrand) this.dom.filterBrand.addEventListener('change', triggerHistory);
+                if(this.dom.filterBuilding) this.dom.filterBuilding.addEventListener('change', triggerHistory);
+                if(this.dom.filterFloorH) this.dom.filterFloorH.addEventListener('change', triggerHistory);
+                if(this.dom.filterAreaH) this.dom.filterAreaH.addEventListener('change', triggerHistory);
+                if(this.dom.filterStatus) this.dom.filterStatus.addEventListener('change', triggerHistory);
+                if(this.dom.filterDateStart) this.dom.filterDateStart.addEventListener('change', triggerHistory);
+                if(this.dom.filterDateEnd) this.dom.filterDateEnd.addEventListener('change', triggerHistory);
+                document.querySelector('[data-action="clean-filters"]').addEventListener('click', () => {
+                    if(this.dom.filterText) this.dom.filterText.value = '';
+                    if(this.dom.filterCode) this.dom.filterCode.value = '';
+                    if(this.dom.filterLoc) this.dom.filterLoc.value = '';
+                    if(this.dom.filterType) this.dom.filterType.value = '';
+                    if(this.dom.filterBrand) this.dom.filterBrand.value = '';
+                    if(this.dom.filterBuilding) this.dom.filterBuilding.value = '';
+                    if(this.dom.filterFloorH) this.dom.filterFloorH.value = '';
+                    if(this.dom.filterAreaH) this.dom.filterAreaH.value = '';
+                    if(this.dom.filterStatus) this.dom.filterStatus.value = '';
+                    if(this.dom.filterDateStart) this.dom.filterDateStart.value = '';
+                    if(this.dom.filterDateEnd) this.dom.filterDateEnd.value = '';
+                    this.renderHistory();
                 });
             },
             async login(fd) {
@@ -691,9 +941,18 @@
                 this.dom.ticketFilterBuild.innerHTML = createOpts(this.state.config.buildings);
                 this.dom.ticketFilterFloor.innerHTML = createOpts(this.state.config.floors);
                 document.getElementById('ticket-filter-area').innerHTML = createOpts(this.state.config.areas);
-                this.dom.listCodes.innerHTML = (this.state.config.codes||[]).map(c=>`<option value="${c}">`).join('');
-                this.dom.filterCode.innerHTML = createOpts(this.state.config.codes);
-                this.dom.filterLoc.innerHTML = createOpts(this.state.config.locations);
+                if(this.dom.filterCode) this.dom.filterCode.innerHTML = createOpts(this.state.config.codes);
+                if(this.dom.filterLoc) this.dom.filterLoc.innerHTML = createOpts(this.state.config.locations);
+                // Filtros del Historial
+                if(this.dom.filterType) this.dom.filterType.innerHTML = createOpts(this.state.config.types);
+                if(this.dom.filterBrand) this.dom.filterBrand.innerHTML = createOpts(this.state.config.brands);
+                if(this.dom.filterBuilding) this.dom.filterBuilding.innerHTML = createOpts(this.state.config.buildings);
+                if(this.dom.filterFloorH) this.dom.filterFloorH.innerHTML = createOpts(this.state.config.floors);
+                if(this.dom.filterAreaH) this.dom.filterAreaH.innerHTML = createOpts(this.state.config.areas);
+                
+                // Inicializar selects especiales y localizaciones
+                this.loadLocationsForSelect();
+                this.initSpecialSelects();
             },
             async fetchTickets() {
                 console.log("[v0] Cargando tickets...");
@@ -789,18 +1048,174 @@
                 sel.innerHTML = '<option value="">-- Seleccione --</option>' + data.data.map(d => `<option value="${d.id}" data-code="${d.code}">${d.type} - ${d.location} - ${d.brand} - ${d.model} - ${d.serial}</option>`).join('');
             },
             async loadLocationsForSelect() {
-                const res = await fetch('/api/locations');
-                const data = await res.json();
-                document.getElementById('new-dev-location').innerHTML = data.map(l => `<option value="${l.id}">${l.fullText}</option>`).join('');
+                console.log("[v0] Cargando ubicaciones para selects especiales");
+                
+                // Cargar edificios
+                if(this.state.config.buildings && this.state.config.buildings.length > 0) {
+                    const buildingSelect = document.getElementById('new-dev-building');
+                    const locBuildingSelect = document.getElementById('loc-building');
+                    if(buildingSelect) buildingSelect.innerHTML = '<option value="">-- Seleccione --</option>' + this.state.config.buildings.map(b => `<option value="${b}">${b}</option>`).join('');
+                    if(locBuildingSelect) locBuildingSelect.innerHTML = '<option value="">-- Seleccione --</option>' + this.state.config.buildings.map(b => `<option value="${b}">${b}</option>`).join('');
+                }
+                
+                // Cargar tipos, marcas, sistemas operativos
+                if(this.state.config.types && this.state.config.types.length > 0) {
+                    const typeSelect = document.getElementById('new-dev-type');
+                    if(typeSelect) typeSelect.innerHTML = '<option value="">-- Seleccione --</option>' + this.state.config.types.map(t => `<option value="${t}">${t}</option>`).join('');
+                }
+                if(this.state.config.brands && this.state.config.brands.length > 0) {
+                    const brandSelect = document.getElementById('new-dev-brand');
+                    if(brandSelect) brandSelect.innerHTML = '<option value="">-- Seleccione --</option>' + this.state.config.brands.map(b => `<option value="${b}">${b}</option>`).join('');
+                }
+                if(this.state.config.os && this.state.config.os.length > 0) {
+                    const osSelect = document.getElementById('new-dev-os');
+                    if(osSelect) osSelect.innerHTML = '<option value="">-- Seleccione --</option>' + this.state.config.os.map(o => `<option value="${o}">${o}</option>`).join('');
+                }
+            },
+            initDeviceHierarchy() {
+                console.log("[v0] Inicializando jerarquía de dispositivo");
+                const floorSelect = document.getElementById('new-dev-floor');
+                const areaSelect = document.getElementById('new-dev-area');
+                
+                if(floorSelect) {
+                    floorSelect.addEventListener('change', () => {
+                        const floor = floorSelect.value;
+                        if(!floor) {
+                            areaSelect.innerHTML = '<option value="">-- Seleccione --</option>';
+                            return;
+                        }
+                        
+                        // Cargar áreas para este piso
+                        const areas = this.state.config.areas || [];
+                        areaSelect.innerHTML = '<option value="">-- Seleccione --</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
+                    });
+                }
+            },
+            initSpecialSelects() {
+                console.log("[v0] Inicializando selects especiales");
+                
+                // Función helper para agregar nuevo valor a un select especial
+                const addSpecialValue = (selectId, inputId, fieldName, callback) => {
+                    const inputEl = document.getElementById(inputId);
+                    const selectEl = document.getElementById(selectId);
+                    
+                    if(!inputEl || !selectEl) return;
+                    
+                    const addBtn = document.createElement('button');
+                    addBtn.textContent = 'Añadir';
+                    addBtn.className = 'btn-primary btn-sm';
+                    addBtn.style.marginTop = '4px';
+                    addBtn.onclick = (e) => {
+                        e.preventDefault();
+                        const value = inputEl.value.trim();
+                        if(!value) { alert('Por favor ingrese un valor'); return; }
+                        
+                        // Verificar si ya existe
+                        const exists = Array.from(selectEl.options).some(opt => opt.value === value);
+                        if(exists) { alert('Este valor ya existe'); return; }
+                        
+                        // Agregar opción
+                        const opt = document.createElement('option');
+                        opt.value = value;
+                        opt.textContent = value;
+                        selectEl.appendChild(opt);
+                        selectEl.value = value;
+                        
+                        inputEl.value = '';
+                        inputEl.style.display = 'none';
+                        console.log("[v0] Nuevo", fieldName, "agregado:", value);
+                        if(callback) callback();
+                    };
+                    
+                    inputEl.parentNode.appendChild(addBtn);
+                };
+                
+                // Inicializar cada select especial
+                addSpecialValue('new-dev-type', 'input-new-type', 'tipo');
+                addSpecialValue('new-dev-brand', 'input-new-brand', 'marca');
+                addSpecialValue('new-dev-os', 'input-new-os', 'S.O.');
+                addSpecialValue('new-dev-ram', 'input-new-ram', 'RAM');
+                addSpecialValue('new-dev-processor', 'input-new-processor', 'procesador');
+                addSpecialValue('new-dev-architecture', 'input-new-architecture', 'arquitectura');
+                addSpecialValue('new-dev-storage', 'input-new-storage', 'almacenamiento');
+                
+                addSpecialValue('loc-building', 'input-loc-building', 'edificio');
+                addSpecialValue('loc-floor', 'input-loc-floor', 'piso');
+                addSpecialValue('loc-area', 'input-loc-area', 'área');
+                addSpecialValue('loc-room', 'input-loc-room', 'habitación');
             },
             async saveLocation(fd) {
-                await fetch('/api/locations', { method:'POST', body: JSON.stringify(Object.fromEntries(fd)) });
-                alert("Ubicación creada"); document.querySelector('[data-action="close-modals"]').click(); this.fetchConfig();
+                const data = Object.fromEntries(fd);
+                console.log("[v0] Guardando ubicación:", data);
+                
+                // Obtener valores de inputs especiales si están visibles
+                const inputBuilding = document.getElementById('input-loc-building');
+                const inputFloor = document.getElementById('input-loc-floor');
+                const inputArea = document.getElementById('input-loc-area');
+                const inputRoom = document.getElementById('input-loc-room');
+                
+                if(inputBuilding?.style.display !== 'none' && inputBuilding?.value) data.building = inputBuilding.value;
+                if(inputFloor?.style.display !== 'none' && inputFloor?.value) data.floor = inputFloor.value;
+                if(inputArea?.style.display !== 'none' && inputArea?.value) data.area = inputArea.value;
+                if(inputRoom?.style.display !== 'none' && inputRoom?.value) data.room = inputRoom.value;
+                
+                const res = await fetch('/api/locations', { method:'POST', body: JSON.stringify(data) });
+                if(res.ok) {
+                    alert("Ubicación creada");
+                    document.getElementById('modal-location').classList.add('hidden');
+                    this.fetchConfig();
+                    this.loadLocationsForSelect();
+                } else {
+                    alert("Error al crear ubicación");
+                }
             },
             async saveDevice(fd) {
-                const data = Object.fromEntries(fd); data.locationId = parseInt(data.locationId);
-                await fetch('/api/devices', { method:'POST', body: JSON.stringify(data) });
-                alert("Dispositivo creado"); document.querySelector('[data-action="close-modals"]').click(); this.fetchDevices(); this.fetchConfig();
+                const data = Object.fromEntries(fd);
+                console.log("[v0] Guardando dispositivo...");
+                
+                // Construir ubicación desde selects jerárquicos
+                const building = document.getElementById('new-dev-building').value;
+                const floor = document.getElementById('new-dev-floor').value || '';
+                const area = document.getElementById('new-dev-area').value || '';
+                const room = document.getElementById('new-dev-room').value || '';
+                
+                if(!building) {
+                    alert("El edificio es obligatorio");
+                    return;
+                }
+                
+                data.location = `${building} - ${floor} - ${area} ${room}`.trim();
+                
+                // Obtener valores de inputs especiales si están visibles
+                const inputType = document.getElementById('input-new-type');
+                const inputBrand = document.getElementById('input-new-brand');
+                const inputOS = document.getElementById('input-new-os');
+                const inputRAM = document.getElementById('input-new-ram');
+                const inputProcessor = document.getElementById('input-new-processor');
+                const inputArchitecture = document.getElementById('input-new-architecture');
+                const inputStorage = document.getElementById('input-new-storage');
+                
+                if(inputType?.style.display !== 'none' && inputType?.value) data.type = inputType.value;
+                if(inputBrand?.style.display !== 'none' && inputBrand?.value) data.brand = inputBrand.value;
+                if(inputOS?.style.display !== 'none' && inputOS?.value) data.os = inputOS.value;
+                if(inputRAM?.style.display !== 'none' && inputRAM?.value) data.ram = inputRAM.value;
+                if(inputProcessor?.style.display !== 'none' && inputProcessor?.value) data.processor = inputProcessor.value;
+                if(inputArchitecture?.style.display !== 'none' && inputArchitecture?.value) data.architecture = inputArchitecture.value;
+                if(inputStorage?.style.display !== 'none' && inputStorage?.value) data.storage = inputStorage.value;
+                
+                console.log("[v0] Dispositivo a guardar:", data);
+                
+                const res = await fetch('/api/devices', { method:'POST', body: JSON.stringify(data) });
+                if(res.ok) {
+                    alert("Dispositivo creado");
+                    document.getElementById('modal-device').classList.add('hidden');
+                    this.fetchDevices();
+                    this.fetchConfig();
+                } else {
+                    const err = await res.text();
+                    console.log("[v0] Error:", err);
+                    alert("Error al crear dispositivo: " + err);
+                }
             },
             async saveTicket(fd) {
                 const d = Object.fromEntries(fd); 
@@ -1062,17 +1477,23 @@
             renderHistory() {
                 console.log("[v0] Renderizando historial con filtros...");
                 const textF = (this.dom.filterText.value || '').toLowerCase();
-                const codeF = this.dom.filterCode.value;
-                const locF = this.dom.filterLoc.value;
-                const statusF = this.dom.filterStatus.value;
-                const dateStartF = this.dom.filterDateStart.value;
-                const dateEndF = this.dom.filterDateEnd.value;
+                const typeF = this.dom.filterType?.value || '';
+                const brandF = this.dom.filterBrand?.value || '';
+                const statusF = this.dom.filterStatus?.value || '';
+                const buildingF = this.dom.filterBuilding?.value || '';
+                const floorF = this.dom.filterFloorH?.value || '';
+                const areaF = this.dom.filterAreaH?.value || '';
+                const dateStartF = this.dom.filterDateStart?.value || '';
+                const dateEndF = this.dom.filterDateEnd?.value || '';
                 
                 this.state.filteredTickets = this.state.tickets.filter(t => {
                     if(textF && !JSON.stringify(t).toLowerCase().includes(textF)) return false;
-                    if(codeF && t.code !== codeF) return false;
-                    if(locF && t.location !== locF) return false;
+                    if(typeF && t.type !== typeF) return false;
+                    if(brandF && t.brand !== brandF) return false;
                     if(statusF && t.status !== statusF) return false;
+                    if(buildingF && !t.location?.includes(buildingF)) return false;
+                    if(floorF && !t.location?.includes(floorF)) return false;
+                    if(areaF && !t.location?.includes(areaF)) return false;
                     if(dateStartF && t.dateIn < dateStartF) return false;
                     if(dateEndF && t.dateIn > dateEndF) return false;
                     return true;
