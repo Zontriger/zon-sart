@@ -162,6 +162,10 @@
         .modal-body { padding: 1.5rem; overflow-y: auto; }
         .modal-footer { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
         .ticket-info-box { background: #f0f7ff; padding: 0.75rem; border-radius: 4px; margin-bottom: 1rem; }
+        
+        .special-select-input { max-height: 100px; }
+        .special-select-input.hidden { display: none; }
+        .special-select-select.hidden { display: none; }
     
         .card.period { grid-column: span 1; padding: 1rem; background-image: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark)); color: var(--color-white); border-top: none !important; }
         @media (min-width: 1024px) { .card.period { grid-column: span 2; } }
@@ -353,8 +357,8 @@
                         <div><label class="filter-label">Edificio</label><select id="filter-building"></select></div>
                         <div><label class="filter-label">Piso</label><select id="filter-floor-h"></select></div>
                         <div><label class="filter-label">Área</label><select id="filter-area-h"></select></div>
-                        <div><label class="filter-label">Después de (dd/mm/aaaa)</label><input type="date" id="filter-date-start" placeholder="dd/mm/aaaa"></div>
-                        <div><label class="filter-label">Antes de (dd/mm/aaaa)</label><input type="date" id="filter-date-end" placeholder="dd/mm/aaaa"></div>
+                        <div><label class="filter-label">Después de</label><input type="date" id="filter-date-start"></div>
+                        <div><label class="filter-label">Antes de</label><input type="date" id="filter-date-end"></div>
                     </div>
                     <div class="table-responsive">
                         <table class="table">
@@ -486,28 +490,36 @@
                     <div class="modal-body">
                         <form data-js="form-location">
                             <div class="mb-2">
-                                <label class="filter-label">Edificio (Especial)</label>
-                                <select name="building" id="loc-building" required class="w-full"><option value="">-- Seleccione --</option></select>
-                                <small style="color:#f59e0b; display:block; margin-top:4px;">+ <a href="#" onclick="document.getElementById('input-loc-building').style.display='block'; return false;" style="color:#f59e0b; text-decoration:underline;">Agregar edificio</a></small>
-                                <input type="text" id="input-loc-building" style="display:none; margin-top:4px;" placeholder="Nuevo edificio" class="w-full">
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="filter-label">Edificio</label>
+                                    <a href="#" class="special-select-toggle" data-target="loc-building" onclick="return app.toggleSpecialSelect(event, 'loc-building')" style="color:#f59e0b; text-decoration:none; font-size:0.8rem; font-weight:bold;">+ Agregar</a>
+                                </div>
+                                <select name="building" id="loc-building" required class="w-full special-select-select"><option value="">-- Seleccione --</option></select>
+                                <input type="text" id="input-loc-building" class="w-full special-select-input hidden" placeholder="Nuevo edificio">
                             </div>
                             <div class="mb-2">
-                                <label class="filter-label">Piso (Especial)</label>
-                                <select name="floor" id="loc-floor" required class="w-full"><option value="">-- Seleccione --</option></select>
-                                <small style="color:#f59e0b; display:block; margin-top:4px;">+ <a href="#" onclick="document.getElementById('input-loc-floor').style.display='block'; return false;" style="color:#f59e0b; text-decoration:underline;">Agregar piso</a></small>
-                                <input type="text" id="input-loc-floor" style="display:none; margin-top:4px;" placeholder="Nuevo piso" class="w-full">
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="filter-label">Piso</label>
+                                    <a href="#" class="special-select-toggle" data-target="loc-floor" onclick="return app.toggleSpecialSelect(event, 'loc-floor')" style="color:#f59e0b; text-decoration:none; font-size:0.8rem; font-weight:bold;">+ Agregar</a>
+                                </div>
+                                <select name="floor" id="loc-floor" required class="w-full special-select-select"><option value="">-- Seleccione --</option></select>
+                                <input type="text" id="input-loc-floor" class="w-full special-select-input hidden" placeholder="Nuevo piso">
                             </div>
                             <div class="mb-2">
-                                <label class="filter-label">Área (Especial)</label>
-                                <select name="area" id="loc-area" required class="w-full"><option value="">-- Seleccione --</option></select>
-                                <small style="color:#f59e0b; display:block; margin-top:4px;">+ <a href="#" onclick="document.getElementById('input-loc-area').style.display='block'; return false;" style="color:#f59e0b; text-decoration:underline;">Agregar área</a></small>
-                                <input type="text" id="input-loc-area" style="display:none; margin-top:4px;" placeholder="Nueva área" class="w-full">
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="filter-label">Área</label>
+                                    <a href="#" class="special-select-toggle" data-target="loc-area" onclick="return app.toggleSpecialSelect(event, 'loc-area')" style="color:#f59e0b; text-decoration:none; font-size:0.8rem; font-weight:bold;">+ Agregar</a>
+                                </div>
+                                <select name="area" id="loc-area" required class="w-full special-select-select"><option value="">-- Seleccione --</option></select>
+                                <input type="text" id="input-loc-area" class="w-full special-select-input hidden" placeholder="Nueva área">
                             </div>
                             <div class="mb-2">
-                                <label class="filter-label">Habitación (Especial, Opcional)</label>
-                                <select name="room" id="loc-room" class="w-full"><option value="">-- Seleccione --</option></select>
-                                <small style="color:#f59e0b; display:block; margin-top:4px;">+ <a href="#" onclick="document.getElementById('input-loc-room').style.display='block'; return false;" style="color:#f59e0b; text-decoration:underline;">Agregar habitación</a></small>
-                                <input type="text" id="input-loc-room" style="display:none; margin-top:4px;" placeholder="Nueva habitación" class="w-full">
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="filter-label">Habitación (Opcional)</label>
+                                    <a href="#" class="special-select-toggle" data-target="loc-room" onclick="return app.toggleSpecialSelect(event, 'loc-room')" style="color:#f59e0b; text-decoration:none; font-size:0.8rem; font-weight:bold;">+ Agregar</a>
+                                </div>
+                                <select name="room" id="loc-room" class="w-full special-select-select"><option value="">-- Seleccione --</option></select>
+                                <input type="text" id="input-loc-room" class="w-full special-select-input hidden" placeholder="Nueva habitación">
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn-secondary" data-action="close-modal-location">Cancelar</button>
@@ -557,10 +569,12 @@
                                 <span class="filter-label text-primary mb-1">Datos del Dispositivo</span>
                                 <div class="grid-2 gap-2 mb-2">
                                     <div>
-                                        <label class="filter-label">Tipo (Obligatorio)</label>
-                                        <select name="type" id="new-dev-type" required class="w-full"><option value="">-- Seleccione --</option></select>
-                                        <small style="color:#f59e0b; display:block; margin-top:4px;">+ <a href="#" onclick="document.getElementById('input-new-type').style.display='block'; return false;" style="color:#f59e0b; text-decoration:underline;">Agregar tipo</a></small>
-                                        <input type="text" id="input-new-type" style="display:none; margin-top:4px;" placeholder="Nuevo tipo" class="w-full">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <label class="filter-label">Tipo (Obligatorio)</label>
+                                            <a href="#" class="special-select-toggle" data-target="new-dev-type" onclick="return app.toggleSpecialSelect(event, 'new-dev-type')" style="color:#f59e0b; text-decoration:none; font-size:0.8rem; font-weight:bold;">+ Agregar</a>
+                                        </div>
+                                        <select name="type" id="new-dev-type" required class="w-full special-select-select"><option value="">-- Seleccione --</option></select>
+                                        <input type="text" id="input-new-dev-type" class="w-full special-select-input hidden" placeholder="Nuevo tipo">
                                     </div>
                                     <div>
                                         <label class="filter-label">Código</label>
@@ -569,10 +583,12 @@
                                 </div>
                                 <div class="grid-2 gap-2 mb-2">
                                     <div>
-                                        <label class="filter-label">Marca (Especial)</label>
-                                        <select name="brand" id="new-dev-brand" class="w-full"><option value="">-- Seleccione --</option></select>
-                                        <small style="color:#f59e0b; display:block; margin-top:4px;">+ <a href="#" onclick="document.getElementById('input-new-brand').style.display='block'; return false;" style="color:#f59e0b; text-decoration:underline;">Agregar marca</a></small>
-                                        <input type="text" id="input-new-brand" style="display:none; margin-top:4px;" placeholder="Nueva marca" class="w-full">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <label class="filter-label">Marca</label>
+                                            <a href="#" class="special-select-toggle" data-target="new-dev-brand" onclick="return app.toggleSpecialSelect(event, 'new-dev-brand')" style="color:#f59e0b; text-decoration:none; font-size:0.8rem; font-weight:bold;">+ Agregar</a>
+                                        </div>
+                                        <select name="brand" id="new-dev-brand" class="w-full special-select-select"><option value="">-- Seleccione --</option></select>
+                                        <input type="text" id="input-new-dev-brand" class="w-full special-select-input hidden" placeholder="Nueva marca">
                                     </div>
                                     <div>
                                         <label class="filter-label">Modelo</label>
@@ -585,10 +601,12 @@
                                         <input type="text" name="serial" class="w-full">
                                     </div>
                                     <div>
-                                        <label class="filter-label">S.O. (Especial)</label>
-                                        <select name="os" id="new-dev-os" class="w-full"><option value="">-- Seleccione --</option></select>
-                                        <small style="color:#f59e0b; display:block; margin-top:4px;">+ <a href="#" onclick="document.getElementById('input-new-os').style.display='block'; return false;" style="color:#f59e0b; text-decoration:underline;">Agregar S.O.</a></small>
-                                        <input type="text" id="input-new-os" style="display:none; margin-top:4px;" placeholder="Nuevo S.O." class="w-full">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <label class="filter-label">S.O.</label>
+                                            <a href="#" class="special-select-toggle" data-target="new-dev-os" onclick="return app.toggleSpecialSelect(event, 'new-dev-os')" style="color:#f59e0b; text-decoration:none; font-size:0.8rem; font-weight:bold;">+ Agregar</a>
+                                        </div>
+                                        <select name="os" id="new-dev-os" class="w-full special-select-select"><option value="">-- Seleccione --</option></select>
+                                        <input type="text" id="input-new-dev-os" class="w-full special-select-input hidden" placeholder="Nuevo S.O.">
                                     </div>
                                 </div>
                             </div>
@@ -598,30 +616,38 @@
                                 <span class="filter-label text-primary mb-1">Especificaciones Técnicas</span>
                                 <div class="grid-2 gap-2 mb-2">
                                     <div>
-                                        <label class="filter-label">RAM (Especial)</label>
-                                        <select name="ram" id="new-dev-ram" class="w-full"><option value="">-- Seleccione --</option></select>
-                                        <small style="color:#f59e0b; display:block; margin-top:4px;">+ <a href="#" onclick="document.getElementById('input-new-ram').style.display='block'; return false;" style="color:#f59e0b; text-decoration:underline;">Agregar RAM</a></small>
-                                        <input type="text" id="input-new-ram" style="display:none; margin-top:4px;" placeholder="Nueva RAM" class="w-full">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <label class="filter-label">RAM</label>
+                                            <a href="#" class="special-select-toggle" data-target="new-dev-ram" onclick="return app.toggleSpecialSelect(event, 'new-dev-ram')" style="color:#f59e0b; text-decoration:none; font-size:0.8rem; font-weight:bold;">+ Agregar</a>
+                                        </div>
+                                        <select name="ram" id="new-dev-ram" class="w-full special-select-select"><option value="">-- Seleccione --</option></select>
+                                        <input type="text" id="input-new-dev-ram" class="w-full special-select-input hidden" placeholder="Nueva RAM">
                                     </div>
                                     <div>
-                                        <label class="filter-label">Procesador (Especial)</label>
-                                        <select name="processor" id="new-dev-processor" class="w-full"><option value="">-- Seleccione --</option></select>
-                                        <small style="color:#f59e0b; display:block; margin-top:4px;">+ <a href="#" onclick="document.getElementById('input-new-processor').style.display='block'; return false;" style="color:#f59e0b; text-decoration:underline;">Agregar procesador</a></small>
-                                        <input type="text" id="input-new-processor" style="display:none; margin-top:4px;" placeholder="Nuevo procesador" class="w-full">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <label class="filter-label">Procesador</label>
+                                            <a href="#" class="special-select-toggle" data-target="new-dev-processor" onclick="return app.toggleSpecialSelect(event, 'new-dev-processor')" style="color:#f59e0b; text-decoration:none; font-size:0.8rem; font-weight:bold;">+ Agregar</a>
+                                        </div>
+                                        <select name="processor" id="new-dev-processor" class="w-full special-select-select"><option value="">-- Seleccione --</option></select>
+                                        <input type="text" id="input-new-dev-processor" class="w-full special-select-input hidden" placeholder="Nuevo procesador">
                                     </div>
                                 </div>
                                 <div class="grid-2 gap-2 mb-2">
                                     <div>
-                                        <label class="filter-label">Arquitectura (Especial)</label>
-                                        <select name="architecture" id="new-dev-architecture" class="w-full"><option value="">-- Seleccione --</option></select>
-                                        <small style="color:#f59e0b; display:block; margin-top:4px;">+ <a href="#" onclick="document.getElementById('input-new-architecture').style.display='block'; return false;" style="color:#f59e0b; text-decoration:underline;">Agregar arquitectura</a></small>
-                                        <input type="text" id="input-new-architecture" style="display:none; margin-top:4px;" placeholder="Nueva arquitectura" class="w-full">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <label class="filter-label">Arquitectura</label>
+                                            <a href="#" class="special-select-toggle" data-target="new-dev-architecture" onclick="return app.toggleSpecialSelect(event, 'new-dev-architecture')" style="color:#f59e0b; text-decoration:none; font-size:0.8rem; font-weight:bold;">+ Agregar</a>
+                                        </div>
+                                        <select name="architecture" id="new-dev-architecture" class="w-full special-select-select"><option value="">-- Seleccione --</option></select>
+                                        <input type="text" id="input-new-dev-architecture" class="w-full special-select-input hidden" placeholder="Nueva arquitectura">
                                     </div>
                                     <div>
-                                        <label class="filter-label">Almacenamiento (Especial)</label>
-                                        <select name="storage" id="new-dev-storage" class="w-full"><option value="">-- Seleccione --</option></select>
-                                        <small style="color:#f59e0b; display:block; margin-top:4px;">+ <a href="#" onclick="document.getElementById('input-new-storage').style.display='block'; return false;" style="color:#f59e0b; text-decoration:underline;">Agregar almacenamiento</a></small>
-                                        <input type="text" id="input-new-storage" style="display:none; margin-top:4px;" placeholder="Nuevo almacenamiento" class="w-full">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <label class="filter-label">Almacenamiento</label>
+                                            <a href="#" class="special-select-toggle" data-target="new-dev-storage" onclick="return app.toggleSpecialSelect(event, 'new-dev-storage')" style="color:#f59e0b; text-decoration:none; font-size:0.8rem; font-weight:bold;">+ Agregar</a>
+                                        </div>
+                                        <select name="storage" id="new-dev-storage" class="w-full special-select-select"><option value="">-- Seleccione --</option></select>
+                                        <input type="text" id="input-new-dev-storage" class="w-full special-select-input hidden" placeholder="Nuevo almacenamiento">
                                     </div>
                                 </div>
                                 <div class="mb-2">
@@ -1091,73 +1117,73 @@
                     });
                 }
             },
+            toggleSpecialSelect(event, selectId) {
+                event.preventDefault();
+                const selectEl = document.getElementById(selectId);
+                const inputEl = document.getElementById('input-' + selectId);
+                
+                if(!selectEl || !inputEl) return false;
+                
+                const selectIsHidden = selectEl.classList.contains('hidden');
+                
+                if(selectIsHidden) {
+                    // Cambiar a select (ocultar input)
+                    inputEl.classList.add('hidden');
+                    selectEl.classList.remove('hidden');
+                    selectEl.focus();
+                } else {
+                    // Cambiar a input (ocultar select)
+                    selectEl.classList.add('hidden');
+                    inputEl.classList.remove('hidden');
+                    inputEl.value = '';
+                    inputEl.focus();
+                }
+                
+                return false;
+            },
             initSpecialSelects() {
                 console.log("[v0] Inicializando selects especiales");
-                
-                // Función helper para agregar nuevo valor a un select especial
-                const addSpecialValue = (selectId, inputId, fieldName, callback) => {
-                    const inputEl = document.getElementById(inputId);
-                    const selectEl = document.getElementById(selectId);
-                    
-                    if(!inputEl || !selectEl) return;
-                    
-                    const addBtn = document.createElement('button');
-                    addBtn.textContent = 'Añadir';
-                    addBtn.className = 'btn-primary btn-sm';
-                    addBtn.style.marginTop = '4px';
-                    addBtn.onclick = (e) => {
-                        e.preventDefault();
-                        const value = inputEl.value.trim();
-                        if(!value) { alert('Por favor ingrese un valor'); return; }
-                        
-                        // Verificar si ya existe
-                        const exists = Array.from(selectEl.options).some(opt => opt.value === value);
-                        if(exists) { alert('Este valor ya existe'); return; }
-                        
-                        // Agregar opción
-                        const opt = document.createElement('option');
-                        opt.value = value;
-                        opt.textContent = value;
-                        selectEl.appendChild(opt);
-                        selectEl.value = value;
-                        
-                        inputEl.value = '';
-                        inputEl.style.display = 'none';
-                        console.log("[v0] Nuevo", fieldName, "agregado:", value);
-                        if(callback) callback();
-                    };
-                    
-                    inputEl.parentNode.appendChild(addBtn);
-                };
-                
-                // Inicializar cada select especial
-                addSpecialValue('new-dev-type', 'input-new-type', 'tipo');
-                addSpecialValue('new-dev-brand', 'input-new-brand', 'marca');
-                addSpecialValue('new-dev-os', 'input-new-os', 'S.O.');
-                addSpecialValue('new-dev-ram', 'input-new-ram', 'RAM');
-                addSpecialValue('new-dev-processor', 'input-new-processor', 'procesador');
-                addSpecialValue('new-dev-architecture', 'input-new-architecture', 'arquitectura');
-                addSpecialValue('new-dev-storage', 'input-new-storage', 'almacenamiento');
-                
-                addSpecialValue('loc-building', 'input-loc-building', 'edificio');
-                addSpecialValue('loc-floor', 'input-loc-floor', 'piso');
-                addSpecialValue('loc-area', 'input-loc-area', 'área');
-                addSpecialValue('loc-room', 'input-loc-room', 'habitación');
+                // Los inputs están ocultos por defecto, los selects visibles
             },
             async saveLocation(fd) {
                 const data = Object.fromEntries(fd);
                 console.log("[v0] Guardando ubicación:", data);
                 
-                // Obtener valores de inputs especiales si están visibles
-                const inputBuilding = document.getElementById('input-loc-building');
-                const inputFloor = document.getElementById('input-loc-floor');
-                const inputArea = document.getElementById('input-loc-area');
-                const inputRoom = document.getElementById('input-loc-room');
+                // Capturar valores de selects especiales (pueden venir del select O del input)
+                const buildingSelect = document.getElementById('loc-building');
+                const floorSelect = document.getElementById('loc-floor');
+                const areaSelect = document.getElementById('loc-area');
+                const roomSelect = document.getElementById('loc-room');
                 
-                if(inputBuilding?.style.display !== 'none' && inputBuilding?.value) data.building = inputBuilding.value;
-                if(inputFloor?.style.display !== 'none' && inputFloor?.value) data.floor = inputFloor.value;
-                if(inputArea?.style.display !== 'none' && inputArea?.value) data.area = inputArea.value;
-                if(inputRoom?.style.display !== 'none' && inputRoom?.value) data.room = inputRoom.value;
+                const buildingInput = document.getElementById('input-loc-building');
+                const floorInput = document.getElementById('input-loc-floor');
+                const areaInput = document.getElementById('input-loc-area');
+                const roomInput = document.getElementById('input-loc-room');
+                
+                // Si el input NO está oculto, capturar su valor; sino, capturar del select
+                if(buildingInput && !buildingInput.classList.contains('hidden') && buildingInput.value) {
+                    data.building = buildingInput.value;
+                } else if(buildingSelect?.value) {
+                    data.building = buildingSelect.value;
+                }
+                
+                if(floorInput && !floorInput.classList.contains('hidden') && floorInput.value) {
+                    data.floor = floorInput.value;
+                } else if(floorSelect?.value) {
+                    data.floor = floorSelect.value;
+                }
+                
+                if(areaInput && !areaInput.classList.contains('hidden') && areaInput.value) {
+                    data.area = areaInput.value;
+                } else if(areaSelect?.value) {
+                    data.area = areaSelect.value;
+                }
+                
+                if(roomInput && !roomInput.classList.contains('hidden') && roomInput.value) {
+                    data.room = roomInput.value;
+                } else if(roomSelect?.value) {
+                    data.room = roomSelect.value;
+                }
                 
                 const res = await fetch('/api/locations', { method:'POST', body: JSON.stringify(data) });
                 if(res.ok) {
@@ -1186,22 +1212,66 @@
                 
                 data.location = `${building} - ${floor} - ${area} ${room}`.trim();
                 
-                // Obtener valores de inputs especiales si están visibles
-                const inputType = document.getElementById('input-new-type');
-                const inputBrand = document.getElementById('input-new-brand');
-                const inputOS = document.getElementById('input-new-os');
-                const inputRAM = document.getElementById('input-new-ram');
-                const inputProcessor = document.getElementById('input-new-processor');
-                const inputArchitecture = document.getElementById('input-new-architecture');
-                const inputStorage = document.getElementById('input-new-storage');
+                // Capturar valores de selects especiales (pueden venir del select O del input)
+                const typeSelect = document.getElementById('new-dev-type');
+                const brandSelect = document.getElementById('new-dev-brand');
+                const osSelect = document.getElementById('new-dev-os');
+                const ramSelect = document.getElementById('new-dev-ram');
+                const processorSelect = document.getElementById('new-dev-processor');
+                const architectureSelect = document.getElementById('new-dev-architecture');
+                const storageSelect = document.getElementById('new-dev-storage');
                 
-                if(inputType?.style.display !== 'none' && inputType?.value) data.type = inputType.value;
-                if(inputBrand?.style.display !== 'none' && inputBrand?.value) data.brand = inputBrand.value;
-                if(inputOS?.style.display !== 'none' && inputOS?.value) data.os = inputOS.value;
-                if(inputRAM?.style.display !== 'none' && inputRAM?.value) data.ram = inputRAM.value;
-                if(inputProcessor?.style.display !== 'none' && inputProcessor?.value) data.processor = inputProcessor.value;
-                if(inputArchitecture?.style.display !== 'none' && inputArchitecture?.value) data.architecture = inputArchitecture.value;
-                if(inputStorage?.style.display !== 'none' && inputStorage?.value) data.storage = inputStorage.value;
+                const typeInput = document.getElementById('input-new-dev-type');
+                const brandInput = document.getElementById('input-new-dev-brand');
+                const osInput = document.getElementById('input-new-dev-os');
+                const ramInput = document.getElementById('input-new-dev-ram');
+                const processorInput = document.getElementById('input-new-dev-processor');
+                const architectureInput = document.getElementById('input-new-dev-architecture');
+                const storageInput = document.getElementById('input-new-dev-storage');
+                
+                // Si el input NO está oculto, capturar su valor; sino, capturar del select
+                if(typeInput && !typeInput.classList.contains('hidden') && typeInput.value) {
+                    data.type = typeInput.value;
+                } else if(typeSelect?.value) {
+                    data.type = typeSelect.value;
+                }
+                
+                if(brandInput && !brandInput.classList.contains('hidden') && brandInput.value) {
+                    data.brand = brandInput.value;
+                } else if(brandSelect?.value) {
+                    data.brand = brandSelect.value;
+                }
+                
+                if(osInput && !osInput.classList.contains('hidden') && osInput.value) {
+                    data.os = osInput.value;
+                } else if(osSelect?.value) {
+                    data.os = osSelect.value;
+                }
+                
+                // Especificaciones técnicas opcionales
+                if(ramInput && !ramInput.classList.contains('hidden') && ramInput.value) {
+                    data.ram = ramInput.value;
+                } else if(ramSelect?.value) {
+                    data.ram = ramSelect.value;
+                }
+                
+                if(processorInput && !processorInput.classList.contains('hidden') && processorInput.value) {
+                    data.processor = processorInput.value;
+                } else if(processorSelect?.value) {
+                    data.processor = processorSelect.value;
+                }
+                
+                if(architectureInput && !architectureInput.classList.contains('hidden') && architectureInput.value) {
+                    data.architecture = architectureInput.value;
+                } else if(architectureSelect?.value) {
+                    data.architecture = architectureSelect.value;
+                }
+                
+                if(storageInput && !storageInput.classList.contains('hidden') && storageInput.value) {
+                    data.storage = storageInput.value;
+                } else if(storageSelect?.value) {
+                    data.storage = storageSelect.value;
+                }
                 
                 console.log("[v0] Dispositivo a guardar:", data);
                 
@@ -1268,22 +1338,41 @@
                 }
             },
             async fetchPeriod() {
-                const res = await fetch('/api/periods/active'); const p = await res.json();
-                if(p) {
-                    this.state.currentPeriodCode = p.code;
-                    document.querySelector('[data-render="current-period"]').textContent = p.code;
-                    document.querySelector('[data-render="period-ini"]').textContent = this.fmtDate(p.date_ini);
-                    document.querySelector('[data-render="period-end"]').textContent = this.fmtDate(p.date_end);
-                    const now = new Date().getTime(), start = new Date(p.date_ini).getTime(), end = new Date(p.date_end).getTime();
+                console.log("[v0] Buscando período académico activo...");
+                const allP = await (await fetch('/api/periods')).json();
+                const today = new Date().toISOString().split('T')[0];
+                
+                // Buscar período activo: donde hoy >= fecha_inicio Y hoy < fecha_próximo_período
+                let activePeriod = null;
+                for(let i = 0; i < allP.length; i++) {
+                    if(today >= allP[i].date_ini && (i === allP.length - 1 || today < allP[i + 1].date_ini)) {
+                        activePeriod = allP[i];
+                        break;
+                    }
+                }
+                
+                // Si no hay período activo, usar el más reciente
+                if(!activePeriod && allP.length > 0) {
+                    activePeriod = allP[allP.length - 1];
+                    console.log("[v0] No hay período exacto para hoy, usando período más reciente");
+                }
+                
+                if(activePeriod) {
+                    this.state.currentPeriodCode = activePeriod.code;
+                    document.querySelector('[data-render="current-period"]').textContent = activePeriod.code;
+                    document.querySelector('[data-render="period-ini"]').textContent = this.fmtDate(activePeriod.date_ini);
+                    document.querySelector('[data-render="period-end"]').textContent = this.fmtDate(activePeriod.date_end);
+                    const now = new Date().getTime(), start = new Date(activePeriod.date_ini).getTime(), end = new Date(activePeriod.date_end).getTime();
                     let pct = ((now-start)/(end-start))*100;
                     if(pct<0) pct=0; if(pct>100) pct=100;
                     document.querySelector('.progress-bar').style.width = `${pct}%`;
                     
-                    const allP = await (await fetch('/api/periods')).json();
-                    this.dom['tbody-periods'].innerHTML = allP.filter(x => x.code === p.code).map(x => `<tr><td>${x.code}</td><td><input type="date" id="ini-${x.code}" value="${x.date_ini}"></td><td><input type="date" id="end-${x.code}" value="${x.date_end}"></td><td><button class="btn-sm btn-success" onclick="app.updPeriod('${x.code}')">Guardar</button></td></tr>`).join('');
+                    console.log("[v0] Período activo seleccionado:", activePeriod.code);
+                    this.dom['tbody-periods'].innerHTML = allP.map(x => `<tr><td>${x.code}${x.code === activePeriod.code ? ' <span style="color:var(--color-success); font-weight:bold;">(ACTUAL)</span>' : ''}</td><td><input type="date" id="ini-${x.code}" value="${x.date_ini}"></td><td><input type="date" id="end-${x.code}" value="${x.date_end}"></td><td><button class="btn-sm btn-success" onclick="app.updPeriod('${x.code}')">Guardar</button></td></tr>`).join('');
                 } else {
+                    console.log("[v0] Error: No hay ningún período definido en la base de datos");
                     document.querySelector('[data-render="current-period"]').textContent = "Sin Período";
-                    this.dom['tbody-periods'].innerHTML = '<tr><td colspan="4">No hay período activo.</td></tr>';
+                    this.dom['tbody-periods'].innerHTML = '<tr><td colspan="4">No hay períodos definidos.</td></tr>';
                 }
             },
             async updPeriod(code) {
