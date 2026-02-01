@@ -57,15 +57,18 @@ type UserResponse struct {
 }
 
 type Ticket struct {
-	ID       int    `json:"id"`
-	Code     string `json:"code"`
-	Type     string `json:"type"`
-	Location string `json:"location"`
-	DateIn   string `json:"dateIn"`
-	DateOut  string `json:"dateOut"`
+	ID        int    `json:"id"`
+	Code      string `json:"code"`
+	Type      string `json:"type"`
+	Location  string `json:"location"`
+	DateIn    string `json:"dateIn"`
+	DateOut   string `json:"dateOut"`
+	DetailsIn string `json:"details_in"`
+	DetailsOut string `json:"details_out"`
+	Status    string `json:"status"`
+	// Campos para compatibilidad con frontend anterior
 	Issue    string `json:"issue"`
 	Solution string `json:"solution"`
-	Status   string `json:"status"`
 }
 
 type DeviceItem struct {
@@ -464,22 +467,30 @@ func handleUsers(w http.ResponseWriter, r *http.Request) {
 func handleTickets(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	if r.Method == "GET" {
-		rows, err := db.Query(`SELECT T.id, COALESCE(D.code, '---'), D.device_type, U.area || ' - ' || COALESCE(U.room, ''), T.date_in, COALESCE(T.date_out, ''), COALESCE(T.details, ''), COALESCE(T.solution, ''), T.status FROM Taller T JOIN Dispositivo D ON T.id_device = D.id JOIN Ubicacion U ON D.id_ubication = U.id ORDER BY T.id DESC`)
+		rows, err := db.Query(`SELECT T.id, COALESCE(D.code, '---'), D.device_type, U.area || ' - ' || COALESCE(U.room, ''), T.date_in, COALESCE(T.date_out, ''), COALESCE(T.details_in, ''), COALESCE(T.details_out, ''), T.status FROM Taller T JOIN Dispositivo D ON T.id_device = D.id JOIN Ubicacion U ON D.id_ubication = U.id ORDER BY T.id DESC`)
 		if err != nil { http.Error(w, err.Error(), 500); return }
 		defer rows.Close()
 		var tickets []Ticket
-		for rows.Next() {
-			var t Ticket
-			rows.Scan(&t.ID, &t.Code, &t.Type, &t.Location, &t.DateIn, &t.DateOut, &t.Issue, &t.Solution, &t.Status)
-			if t.Status == "pending" { t.Status = "Pendiente" } else if t.Status == "repaired" { t.Status = "Reparado" } else { t.Status = "No Reparado" }
-			tickets = append(tickets, t)
-		}
+			for rows.Next() {
+				var t Ticket
+				rows.Scan(&t.ID, &t.Code, &t.Type, &t.Location, &t.DateIn, &t.DateOut, &t.DetailsIn, &t.DetailsOut, &t.Status)
+				// Compatibilidad con frontend anterior
+				t.Issue = t.DetailsIn
+				t.Solution = t.DetailsOut
+				if t.Status == "pending" { t.Status = "Pendiente" } else if t.Status == "repaired" { t.Status = "Reparado" } else { t.Status = "No Reparado" }
+				tickets = append(tickets, t)
+			}
 		if tickets == nil { tickets = []Ticket{} }
 		json.NewEncoder(w).Encode(tickets)
 
 	} else if r.Method == "POST" {
-		var req struct { DeviceID int64 `json:"deviceId"`; Code, DateIn, Issue string }
+		var req struct { DeviceID int64 `json:"deviceId"`; Code, DateIn, DetailsIn, Issue string }
 		json.NewDecoder(r.Body).Decode(&req)
+		
+		// Compatibilidad: si viene "issue", usarlo como "details_in"
+		if req.Issue != "" && req.DetailsIn == "" {
+			req.DetailsIn = req.Issue
+		}
 		
 		// Validar que fecha ingreso no sea futura
 		today := time.Now().Format("2006-01-02")
@@ -498,16 +509,21 @@ func handleTickets(w http.ResponseWriter, r *http.Request) {
 		}
 		
 		log.Printf("[DIAG] Creando ticket para dispositivo %d en fecha %s", devID, req.DateIn)
-		db.Exec("INSERT INTO Taller (id_device, status, date_in, details) VALUES (?, 'pending', ?, ?)", devID, req.DateIn, req.Issue)
+		db.Exec("INSERT INTO Taller (id_device, status, date_in, details_in) VALUES (?, 'pending', ?, ?)", devID, req.DateIn, req.DetailsIn)
 		w.Write([]byte(`{"status":"ok"}`))
 	}
 }
 
 func handleFinish(w http.ResponseWriter, r *http.Request) {
-	var req struct { ID int; Status, DateOut, Solution string }
+	var req struct { ID int; Status, DateOut, DetailsOut, Solution string }
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Printf("[ERROR] JSON inválido en finish: %v", err)
 		http.Error(w, "Bad JSON", 400); return
+	}
+
+	// Compatibilidad: si viene "solution", usarlo como "details_out"
+	if req.Solution != "" && req.DetailsOut == "" {
+		req.DetailsOut = req.Solution
 	}
 
 	log.Printf("[DIAG] Finalizando ticket ID=%d, Status=%s, DateOut=%s", req.ID, req.Status, req.DateOut)
@@ -515,7 +531,7 @@ func handleFinish(w http.ResponseWriter, r *http.Request) {
 	dbStatus := "pending"
 	if req.Status == "Reparado" { dbStatus = "repaired" } else if req.Status == "No Reparado" { dbStatus = "unrepaired" }
 
-	result, err := db.Exec("UPDATE Taller SET status=?, date_out=?, solution=? WHERE id=?", dbStatus, req.DateOut, req.Solution, req.ID)
+	result, err := db.Exec("UPDATE Taller SET status=?, date_out=?, details_out=? WHERE id=?", dbStatus, req.DateOut, req.DetailsOut, req.ID)
 	if err != nil {
 		log.Printf("[ERROR] Error actualizando ticket: %v", err)
 		http.Error(w, "Error actualizando ticket: "+err.Error(), 500)
