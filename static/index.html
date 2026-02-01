@@ -26,11 +26,9 @@
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
-        /* --- RESET & BASE --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background-color: var(--color-bg); color: var(--color-text); height: 100vh; overflow: hidden; }
 
-        /* --- UTILIDADES --- */
         .hidden { display: none !important; }
         .text-primary { color: var(--color-primary); }
         .text-secondary { color: var(--color-text-light); }
@@ -57,95 +55,50 @@
         .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
         .overflow-y-auto { overflow-y: auto; }
 
-        /* --- GRID FILTROS --- */
         .filter-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); 
-            gap: 0.8rem; 
-            align-items: end;
-            background-color: #f8fafc;
-            padding: 1rem;
-            border-radius: var(--radius);
-            border: 1px solid var(--border-color);
-            margin-bottom: 1rem;
-        }
-        .manage-input-group {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 0.5rem;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.8rem; align-items: end;
+            background-color: #f8fafc; padding: 1rem; border-radius: var(--radius); border: 1px solid var(--border-color); margin-bottom: 1rem;
         }
         
-        /* Animaciones */
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- COMPONENTES UI --- */
-        button { cursor: pointer; border: none; border-radius: var(--radius); font-weight: 600; transition: background 0.2s; font-size: 0.9rem; }
-        
-        .btn-primary { background-color: var(--color-primary); color: var(--color-white); padding: 0.6rem 1.2rem; }
-        .btn-primary:hover { background-color: var(--color-primary-dark); }
-        
-        .btn-secondary { background-color: #e5e7eb; color: var(--color-text); padding: 0.75rem 1.5rem; }
-        .btn-secondary:hover { background-color: #d1d5db; }
-        
-        .btn-success { background-color: var(--color-success); color: var(--color-white); padding: 0.5rem 1rem; font-size: 1.2rem; }
-        .btn-warning { background-color: var(--color-warning); color: var(--color-white); }
-        .btn-danger { background-color: var(--color-danger); color: var(--color-white); }
+        button { cursor: pointer; border: none; border-radius: var(--radius); font-weight: 600; padding: 0.6rem 1.2rem; transition: background 0.2s; font-size: 0.9rem; }
+        .btn-primary { background-color: var(--color-primary); color: white; } .btn-primary:hover { background-color: var(--color-primary-dark); }
+        .btn-secondary { background-color: #e5e7eb; color: var(--color-text); } .btn-secondary:hover { background-color: #d1d5db; }
+        .btn-success { background-color: var(--color-success); color: white; } .btn-warning { background-color: var(--color-warning); color: white; }
+        .btn-danger { background-color: var(--color-danger); color: white; }
 
-        /* Botón Logout */
         .btn-logout {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid rgba(255,255,255,0.2);
-            background-color: transparent;
-            color: rgba(255,255,255,0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            transition: all 0.2s;
+            width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(255,255,255,0.2); background-color: transparent; color: rgba(255,255,255,0.7); display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s;
         }
-        .btn-logout:hover {
-            background-color: rgba(0,0,0,0.2);
-            color: var(--color-white);
-            border-color: rgba(255,255,255,0.4);
-        }
+        .btn-logout:hover { background-color: rgba(0,0,0,0.2); color: var(--color-white); border-color: rgba(255,255,255,0.4); }
 
-        /* Botones Header Reportes */
         .header-actions { display: flex; gap: 0.5rem; align-items: center; }
-        
         .btn-report-red { background-color: var(--color-danger); color: white; padding: 0.4rem 0.8rem; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; border-radius: 4px; }
         .btn-report-red:hover { background-color: #b91c1c; }
-
         .btn-report-dark { background-color: var(--color-dark); color: white; padding: 0.4rem 0.8rem; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; border-radius: 4px; }
         .btn-report-dark:hover { background-color: #000; }
-
         .btn-clean { background: var(--color-white); border: 1px solid var(--border-color); color: var(--color-text); padding: 0.4rem 0.8rem; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 0.85rem; }
         .btn-clean:hover { background-color: #f3f4f6; color: var(--color-danger); border-color: var(--color-danger); }
 
-        /* Botones Tabla */
         .btn-sm { padding: 0.3rem 0.6rem; }
         .btn-icon { background: transparent; color: inherit; padding: 0.5rem; display: flex; align-items: center; justify-content: center; }
         .btn-icon:hover { background-color: rgba(0,0,0,0.05); border-radius: 50%; }
         .btn-delete { color: var(--color-danger); background: none; font-size: 1.2rem; line-height: 1; padding: 0 0.5rem; }
         .action-group { display: flex; gap: 0.25rem; justify-content: center; }
 
-        /* Inputs */
         input, select, textarea { width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius); outline: none; font-size: 0.85rem; background: var(--color-white); }
         input:focus, select:focus, textarea:focus { border-color: var(--color-primary); box-shadow: 0 0 0 2px rgba(0, 51, 102, 0.1); }
-        
         textarea { resize: vertical; min-height: 80px; max-height: 200px; }
         .char-counter { font-size: 0.7rem; color: var(--color-text-light); text-align: right; margin-top: 2px; }
-        
         .filter-label { font-size: 0.7rem; font-weight: bold; color: var(--color-text-light); margin-bottom: 0.3rem; display: block; text-transform: uppercase; }
 
-        /* Cards */
         .card { background: var(--color-white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.5rem; margin-bottom: 1.5rem; height: 100%; display: flex; flex-direction: column; }
         .card-header { border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
         .card-header-title { color: var(--color-primary); font-weight: bold; font-size: 1.1rem; }
         .card-body-scroll { flex: 1; overflow-y: auto; }
 
-        /* --- LOGIN & LAYOUT --- */
         .login-wrapper { position: fixed; inset: 0; background-color: var(--color-primary); display: flex; align-items: center; justify-content: center; z-index: 1000; }
         .login-box { background: var(--color-white); padding: 2.5rem; border-radius: 12px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); }
         .login-logo { width: 80px; height: 80px; background: var(--color-white); border: 4px solid var(--color-secondary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: var(--color-primary); }
@@ -155,8 +108,6 @@
         .login-error-msg { color: var(--color-danger); font-size: 0.85rem; margin-top: 1rem; }
 
         .app-layout { display: flex; height: 100%; }
-        
-        /* Sidebar */
         .sidebar { width: var(--sidebar-width); background-color: var(--color-primary); color: var(--color-white); display: flex; flex-direction: column; transition: transform 0.3s; z-index: 50; }
         .sidebar-header { height: var(--header-height); display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; background-color: rgba(0,0,0,0.2); font-weight: bold; letter-spacing: 1px; }
         .sidebar-menu { list-style: none; padding-top: 1rem; flex: 1; }
@@ -164,7 +115,6 @@
         .nav-link:hover, .nav-link.active { background-color: rgba(212, 175, 55, 0.15); color: var(--color-secondary); border-left: 4px solid var(--color-secondary); }
         .sidebar-footer { padding: 1rem; background-color: rgba(0,0,0,0.2); }
 
-        /* Main Content */
         .main-content { flex: 1; display: flex; flex-direction: column; background-color: var(--color-bg); overflow: hidden; position: relative; }
         .top-header { height: var(--header-height); background: var(--color-white); display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
         .header-title { color: var(--color-primary); font-size: 1.25rem; font-weight: bold; }
@@ -173,7 +123,6 @@
         .header-date { font-size: 0.75rem; color: var(--color-text-light); }
         .content-area { flex: 1; overflow-y: auto; padding: 1.5rem; }
 
-        /* --- TABLES & BADGES --- */
         .table-responsive { width: 100%; overflow-x: auto; border: 1px solid var(--border-color); border-radius: var(--radius); }
         .table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
         .table thead { background-color: #f9fafb; color: var(--color-text-light); text-transform: uppercase; font-size: 0.75rem; }
@@ -185,7 +134,14 @@
         .badge.repaired { background-color: #D1FAE5; color: #059669; }
         .badge.norepaired { background-color: #FEE2E2; color: #DC2626; }
 
-        /* --- STAT CARDS --- */
+        /* BADGES DISPOSITIVOS */
+        .dev-badge { padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
+        .dev-pc { background: #e0f2fe; color: #0369a1; }
+        .dev-laptop { background: #f0fdf4; color: #15803d; }
+        .dev-printer { background: #fef3c7; color: #b45309; }
+        .dev-network { background: #f3e8ff; color: #7e22ce; }
+        .dev-other { background: #f3f4f6; color: #4b5563; }
+
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
         .stat-card { border-top: 4px solid transparent; height: auto; }
         .stat-card.gold { border-color: var(--color-secondary); }
@@ -194,28 +150,21 @@
         .stat-label { font-size: 0.75rem; text-transform: uppercase; color: var(--color-text-light); display: block; }
         .stat-value { font-size: 2rem; font-weight: bold; color: var(--color-text); margin-top: 0.5rem; }
 
-        /* --- MODAL --- */
+        .pagination-container { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+        .page-info { font-size: 0.9rem; color: var(--color-text-light); }
+        .page-btn { padding: 0.4rem 0.8rem; border: 1px solid var(--border-color); background: white; border-radius: var(--radius); cursor: pointer; }
+        .page-btn:hover:not(:disabled) { background-color: #f3f4f6; }
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 2000; }
         .modal-container { background: var(--color-white); width: 100%; max-width: 600px; border-radius: var(--radius); overflow: hidden; animation: fadeIn 0.2s; display: flex; flex-direction: column; max-height: 90vh; }
         .modal-header { background: var(--color-primary); color: var(--color-white); padding: 1rem; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
         .modal-body { padding: 1.5rem; overflow-y: auto; }
         .modal-footer { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
         .ticket-info-box { background: #f0f7ff; padding: 0.75rem; border-radius: 4px; margin-bottom: 1rem; }
-        .list-group-item { display: flex; justify-content: space-between; padding: 0.5rem; border-bottom: 1px solid var(--border-color); align-items: center; }
     
-        /* --- WIDGET PERÍODO ACADÉMICO --- */
-        .card.period {
-            grid-column: span 1; 
-            padding: 1rem;
-            background-image: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
-            color: var(--color-white);
-            border-top: none !important;
-        }
-
-        @media (min-width: 1024px) {
-            .card.period { grid-column: span 2; }
-        }
-
+        .card.period { grid-column: span 1; padding: 1rem; background-image: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark)); color: var(--color-white); border-top: none !important; }
+        @media (min-width: 1024px) { .card.period { grid-column: span 2; } }
         .card.period .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
         .card.period .header h2 { font-size: 1.1rem; font-weight: bold; color: white; }
         .card.period .content { display: grid; grid-template-columns: auto 1fr; gap: 1rem; align-items: center; }
@@ -226,16 +175,13 @@
         .card.period .progress-bar { height: 100%; border-radius: 9999px; background: var(--color-secondary); width: 0%; transition: width 1s ease-in-out; }
         .card.period .progress-bar-wrapper p { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; color: var(--color-white); text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
         
-        /* --- MOBILE TOGGLE --- */
         .sidebar-toggle-btn { display: none; } 
         .sidebar-close-btn { display: none; }
-
         @media (max-width: 768px) {
             .sidebar { position: absolute; height: 100%; transform: translateX(-100%); }
             .sidebar.is-open { transform: translateX(0); }
             .sidebar-toggle-btn { display: block; margin-right: 1rem; }
             .sidebar-close-btn { display: block; }
-            
             .grid-2, .grid-3 { grid-template-columns: 1fr; } 
             .header-user { display: none; }
             .action-group { flex-direction: column; }
@@ -246,6 +192,7 @@
 </head>
 <body>
 
+    <!-- LOGIN -->
     <section id="view-login" class="login-wrapper">
         <div class="login-box">
             <div class="login-logo">
@@ -276,8 +223,8 @@
         </div>
     </section>
 
+    <!-- APP -->
     <div id="view-app" class="app-layout hidden">
-        
         <aside class="sidebar" data-js="sidebar">
             <div class="sidebar-header">
                 <span>SART</span>
@@ -285,7 +232,6 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
                 </button>
             </div>
-            
             <nav class="sidebar-menu">
                 <a href="#" class="nav-link active" data-target="home">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
@@ -301,14 +247,13 @@
                 </a>
                 <a href="#" class="nav-link admin-only" data-target="data">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path><path d="M21 5c0 1.66-4 3-9 3s-9-1.34-9-3"></path></svg>
-                    Gestión Datos
+                    Inventario
                 </a>
                 <a href="#" class="nav-link admin-only" data-target="settings">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.18-.08a2 2 0 0 0-2 2v.44a2 2 0 0 0 2 2h.18a2 2 0 0 1 1.73 1l.25.43a2 2 0 0 1 0 2l-.08.18a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.18.08a2 2 0 0 0 2-2v-.44a2 2 0 0 0-2-2h-.18a2 2 0 0 1-1.73-1l-.25-.43a2 2 0 0 1 0-2l.08-.18a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                     Configuración
                 </a>
             </nav>
-
             <div class="sidebar-footer">
                 <button data-action="logout" class="btn-logout">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
@@ -332,7 +277,6 @@
             </header>
 
             <div class="content-area">
-                
                 <div id="section-home" class="view-section fade-in">
                     <div class="stats-grid">
                         <div class="card stat-card gold">
@@ -353,11 +297,11 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 14v2.2l1.6 1"/><path d="M16 2v4"/><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/><path d="M3 10h5"/><path d="M8 2v4"/><circle cx="16" cy="16" r="6"/></svg>
                             </div>
                             <div class="content">
-                                <h2 data-render="current-period"></h2>
+                                <h2 data-render="current-period">--</h2>
                                 <div class="progress-and-dates">
                                     <div class="dates">
-                                        <p data-render="period-ini"></p>
-                                        <p data-render="period-end"></p>
+                                        <p data-render="period-ini">--</p>
+                                        <p data-render="period-end">--</p>
                                     </div>
                                     <div class="progress-bar-wrapper">
                                         <div data-component="progress-bar" data-name="period-progress-bar" class="progress-bar"></div>
@@ -373,32 +317,21 @@
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-header-title">Gestión de Taller</h3>
-                            <button class="btn-success admin-only" data-action="open-create-modal">
-                                + Nuevo Equipo
+                            <button class="btn-success admin-only" data-action="open-create-modal" style="display:flex; align-items:center; gap:5px;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                Añadir
                             </button>
                         </div>
-                        
                         <div class="flex justify-between items-center mb-2">
                             <input type="text" placeholder="Buscar..." class="w-full" style="max-width: 300px;" data-js="search-workshop">
                         </div>
-
                         <div class="table-responsive">
                             <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Código</th>
-                                        <th>Equipo</th>
-                                        <th>Falla Reportada</th>
-                                        <th>Fecha Ingreso</th>
-                                        <th class="admin-only text-center">Acciones</th>
-                                    </tr>
-                                </thead>
+                                <thead><tr><th>Código</th><th>Equipo</th><th>Falla Reportada</th><th>Fecha Ingreso</th><th class="admin-only text-center">Acciones</th></tr></thead>
                                 <tbody data-js="tbody-workshop"></tbody>
                             </table>
                         </div>
-                        <div data-js="empty-workshop" class="table-empty hidden">
-                            No hay equipos pendientes en el taller.
-                        </div>
+                        <div data-js="empty-workshop" class="table-empty hidden">No hay equipos pendientes en el taller.</div>
                     </div>
                 </div>
 
@@ -407,66 +340,22 @@
                         <div class="card-header">
                             <h3 class="card-header-title">Historial y Reportes</h3>
                             <div class="header-actions">
-                                <button class="btn-clean" data-action="clean-filters" title="Limpiar Filtros">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
-                                    Limpiar filtros
-                                </button>
-                                <button class="btn-report-red" onclick="app.printReport('view')">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                                    Exportar Vista
-                                </button>
-                                <button class="btn-report-dark" onclick="app.printReport('all')">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                                    Exportar Todo
-                                </button>
+                                <button class="btn-clean" data-action="clean-filters" title="Limpiar Filtros">Limpiar filtros</button>
+                                <button class="btn-report-red" onclick="app.printReport('view')">Exportar Vista</button>
+                                <button class="btn-report-dark" onclick="app.printReport('all')">Exportar Todo</button>
                             </div>
                         </div>
-
                         <div class="filter-grid">
-                            <div>
-                                <label class="filter-label">Búsqueda General</label>
-                                <input type="text" id="filter-text" placeholder="Buscar...">
-                            </div>
-                            <div>
-                                <label class="filter-label">Código</label>
-                                <select id="filter-code"></select>
-                            </div>
-                            <div>
-                                <label class="filter-label">Departamento</label>
-                                <select id="filter-loc"></select>
-                            </div>
-                            <div>
-                                <label class="filter-label">Estado</label>
-                                <select id="filter-status">
-                                    <option value="">Todos los estados</option>
-                                    <option value="Reparado">Reparado</option>
-                                    <option value="No Reparado">No Reparado</option>
-                                    <option value="Pendiente">Pendiente</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="filter-label">Después de:</label>
-                                <input type="date" id="filter-date-start">
-                            </div>
-                            <div>
-                                <label class="filter-label">Antes de:</label>
-                                <input type="date" id="filter-date-end">
-                            </div>
+                            <div><label class="filter-label">Búsqueda General</label><input type="text" id="filter-text" placeholder="Buscar..."></div>
+                            <div><label class="filter-label">Código</label><select id="filter-code"></select></div>
+                            <div><label class="filter-label">Ubicación</label><select id="filter-loc"></select></div>
+                            <div><label class="filter-label">Estado</label><select id="filter-status"><option value="">Todos</option><option value="Reparado">Reparado</option><option value="No Reparado">No Reparado</option><option value="Pendiente">Pendiente</option></select></div>
+                            <div><label class="filter-label">Después de:</label><input type="date" id="filter-date-start"></div>
+                            <div><label class="filter-label">Antes de:</label><input type="date" id="filter-date-end"></div>
                         </div>
-
                         <div class="table-responsive">
                             <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Estado</th>
-                                        <th>Código</th>
-                                        <th>Tipo</th>
-                                        <th>Ubicación</th>
-                                        <th>Entrada</th>
-                                        <th>Salida</th>
-                                        <th>Detalles</th>
-                                    </tr>
-                                </thead>
+                                <thead><tr><th>Estado</th><th>Código</th><th>Tipo</th><th>Ubicación</th><th>Entrada</th><th>Salida</th><th>Detalles</th></tr></thead>
                                 <tbody data-js="tbody-history"></tbody>
                             </table>
                         </div>
@@ -474,80 +363,100 @@
                 </div>
 
                 <div id="section-data" class="view-section hidden fade-in">
-                    <div class="grid-3">
-                        <div class="card">
-                            <div class="card-header"><h4 class="card-header-title">Códigos de Bien</h4></div>
-                            <div class="manage-input-group">
-                                <input type="text" id="new-code" placeholder="NUEVO..." class="uppercase">
-                                <button class="btn-success" data-action="add-code">+</button>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-header-title">Inventario</h3>
+                            <div style="display:flex; gap:10px;">
+                                <button class="btn-secondary" data-action="open-loc-modal">+ Ubicación</button>
+                                <button class="btn-success" data-action="open-dev-modal">+ Dispositivo</button>
                             </div>
-                            <div class="card-body-scroll"><ul data-js="list-codes-manage" class="manage-list"></ul></div>
                         </div>
-                        <div class="card">
-                            <div class="card-header"><h4 class="card-header-title">Ubicaciones</h4></div>
-                            <div class="manage-input-group">
-                                <input type="text" id="new-loc" placeholder="Nueva Ubicación...">
-                                <button class="btn-success" data-action="add-loc">+</button>
-                            </div>
-                            <div class="card-body-scroll"><ul data-js="list-locs-manage" class="manage-list"></ul></div>
+                        <div class="filter-grid">
+                            <div><label class="filter-label">Búsqueda General</label><input type="text" id="dev-filter-q" placeholder="Buscar..."></div>
+                            <div><label class="filter-label">Tipo de Equipo</label><select id="dev-filter-type"><option value="">Todos</option></select></div>
+                            <div><label class="filter-label">Edificio</label><select id="dev-filter-building"><option value="">Todos</option></select></div>
+                            <div><label class="filter-label">Piso</label><select id="dev-filter-floor"><option value="">Todos</option></select></div>
+                            <div><label class="filter-label">Área</label><select id="dev-filter-area"><option value="">Todas</option></select></div>
+                            <div><label class="filter-label">Marca</label><select id="dev-filter-brand"><option value="">Todas</option></select></div>
+                            <div><label class="filter-label">S.O.</label><select id="dev-filter-os"><option value="">Todos</option></select></div>
                         </div>
-                        <div class="card">
-                            <div class="card-header"><h4 class="card-header-title">Tipos de Equipo</h4></div>
-                            <div class="manage-input-group">
-                                <input type="text" id="new-type" placeholder="Nuevo Tipo...">
-                                <button class="btn-success" data-action="add-type">+</button>
+                        <div class="table-responsive mb-2">
+                            <table class="table">
+                                <thead><tr><th>Código</th><th>Tipo</th><th>Marca / Modelo</th><th>Serial</th><th>Ubicación</th><th>S.O.</th></tr></thead>
+                                <tbody data-js="tbody-devices"></tbody>
+                            </table>
+                        </div>
+                        <div class="pagination-container">
+                            <span class="page-info" id="dev-pagination-info"></span>
+                            <div class="flex gap-1">
+                                <button class="page-btn" id="dev-prev-btn" disabled>&laquo;</button>
+                                <button class="page-btn" id="dev-next-btn" disabled>&raquo;</button>
                             </div>
-                            <div class="card-body-scroll"><ul data-js="list-types-manage" class="manage-list"></ul></div>
                         </div>
                     </div>
                 </div>
 
                 <div id="section-settings" class="view-section hidden fade-in">
                     <div class="card">
-                        <div class="card-header"><h3 class="card-header-title">Configuración de Cuentas y Roles</h3></div>
-                        <div class="grid-2">
-                            <form data-js="form-settings-admin" class="p-2 border rounded">
-                                <h4 class="mb-2 font-bold text-primary">Perfil Administrador (Jefe de Área)</h4>
+                        <div class="card-header"><h3 class="card-header-title">Configuración</h3></div>
+                        <div class="grid-2 mb-3">
+                            <form class="p-2 border rounded" data-js="form-settings-admin">
+                                <h4 class="mb-2 font-bold text-primary">Perfil Administrador</h4>
                                 <div class="mb-2"><label class="filter-label">Nombre Completo</label><input type="text" name="fullName" required></div>
                                 <div class="mb-2"><label class="filter-label">Cargo</label><input type="text" name="jobTitle" required></div>
                                 <div class="mb-2"><label class="filter-label">Usuario</label><input type="text" name="username" required></div>
-                                <div class="mb-2"><label class="filter-label">Contraseña</label><input type="password" name="password" required></div>
-                                <button type="submit" class="btn-primary w-full">Actualizar Admin</button>
+                                <div class="mb-2"><label class="filter-label">Nueva Contraseña</label><input type="password" name="password"></div>
+                                <button type="submit" class="btn-primary w-full">Guardar Cambios Admin</button>
                             </form>
-                
-                            <form data-js="form-settings-user" class="p-2 border rounded">
-                                <h4 class="mb-2 font-bold text-secondary">Perfil Coordinador TIC</h4>
+                            <form class="p-2 border rounded" data-js="form-settings-user">
+                                <h4 class="mb-2 font-bold text-secondary">Perfil Coordinador</h4>
                                 <div class="mb-2"><label class="filter-label">Nombre Completo</label><input type="text" name="fullName" required></div>
                                 <div class="mb-2"><label class="filter-label">Cargo</label><input type="text" name="jobTitle" required></div>
                                 <div class="mb-2"><label class="filter-label">Usuario</label><input type="text" name="username" required></div>
-                                <div class="mb-2"><label class="filter-label">Contraseña</label><input type="password" name="password" required></div>
-                                <button type="submit" class="btn-primary w-full">Actualizar Coordinador</button>
+                                <div class="mb-2"><label class="filter-label">Nueva Contraseña</label><input type="password" name="password"></div>
+                                <button type="submit" class="btn-primary w-full">Guardar Cambios Coord.</button>
                             </form>
+                        </div>
+                        <div class="p-2 border rounded">
+                            <h4 class="mb-2 font-bold text-primary">Período Académico Activo</h4>
+                            <p class="mb-2 text-sm text-secondary">Edite solo las fechas del período activo actual.</p>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead><tr><th>Período</th><th>Inicio</th><th>Fin</th><th>Acción</th></tr></thead>
+                                    <tbody data-js="tbody-periods"></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
-
             </div>
         </main>
     </div>
 
+    <!-- MODAL NUEVO EQUIPO REDISEÑADO CON BÚSQUEDA -->
     <div id="modal-ticket" class="modal-overlay hidden">
         <div class="modal-container">
             <div class="modal-header">
-                <strong class="font-bold" data-js="modal-ticket-title">Nuevo Equipo</strong>
+                <strong class="font-bold" data-js="modal-ticket-title">Añadir al Taller</strong>
                 <button data-action="close-modal-ticket" class="btn-icon text-white"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
             </div>
             <div class="modal-body">
                 <form data-js="form-ticket">
-                    <input type="hidden" name="id">
-                    <div class="grid-2 mb-2">
-                        <div><label class="filter-label">Código del Bien</label><input type="text" name="codigo" list="list-codigos" required placeholder="Ej. PC-001" class="uppercase"><datalist id="list-codigos"></datalist></div>
-                        <div><label class="filter-label">Tipo de Equipo</label><select name="tipo" id="select-tipo" required></select></div>
+                    <div class="p-2 border rounded mb-2" style="background:#f9fafb;">
+                        <span class="filter-label text-primary mb-1">Buscar en Inventario</span>
+                        <div class="grid-2 mb-1">
+                            <div><label class="filter-label">Edificio</label><select id="ticket-filter-build"><option value="">Todos</option></select></div>
+                            <div><label class="filter-label">Piso</label><select id="ticket-filter-floor"><option value="">Todos</option></select></div>
+                        </div>
+                        <div class="mb-1"><label class="filter-label">Área</label><select id="ticket-filter-area"><option value="">Todas</option></select></div>
+                        <div class="mb-1">
+                            <label class="filter-label">Seleccionar Dispositivo (Tipo - Marca - Código/Serial)</label>
+                            <select id="ticket-device-select" class="w-full" style="font-weight:bold;"><option value="">-- Seleccione Filtros Primero --</option></select>
+                        </div>
                     </div>
-                    <div class="grid-2 mb-2">
-                        <div><label class="filter-label">Departamento</label><input type="text" name="ubicacion" list="list-ubicaciones" required placeholder="Ej. Laboratorio A"><datalist id="list-ubicaciones"></datalist></div>
-                        <div><label class="filter-label">Fecha Ingreso</label><input type="date" name="fecha" required></div>
-                    </div>
+                    <input type="hidden" name="deviceId" id="ticket-selected-id">
+                    <input type="hidden" name="code" id="ticket-selected-code"> 
+                    <div class="mb-2"><label class="filter-label">Fecha Ingreso</label><input type="date" name="fecha" required></div>
                     <div class="mb-3">
                         <label class="filter-label">Descripción de la Falla</label>
                         <textarea name="falla" rows="3" maxlength="300" required placeholder="Describa el problema..."></textarea>
@@ -561,479 +470,272 @@
         </div>
     </div>
 
-    <div id="modal-finish" class="modal-overlay hidden">
-        <div class="modal-container">
-            <div class="modal-header">
-                <strong class="font-bold">Finalizar Servicio</strong>
-                <button data-action="close-modal-finish" class="btn-icon text-white"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-            </div>
-            <div class="modal-body">
-                <form data-js="form-finish">
-                    <input type="hidden" name="id">
-                    <div class="ticket-info-box"><span class="filter-label">Equipo</span><span class="font-bold text-primary block" data-js="modal-code-display">PC-00X</span><span class="text-secondary text-sm" data-js="modal-desc-display">...</span></div>
-                    <div class="mb-2"><label class="filter-label">Estatus Final</label><select name="status"><option value="Reparado">Reparado</option><option value="No Reparado">No Reparado</option></select></div>
-                    <div class="mb-2"><label class="filter-label">Fecha de Salida</label><input type="date" name="date_out" required></div>
-                    <div class="mb-2">
-                        <label class="filter-label">Solución / Observaciones</label>
-                        <textarea name="solution" rows="3" maxlength="300" required></textarea>
-                    </div>
-                    <div class="modal-footer"><button type="button" class="btn-secondary" data-action="close-modal-finish">Cancelar</button><button type="submit" class="btn-success">Finalizar</button></div>
-                </form>
-            </div>
-        </div>
-    </div>
+    <!-- MODAL FINALIZAR -->
+    <div id="modal-finish" class="modal-overlay hidden"><div class="modal-container"><div class="modal-header"><strong class="font-bold">Finalizar Servicio</strong><button data-action="close-modal-finish" class="btn-icon text-white"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div><div class="modal-body"><form data-js="form-finish"><input type="hidden" name="id"><div class="ticket-info-box"><span class="filter-label">Equipo</span><span class="font-bold text-primary block" data-js="modal-code-display">PC-00X</span><span class="text-secondary text-sm" data-js="modal-desc-display">...</span></div><div class="mb-2"><label class="filter-label">Estatus Final</label><select name="status"><option value="Reparado">Reparado</option><option value="No Reparado">No Reparado</option></select></div><div class="mb-2"><label class="filter-label">Fecha de Salida</label><input type="date" name="date_out" required></div><div class="mb-2"><label class="filter-label">Solución / Observaciones</label><textarea name="solution" rows="3" maxlength="300" required></textarea></div><div class="modal-footer"><button type="button" class="btn-secondary" data-action="close-modal-finish">Cancelar</button><button type="submit" class="btn-success">Finalizar</button></div></form></div></div></div>
+
+    <!-- MODAL NUEVA UBICACIÓN -->
+    <div id="modal-location" class="modal-overlay hidden"><div class="modal-container"><div class="modal-header"><strong>Nueva Ubicación</strong><button data-action="close-modals" style="background:none; border:none; color:white; font-size:1.5rem;">&times;</button></div><div class="modal-body"><form data-js="form-location">
+        <div class="grid-2 mb-2"><div><label class="filter-label">Edificio</label><input type="text" name="building" required placeholder="Ej. Edificio 01"></div><div><label class="filter-label">Piso</label><input type="text" name="floor" required placeholder="Ej. Piso 02"></div></div>
+        <div class="grid-2 mb-2"><div><label class="filter-label">Área</label><input type="text" name="area" required placeholder="Ej. Laboratorio"></div><div><label class="filter-label">Habitación (Opcional)</label><input type="text" name="room" placeholder="Ej. Lab A"></div></div>
+        <div class="modal-footer"><button type="submit" class="btn-primary">Crear Ubicación</button></div>
+    </form></div></div></div>
+
+    <!-- MODAL NUEVO DISPOSITIVO -->
+    <div id="modal-device" class="modal-overlay hidden"><div class="modal-container"><div class="modal-header"><strong>Nuevo Dispositivo</strong><button data-action="close-modals" style="background:none; border:none; color:white; font-size:1.5rem;">&times;</button></div><div class="modal-body"><form data-js="form-device">
+        <div class="mb-2"><label class="filter-label">Ubicación (Obligatorio)</label><select name="locationId" id="new-dev-location" required class="w-full"><option value="">Cargando...</option></select></div>
+        <div class="grid-2 mb-2"><div><label class="filter-label">Tipo (Obligatorio)</label><input type="text" name="type" required list="list-types"></div><div><label class="filter-label">Código</label><input type="text" name="code"></div></div>
+        <div class="grid-2 mb-2"><div><label class="filter-label">Marca</label><input type="text" name="brand"></div><div><label class="filter-label">Modelo</label><input type="text" name="model"></div></div>
+        <div class="grid-2 mb-2"><div><label class="filter-label">Serial</label><input type="text" name="serial"></div><div><label class="filter-label">S.O.</label><input type="text" name="os"></div></div>
+        <datalist id="list-types"></datalist>
+        <div class="modal-footer"><button type="submit" class="btn-primary">Crear Dispositivo</button></div>
+    </form></div></div></div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => { app.init(); });
-            
-        // CONFIGURACIÓN PERÍODO
-        const CURRENT_PERIOD = "II-2025";
-        const PERIOD_INI = "27/10/2025";
-        const PERIOD_END = "13/02/2026";
         
         const app = {
-            state: {
-                user: null,
-                // USUARIOS DEFINIDOS EN EL ESTADO (Simulando BD)
-                users: [
-                    { id: 1, role: 'admin', username: 'admin', password: '123', fullName: 'OSWALDO GUEDEZ', jobTitle: 'JEFE DE ÁREA' },
-                    { id: 2, role: 'user', username: 'user', password: '123', fullName: 'FRANCISCO VELAZQUEZ', jobTitle: 'COORDINADOR TIC' }
-                ],
-                tickets: [],
-                filteredTickets: [],
-                config: {
-                    codes: ["PC-LAB-01", "PC-LAB-02", "IMP-HP-01", "LAP-DOC-01"],
-                    types: ["Desktop", "Laptop", "Impresora", "Monitor", "Periférico"],
-                    locations: ["Laboratorio A", "Laboratorio B", "Decanato", "Secretaría"]
-                }
-            },
+            state: { user: null, tickets: [], filteredTickets: [], config: { codes: [], types: [], brands: [], os: [], locations: [], buildings: [], floors: [], areas: [] }, deviceFilters: { q: '', type: '', brand: '', os: '', building: '', floor: '', area: '', page: 1, limit: 10 }, deviceTimer: null, currentPeriodCode: '' },
             dom: {},
-
-            init() {
-                this.loadMockData();
-                this.cacheDOM();
-                this.bindEvents();
-                this.updateTime();
-                this.initPeriodWidget();
-                this.dom.viewApp.classList.add('hidden');
-                this.dom.viewLogin.classList.remove('hidden');
-                this.initCharCounters();
-            },
-
+            async init() { this.cacheDOM(); this.bindEvents(); this.updateTime(); this.dom.viewApp.classList.add('hidden'); this.dom.viewLogin.classList.remove('hidden'); this.initCharCounters(); },
             cacheDOM() {
-                this.dom.viewLogin = document.getElementById('view-login');
-                this.dom.viewApp = document.getElementById('view-app');
-                this.dom.sections = document.querySelectorAll('.view-section');
-                this.dom.loginForm = document.querySelector('[data-js="login-form"]');
-                this.dom.loginError = document.querySelector('[data-js="login-error"]');
-                this.dom.sidebar = document.querySelector('[data-js="sidebar"]');
-                this.dom.navItems = document.querySelectorAll('.nav-link');
-                this.dom.roleDisplay = document.querySelector('[data-js="user-role"]');
-                this.dom.modalTicket = document.getElementById('modal-ticket');
-                this.dom.formTicket = document.querySelector('[data-js="form-ticket"]');
-                this.dom.modalFinish = document.getElementById('modal-finish');
-                this.dom.formFinish = document.querySelector('[data-js="form-finish"]');
-                this.dom.tbodyWorkshop = document.querySelector('[data-js="tbody-workshop"]');
-                this.dom.tbodyHistory = document.querySelector('[data-js="tbody-history"]');
+                const els = ['view-login', 'view-app', 'login-form', 'login-error', 'sidebar', 'user-role', 'modal-ticket', 'form-ticket', 'modal-finish', 'form-finish', 'modal-location', 'form-location', 'modal-device', 'form-device', 'tbody-workshop', 'tbody-history', 'tbody-devices', 'tbody-periods', 'dev-filter-q', 'dev-pagination-info', 'ticket-device-select', 'new-dev-location', 'form-settings-admin', 'form-settings-user'];
+                els.forEach(id => { const el = document.getElementById(id) || document.querySelector(`[data-js="${id}"]`); if(el) this.dom[id] = el; });
+                this.dom.navLinks = document.querySelectorAll('.nav-link');
+                this.dom.ticketFilterBuild = document.getElementById('ticket-filter-build');
+                this.dom.ticketFilterFloor = document.getElementById('ticket-filter-floor');
+                this.dom.ticketFilterArea = document.getElementById('ticket-filter-area');
+                this.dom.ticketSelectedId = document.getElementById('ticket-selected-id');
+                this.dom.ticketSelectedCode = document.getElementById('ticket-selected-code');
+                this.dom.devFilterType = document.getElementById('dev-filter-type');
+                this.dom.devFilterBrand = document.getElementById('dev-filter-brand');
+                this.dom.devFilterOS = document.getElementById('dev-filter-os');
+                this.dom.devFilterBuild = document.getElementById('dev-filter-building');
+                this.dom.devFilterFloor = document.getElementById('dev-filter-floor');
+                this.dom.devFilterArea = document.getElementById('dev-filter-area');
+                this.dom.devPrevBtn = document.getElementById('dev-prev-btn');
+                this.dom.devNextBtn = document.getElementById('dev-next-btn');
+                this.dom.listCodes = document.getElementById('list-codigos');
                 this.dom.filterText = document.getElementById('filter-text');
                 this.dom.filterCode = document.getElementById('filter-code');
                 this.dom.filterLoc = document.getElementById('filter-loc');
                 this.dom.filterStatus = document.getElementById('filter-status');
                 this.dom.filterDateStart = document.getElementById('filter-date-start');
                 this.dom.filterDateEnd = document.getElementById('filter-date-end');
-                this.dom.listCodes = document.getElementById('list-codigos');
-                this.dom.listLocs = document.getElementById('list-ubicaciones');
-                this.dom.selectTypes = document.getElementById('select-tipo');
-                this.dom.listManageCodes = document.querySelector('[data-js="list-codes-manage"]');
-                this.dom.listManageLocs = document.querySelector('[data-js="list-locs-manage"]');
-                this.dom.listManageTypes = document.querySelector('[data-js="list-types-manage"]');
-                
-                // Forms Configuración
-                this.dom.formSettingsAdmin = document.querySelector('[data-js="form-settings-admin"]');
-                this.dom.formSettingsUser = document.querySelector('[data-js="form-settings-user"]');
             },
-
             bindEvents() {
-                this.dom.loginForm.addEventListener('submit', (e) => { e.preventDefault(); this.handleLogin(new FormData(e.target)); });
-                document.querySelector('[data-action="logout"]').addEventListener('click', () => window.location.reload());
-                this.dom.navItems.forEach(item => {
-                    item.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        this.navigate(item.getAttribute('data-target'));
-                        if (window.innerWidth <= 768) this.dom.sidebar.classList.remove('is-open');
-                    });
-                });
+                this.dom['login-form'].addEventListener('submit', e => { e.preventDefault(); this.login(new FormData(e.target)); });
+                document.querySelector('[data-action="logout"]').addEventListener('click', () => location.reload());
+                this.dom.navLinks.forEach(l => l.addEventListener('click', e => { e.preventDefault(); this.nav(l.getAttribute('data-target')); }));
                 document.querySelectorAll('[data-action="toggle-sidebar"]').forEach(btn => btn.addEventListener('click', () => this.dom.sidebar.classList.toggle('is-open')));
+                document.querySelectorAll('[data-action="close-modals"]').forEach(b => b.addEventListener('click', () => document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'))));
+                
+                document.querySelector('[data-action="open-create-modal"]').addEventListener('click', () => { this.dom['modal-ticket'].classList.remove('hidden'); this.fetchModalDevices(); });
+                document.querySelector('[data-action="open-loc-modal"]').addEventListener('click', () => this.dom['modal-location'].classList.remove('hidden'));
+                document.querySelector('[data-action="open-dev-modal"]').addEventListener('click', () => { this.dom['modal-device'].classList.remove('hidden'); this.loadLocationsForSelect(); });
 
-                document.querySelector('[data-action="open-create-modal"]').addEventListener('click', () => this.openTicketModal());
-                document.querySelectorAll('[data-action="close-modal-ticket"]').forEach(btn => btn.addEventListener('click', () => this.dom.modalTicket.classList.add('hidden')));
-                document.querySelectorAll('[data-action="close-modal-finish"]').forEach(btn => btn.addEventListener('click', () => this.dom.modalFinish.classList.add('hidden')));
+                this.dom['form-ticket'].addEventListener('submit', e => { e.preventDefault(); this.saveTicket(new FormData(e.target)); });
+                this.dom['form-finish'].addEventListener('submit', e => { e.preventDefault(); this.finishTicket(new FormData(e.target)); });
+                this.dom['form-location'].addEventListener('submit', e => { e.preventDefault(); this.saveLocation(new FormData(e.target)); });
+                this.dom['form-device'].addEventListener('submit', e => { e.preventDefault(); this.saveDevice(new FormData(e.target)); });
+                this.dom['form-settings-admin'].addEventListener('submit', e => { e.preventDefault(); this.updateUser(new FormData(e.target), 'admin'); });
+                this.dom['form-settings-user'].addEventListener('submit', e => { e.preventDefault(); this.updateUser(new FormData(e.target), 'user'); });
 
-                this.dom.formTicket.addEventListener('submit', (e) => this.handleSaveTicket(e));
-                this.dom.formFinish.addEventListener('submit', (e) => this.handleFinishTicket(e));
-                document.querySelector('[data-action="add-code"]').addEventListener('click', () => this.handleAddData('codes', 'new-code'));
-                document.querySelector('[data-action="add-loc"]').addEventListener('click', () => this.handleAddData('locations', 'new-loc'));
-                document.querySelector('[data-action="add-type"]').addEventListener('click', () => this.handleAddData('types', 'new-type'));
+                // Filters
+                const triggerDevices = () => { this.state.deviceFilters.page = 1; this.fetchDevices(); };
+                this.dom['dev-filter-q'].addEventListener('keyup', () => { clearTimeout(this.state.deviceTimer); this.state.deviceTimer = setTimeout(triggerDevices, 400); });
+                this.dom.devFilterType.addEventListener('change', triggerDevices);
+                this.dom.devFilterBrand.addEventListener('change', triggerDevices);
+                this.dom.devFilterOS.addEventListener('change', triggerDevices);
+                this.dom.devFilterBuild.addEventListener('change', triggerDevices);
+                this.dom.devFilterFloor.addEventListener('change', triggerDevices);
+                this.dom.devFilterArea.addEventListener('change', triggerDevices);
+                this.dom.devPrevBtn.addEventListener('click', () => { if(this.state.deviceFilters.page>1) { this.state.deviceFilters.page--; this.fetchDevices(); }});
+                this.dom.devNextBtn.addEventListener('click', () => { this.state.deviceFilters.page++; this.fetchDevices(); });
 
+                // Ticket Filters
+                const loadModalDevices = () => this.fetchModalDevices();
+                this.dom.ticketFilterBuild.addEventListener('change', loadModalDevices);
+                this.dom.ticketFilterFloor.addEventListener('change', loadModalDevices);
+                document.getElementById('ticket-filter-area').addEventListener('change', loadModalDevices);
+                document.getElementById('ticket-device-select').addEventListener('change', (e) => {
+                    const opt = e.target.options[e.target.selectedIndex];
+                    this.dom.ticketSelectedId.value = e.target.value;
+                    this.dom.ticketSelectedCode.value = opt.dataset.code || '';
+                });
+
+                // History Filters
                 document.querySelector('[data-js="search-workshop"]').addEventListener('keyup', (e) => this.renderWorkshop(e.target.value));
-                
                 const triggerHistory = () => { this.validateDates(); this.renderHistory(); };
-                this.dom.filterText.addEventListener('keyup', triggerHistory);
-                this.dom.filterCode.addEventListener('change', triggerHistory); 
-                this.dom.filterLoc.addEventListener('change', triggerHistory); 
-                this.dom.filterStatus.addEventListener('change', triggerHistory);
-                this.dom.filterDateStart.addEventListener('change', triggerHistory);
-                this.dom.filterDateEnd.addEventListener('change', triggerHistory);
-                
-                document.querySelector('[data-action="clean-filters"]').addEventListener('click', () => {
-                    this.dom.filterText.value = '';
-                    this.dom.filterCode.value = '';
-                    this.dom.filterLoc.value = '';
-                    this.dom.filterStatus.value = '';
-                    this.dom.filterDateStart.value = '';
-                    this.dom.filterDateEnd.value = '';
-                    this.renderHistory();
-                });
-
-                // Guardar Configuración
-                if(this.dom.formSettingsAdmin) {
-                    this.dom.formSettingsAdmin.addEventListener('submit', (e) => {
-                        e.preventDefault(); this.handleSaveSettings(new FormData(e.target), 'admin');
-                    });
-                }
-                if(this.dom.formSettingsUser) {
-                    this.dom.formSettingsUser.addEventListener('submit', (e) => {
-                        e.preventDefault(); this.handleSaveSettings(new FormData(e.target), 'user');
-                    });
-                }
-            },
-            
-            initPeriodWidget() {
-                const parseDate = date => {
-                    const [d, m, y] = date.split("/");
-                    return new Date(`${y}-${m}-${d}`);
-                }
-                document.querySelectorAll("[data-render='current-period']").forEach(el => el.textContent = CURRENT_PERIOD);
-                document.querySelectorAll("[data-render='period-ini']").forEach(el => el.textContent = PERIOD_INI);
-                document.querySelectorAll("[data-render='period-end']").forEach(el => el.textContent = PERIOD_END);
-
-                const start = parseDate(PERIOD_INI).getTime();
-                const end = parseDate(PERIOD_END).getTime();
-                const now = new Date().getTime();
-                const total = end - start;
-                const elapsed = now - start;
-
-                let percent = 0;
-                if (total > 0) {
-                    percent = (elapsed / total) * 100;
-                    if (percent < 0) percent = 0;
-                    if (percent > 100) percent = 100;
-                }
-
-                const bar = document.querySelector("[data-name='period-progress-bar']");
-                const label = document.querySelector("[data-render='progress-percent']");
-                
-                if (bar && label) {
-                    setTimeout(() => {
-                        bar.style.width = `${percent}%`;
-                        label.textContent = `${Math.round(percent)}%`;
-                    }, 500);
-                }
-            },
-            
-            initCharCounters() {
-                document.querySelectorAll('textarea[maxlength]').forEach(txt => {
-                    const counter = document.createElement('div');
-                    counter.className = 'char-counter';
-                    counter.textContent = `0/${txt.getAttribute('maxlength')}`;
-                    txt.parentNode.appendChild(counter);
-                    txt.addEventListener('input', () => {
-                        counter.textContent = `${txt.value.length}/${txt.getAttribute('maxlength')}`;
-                    });
+                this.dom.filterText.addEventListener('keyup', triggerHistory); this.dom.filterCode.addEventListener('change', triggerHistory);
+                this.dom.filterLoc.addEventListener('change', triggerHistory); this.dom.filterStatus.addEventListener('change', triggerHistory);
+                this.dom.filterDateStart.addEventListener('change', triggerHistory); this.dom.filterDateEnd.addEventListener('change', triggerHistory);
+                document.querySelector('[data-action="clean-filters"]').addEventListener('click', () => { 
+                    this.dom.filterText.value = ''; this.dom.filterCode.value = ''; this.dom.filterLoc.value = ''; 
+                    this.dom.filterStatus.value = ''; this.dom.filterDateStart.value = ''; this.dom.filterDateEnd.value = ''; 
+                    this.renderHistory(); 
                 });
             },
-
-            validateDates() {
-                const start = this.dom.filterDateStart.value;
-                const end = this.dom.filterDateEnd.value;
-                const today = new Date().toISOString().split('T')[0];
-                if (start > today || end > today) {
-                   alert("No puedes seleccionar fechas futuras.");
-                   if(start > today) this.dom.filterDateStart.value = '';
-                   if(end > today) this.dom.filterDateEnd.value = '';
-                   return;
-                }
-                if (start && end && start > end) {
-                    alert("La fecha 'Después de' no puede ser mayor a 'Antes de'.");
-                    this.dom.filterDateEnd.value = ''; 
+            async login(fd) {
+                try {
+                    const res = await fetch('/api/login', { method:'POST', body: JSON.stringify(Object.fromEntries(fd)) });
+                    if(!res.ok) throw new Error();
+                    this.state.user = await res.json();
+                    this.dom['view-login'].classList.add('hidden');
+                    this.dom['view-app'].classList.remove('hidden');
+                    this.dom['user-role'].textContent = this.state.user.role === 'admin' ? 'ADMIN' : 'COORD';
+                    if(this.state.user.role === 'user') document.querySelectorAll('.admin-only').forEach(e => e.classList.add('hidden'));
+                    else document.querySelectorAll('.admin-only').forEach(e => e.classList.remove('hidden'));
+                    this.fetchData(); this.nav('home');
+                } catch(e) { this.dom['login-error'].classList.remove('hidden'); }
+            },
+            nav(target) {
+                document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden'));
+                document.getElementById(`section-${target}`).classList.remove('hidden');
+                this.dom.navLinks.forEach(l => l.classList.remove('active'));
+                document.querySelector(`[data-target="${target}"]`).classList.add('active');
+                if(target === 'home') this.renderDash();
+            },
+            async fetchData() {
+                this.fetchConfig();
+                this.fetchTickets();
+                this.fetchPeriod();
+                this.fetchUsers();
+                this.fetchDevices();
+            },
+            async fetchConfig() {
+                const res = await fetch('/api/config');
+                this.state.config = await res.json();
+                const createOpts = (arr) => `<option value="">Todos</option>` + (arr||[]).map(x => `<option value="${x}">${x}</option>`).join('');
+                this.dom.devFilterType.innerHTML = createOpts(this.state.config.types);
+                this.dom.devFilterBrand.innerHTML = createOpts(this.state.config.brands);
+                this.dom.devFilterOS.innerHTML = createOpts(this.state.config.os);
+                this.dom.devFilterBuild.innerHTML = createOpts(this.state.config.buildings);
+                this.dom.devFilterFloor.innerHTML = createOpts(this.state.config.floors);
+                this.dom.devFilterArea.innerHTML = createOpts(this.state.config.areas);
+                this.dom.ticketFilterBuild.innerHTML = createOpts(this.state.config.buildings);
+                this.dom.ticketFilterFloor.innerHTML = createOpts(this.state.config.floors);
+                document.getElementById('ticket-filter-area').innerHTML = createOpts(this.state.config.areas);
+                this.dom.listCodes.innerHTML = (this.state.config.codes||[]).map(c=>`<option value="${c}">`).join('');
+                this.dom.filterCode.innerHTML = createOpts(this.state.config.codes);
+                this.dom.filterLoc.innerHTML = createOpts(this.state.config.locations);
+            },
+            async fetchTickets() {
+                const res = await fetch('/api/tickets');
+                const tickets = await res.json();
+                this.state.tickets = tickets;
+                this.dom['tbody-workshop'].innerHTML = tickets.filter(t=>t.status==='Pendiente').map(t => `<tr><td>${t.code}</td><td>${t.type}</td><td>${t.issue}</td><td>${this.fmtDate(t.dateIn)}</td><td><button class="btn-success btn-sm" onclick="app.openFinish(${t.id})">Finalizar</button></td></tr>`).join('');
+                this.dom['tbody-history'].innerHTML = tickets.map(t => `<tr><td><span class="badge ${t.status==='Pendiente'?'pending':'repaired'}">${t.status}</span></td><td>${t.code}</td><td>${t.type}</td><td>${t.location}</td><td>${this.fmtDate(t.dateIn)}</td><td>${t.dateOut?this.fmtDate(t.dateOut):'-'}</td><td>${t.solution||t.issue}</td></tr>`).join('');
+                this.renderDash();
+            },
+            async fetchDevices() {
+                const f = this.state.deviceFilters;
+                const building = this.dom.devFilterBuild.value;
+                const floor = this.dom.devFilterFloor.value;
+                const area = this.dom.devFilterArea.value;
+                const query = `page=${f.page}&limit=${f.limit}&q=${f.q}&type=${this.dom.devFilterType.value}&brand=${this.dom.devFilterBrand.value}&os=${this.dom.devFilterOS.value}&building=${building}&floor=${floor}&area=${area}`;
+                const res = await fetch(`/api/devices?${query}`);
+                const data = await res.json();
+                this.dom['tbody-devices'].innerHTML = (data.data||[]).map(d => {
+                    const typeLower = d.type.toLowerCase();
+                    let badgeClass = 'dev-other';
+                    if (typeLower.includes('pc')||typeLower.includes('desktop')) badgeClass = 'dev-pc';
+                    else if (typeLower.includes('laptop')) badgeClass = 'dev-laptop';
+                    else if (typeLower.includes('switch')||typeLower.includes('modem')) badgeClass = 'dev-network';
+                    else if (typeLower.includes('impresora')) badgeClass = 'dev-printer';
+                    return `<tr><td class="font-bold text-primary">${d.code}</td><td><span class="dev-badge ${badgeClass}">${d.type}</span></td><td>${d.brand} ${d.model}</td><td>${d.serial}</td><td>${d.location}</td><td>${d.os}</td></tr>`;
+                }).join('');
+                document.getElementById('dev-pagination-info').textContent = `Pág ${data.page} de ${Math.ceil(data.total/data.limit)} (${data.total})`;
+            },
+            async fetchModalDevices() {
+                const b = this.dom.ticketFilterBuild.value;
+                const f = this.dom.ticketFilterFloor.value;
+                const a = document.getElementById('ticket-filter-area').value;
+                const res = await fetch(`/api/devices?limit=100&building=${b}&floor=${f}&area=${a}`);
+                const data = await res.json();
+                const sel = document.getElementById('ticket-device-select');
+                if(!data.data || data.data.length === 0) { sel.innerHTML = '<option value="">No hay equipos</option>'; return; }
+                sel.innerHTML = '<option value="">-- Seleccione --</option>' + data.data.map(d => `<option value="${d.id}" data-code="${d.code}">${d.type} - ${d.brand} ${d.model} [${d.code}]</option>`).join('');
+            },
+            async loadLocationsForSelect() {
+                const res = await fetch('/api/locations');
+                const data = await res.json();
+                document.getElementById('new-dev-location').innerHTML = data.map(l => `<option value="${l.id}">${l.fullText}</option>`).join('');
+            },
+            async saveLocation(fd) {
+                await fetch('/api/locations', { method:'POST', body: JSON.stringify(Object.fromEntries(fd)) });
+                alert("Ubicación creada"); document.querySelector('[data-action="close-modals"]').click(); this.fetchConfig();
+            },
+            async saveDevice(fd) {
+                const data = Object.fromEntries(fd); data.locationId = parseInt(data.locationId);
+                await fetch('/api/devices', { method:'POST', body: JSON.stringify(data) });
+                alert("Dispositivo creado"); document.querySelector('[data-action="close-modals"]').click(); this.fetchDevices(); this.fetchConfig();
+            },
+            async saveTicket(fd) {
+                const d = Object.fromEntries(fd); d.deviceId = parseInt(d.deviceId);
+                await fetch('/api/tickets', { method:'POST', body: JSON.stringify(d) });
+                alert("Ticket creado"); document.querySelector('[data-action="close-modals"]').click(); this.fetchTickets();
+            },
+            async finishTicket(fd) {
+                const d = Object.fromEntries(fd); d.id = parseInt(d.id);
+                await fetch('/api/tickets/finish', { method:'POST', body: JSON.stringify(d) });
+                document.querySelector('.modal-overlay:not(.hidden)').classList.add('hidden'); this.fetchTickets();
+            },
+            openFinish(id) {
+                const t = this.state.tickets.find(x => x.id === id);
+                if(t) { 
+                    const f = this.dom['form-finish']; f.reset();
+                    f.querySelector('[name=id]').value = id; 
+                    f.querySelector('[name=date_out]').value = new Date().toISOString().split('T')[0];
+                    this.dom['modal-finish'].classList.remove('hidden'); 
                 }
             },
-
-            handleLogin(formData) {
-                const u = formData.get('username');
-                const p = formData.get('password');
-                const roleAttempt = formData.get('role');
-
-                // Validar contra estado (mock)
-                const foundUser = this.state.users.find(user => 
-                    user.username === u && 
-                    user.password === p && 
-                    user.role === roleAttempt
-                );
-
-                if (foundUser) {
-                    this.state.user = foundUser;
-                    this.enterApp();
+            async fetchPeriod() {
+                const res = await fetch('/api/periods/active'); const p = await res.json();
+                if(p) {
+                    this.state.currentPeriodCode = p.code;
+                    document.querySelector('[data-render="current-period"]').textContent = p.code;
+                    document.querySelector('[data-render="period-ini"]').textContent = this.fmtDate(p.date_ini);
+                    document.querySelector('[data-render="period-end"]').textContent = this.fmtDate(p.date_end);
+                    const now = new Date().getTime(), start = new Date(p.date_ini).getTime(), end = new Date(p.date_end).getTime();
+                    let pct = ((now-start)/(end-start))*100;
+                    if(pct<0) pct=0; if(pct>100) pct=100;
+                    document.querySelector('.progress-bar').style.width = `${pct}%`;
+                    
+                    const allP = await (await fetch('/api/periods')).json();
+                    this.dom['tbody-periods'].innerHTML = allP.filter(x => x.code === p.code).map(x => `<tr><td>${x.code}</td><td><input type="date" id="ini-${x.code}" value="${x.date_ini}"></td><td><input type="date" id="end-${x.code}" value="${x.date_end}"></td><td><button class="btn-sm btn-success" onclick="app.updPeriod('${x.code}')">Guardar</button></td></tr>`).join('');
                 } else {
-                    this.dom.loginError.classList.remove('hidden');
-                    this.dom.loginError.textContent = "Credenciales incorrectas o rol equivocado.";
+                    document.querySelector('[data-render="current-period"]').textContent = "Sin Período";
+                    this.dom['tbody-periods'].innerHTML = '<tr><td colspan="4">No hay período activo.</td></tr>';
                 }
             },
-
-            enterApp() {
-                this.dom.viewLogin.classList.add('hidden');
-                this.dom.viewApp.classList.remove('hidden');
-                this.dom.roleDisplay.textContent = this.state.user.role === 'admin' ? 'ADMINISTRADOR' : 'CONSULTOR';
-                
-                if (this.state.user.role === 'user') {
-                    document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
-                } else {
-                    document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
-                }
-                
-                this.renderDatalists();
-                this.renderDataManagement();
-                this.navigate('home');
+            async updPeriod(code) {
+                const ini = document.getElementById(`ini-${code}`).value, end = document.getElementById(`end-${code}`).value;
+                const res = await fetch('/api/periods', { method:'PUT', body:JSON.stringify({code, date_ini:ini, date_end:end})});
+                if(res.ok) { alert('Actualizado'); this.fetchPeriod(); } else { const t=await res.text(); alert('Error: ' + t); }
             },
-
-            navigate(viewId) {
-                this.dom.sections.forEach(s => s.classList.add('hidden'));
-                document.getElementById(`section-${viewId}`).classList.remove('hidden');
-                this.dom.navItems.forEach(n => n.classList.remove('active'));
-                const navLink = document.querySelector(`[data-target="${viewId}"]`);
-                if(navLink) navLink.classList.add('active');
-                
-                const titles = { home: 'Inicio', workshop: 'Taller', history: 'Historial', data: 'Gestión de Datos', settings: 'Configuración' };
-                document.querySelector('[data-js="page-title"]').textContent = titles[viewId] || 'S.A.R.T.';
-                
-                if(viewId === 'home') this.renderDashboard();
-                if(viewId === 'workshop') this.renderWorkshop();
-                if(viewId === 'history') this.renderHistory();
-                if(viewId === 'settings') this.renderSettings();
+            async fetchUsers() {
+                const res = await fetch('/api/users'); const users = await res.json();
+                const admin = users.find(u=>u.role==='admin'), user = users.find(u=>u.role==='user');
+                const fa = this.dom['form-settings-admin'], fu = this.dom['form-settings-user'];
+                if(admin) { fa.querySelector('[name=fullName]').value = admin.full_name; fa.querySelector('[name=username]').value = admin.username; fa.querySelector('[name=jobTitle]').value = admin.job_title; }
+                if(user) { fu.querySelector('[name=fullName]').value = user.full_name; fu.querySelector('[name=username]').value = user.username; fu.querySelector('[name=jobTitle]').value = user.job_title; }
+            },
+            async updateUser(fd, role) {
+                const d = Object.fromEntries(fd); d.targetRole = role;
+                const res = await fetch('/api/users', { method:'PUT', body:JSON.stringify(d)});
+                if(res.ok) alert('Usuario actualizado'); else alert('Error');
             },
             
-            renderSettings() {
-                const admin = this.state.users.find(u => u.role === 'admin');
-                const fAdmin = this.dom.formSettingsAdmin;
-                fAdmin.querySelector('[name="fullName"]').value = admin.fullName;
-                fAdmin.querySelector('[name="jobTitle"]').value = admin.jobTitle;
-                fAdmin.querySelector('[name="username"]').value = admin.username;
-                fAdmin.querySelector('[name="password"]').value = admin.password;
-
-                const user = this.state.users.find(u => u.role === 'user');
-                const fUser = this.dom.formSettingsUser;
-                fUser.querySelector('[name="fullName"]').value = user.fullName;
-                fUser.querySelector('[name="jobTitle"]').value = user.jobTitle;
-                fUser.querySelector('[name="username"]').value = user.username;
-                fUser.querySelector('[name="password"]').value = user.password;
-            },
-
-            handleSaveSettings(fd, roleTarget) {
-                const userIdx = this.state.users.findIndex(u => u.role === roleTarget);
-                if (userIdx !== -1) {
-                    this.state.users[userIdx].fullName = fd.get('fullName').toUpperCase();
-                    this.state.users[userIdx].jobTitle = fd.get('jobTitle').toUpperCase();
-                    this.state.users[userIdx].username = fd.get('username');
-                    this.state.users[userIdx].password = fd.get('password');
-                    alert(`Datos del ${roleTarget === 'admin' ? 'Administrador' : 'Coordinador'} actualizados.`);
-                }
-            },
-            
-            openTicketModal(id = null) {
-                const f = this.dom.formTicket;
-                f.reset();
-                const today = new Date().toISOString().split('T')[0];
-                const dateInput = f.querySelector('[name="fecha"]');
-                dateInput.max = today; 
-
-                const title = document.querySelector('[data-js="modal-ticket-title"]');
-                if(id) {
-                    title.textContent = "Editar Equipo";
-                    const t = this.state.tickets.find(x => x.id === id);
-                    if(t) {
-                        f.querySelector('[name="id"]').value = t.id;
-                        f.querySelector('[name="codigo"]').value = t.code;
-                        f.querySelector('[name="tipo"]').value = t.type;
-                        f.querySelector('[name="ubicacion"]').value = t.location;
-                        f.querySelector('[name="fecha"]').value = t.dateIn;
-                        f.querySelector('[name="falla"]').value = t.issue;
-                    }
-                } else {
-                    title.textContent = "Nuevo Equipo";
-                    f.querySelector('[name="id"]').value = "";
-                    dateInput.value = today;
-                }
-                
-                f.querySelector('textarea').dispatchEvent(new Event('input'));
-                this.dom.modalTicket.classList.remove('hidden');
-            },
-            
-            handleSaveTicket(e) {
-                e.preventDefault();
-                const fd = new FormData(e.target);
-                const id = fd.get('id');
-                const fecha = fd.get('fecha');
-                const today = new Date().toISOString().split('T')[0];
-                
-                if (fecha > today) { alert("La fecha de ingreso no puede ser futura."); return; }
-
-                if (id) {
-                    const idx = this.state.tickets.findIndex(t => t.id == id);
-                    if (idx !== -1) {
-                        this.state.tickets[idx].code = fd.get('codigo').toUpperCase();
-                        this.state.tickets[idx].type = fd.get('tipo');
-                        this.state.tickets[idx].location = fd.get('ubicacion');
-                        this.state.tickets[idx].dateIn = fecha;
-                        this.state.tickets[idx].issue = fd.get('falla');
-                        alert("Equipo actualizado.");
-                    }
-                } else {
-                    this.state.tickets.push({
-                        id: Date.now(),
-                        code: fd.get('codigo').toUpperCase(),
-                        type: fd.get('tipo'),
-                        location: fd.get('ubicacion'),
-                        dateIn: fecha,
-                        dateOut: null,
-                        issue: fd.get('falla'),
-                        solution: '',
-                        status: 'Pendiente'
-                    });
-                    alert("Equipo ingresado correctamente.");
-                }
-                this.dom.modalTicket.classList.add('hidden');
-                this.renderWorkshop();
-                this.renderDashboard();
-            },
-
-            handleDeleteTicket(id) {
-                if(confirm("¿Estás seguro de ELIMINAR este registro? NO irá al historial.")) {
-                    this.state.tickets = this.state.tickets.filter(t => t.id !== id);
-                    this.renderWorkshop();
-                    this.renderDashboard();
-                }
-            },
-
-            openFinishModal(id) {
-                const ticket = this.state.tickets.find(t => t.id === id);
-                if (!ticket) return;
-                const f = this.dom.formFinish;
-                f.querySelector('[name="id"]').value = id;
-                f.querySelector('[name="date_out"]').value = new Date().toISOString().split('T')[0];
-                f.querySelector('[name="date_out"]').max = new Date().toISOString().split('T')[0];
-                document.querySelector('[data-js="modal-code-display"]').textContent = ticket.code;
-                document.querySelector('[data-js="modal-desc-display"]').textContent = ticket.issue;
-                f.querySelector('textarea').value = ''; 
-                f.querySelector('textarea').dispatchEvent(new Event('input')); 
-                this.dom.modalFinish.classList.remove('hidden');
-            },
-
-            handleFinishTicket(e) {
-                e.preventDefault();
-                const fd = new FormData(e.target);
-                const id = parseInt(fd.get('id'));
-                const ticket = this.state.tickets.find(t => t.id === id);
-                const dateOut = fd.get('date_out');
-                const today = new Date().toISOString().split('T')[0];
-
-                if (dateOut > today) { alert("La fecha de salida no puede ser futura."); return; }
-                if (dateOut < ticket.dateIn) { alert("La fecha de salida no puede ser anterior a la de ingreso."); return; }
-
-                if (ticket) {
-                    ticket.status = fd.get('status');
-                    ticket.dateOut = dateOut;
-                    ticket.solution = fd.get('solution');
-                    this.dom.modalFinish.classList.add('hidden');
-                    this.renderWorkshop();
-                    this.renderHistory();
-                    this.renderDashboard();
-                    e.target.reset();
-                }
-            },
-
-            renderWorkshop(filterText = '') {
-                const tbody = this.dom.tbodyWorkshop;
-                tbody.innerHTML = '';
-                const q = filterText.toLowerCase();
-                const items = this.state.tickets.filter(t => t.status === 'Pendiente' && (t.code.toLowerCase().includes(q) || t.issue.toLowerCase().includes(q) || t.type.toLowerCase().includes(q) || t.location.toLowerCase().includes(q)));
-                document.querySelector('[data-js="empty-workshop"]').classList.toggle('hidden', items.length > 0);
-                items.forEach(t => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td class="font-bold text-primary">${t.code}</td>
-                        <td>${t.type}</td>
-                        <td>${t.issue}</td>
-                        <td>${this.formatDate(t.dateIn)}</td>
-                        <td class="admin-only"><div class="action-group">
-                            <button class="btn-success btn-sm btn-finish" data-id="${t.id}" title="Finalizar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></button>
-                            <button class="btn-warning btn-sm btn-edit" data-id="${t.id}" title="Editar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
-                            <button class="btn-danger btn-sm btn-del" data-id="${t.id}" title="Eliminar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
-                        </div></td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-                tbody.querySelectorAll('.btn-finish').forEach(b => b.addEventListener('click', () => this.openFinishModal(parseInt(b.dataset.id))));
-                tbody.querySelectorAll('.btn-edit').forEach(b => b.addEventListener('click', () => this.openTicketModal(parseInt(b.dataset.id))));
-                tbody.querySelectorAll('.btn-del').forEach(b => b.addEventListener('click', () => this.handleDeleteTicket(parseInt(b.dataset.id))));
-                
-                if(this.state.user.role === 'user') tbody.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
-            },
-            
-            renderHistory() {
-                const tbody = this.dom.tbodyHistory;
-                tbody.innerHTML = '';
-                const fText = this.dom.filterText.value.toLowerCase();
-                const fCode = this.dom.filterCode.value; 
-                const fLoc = this.dom.filterLoc.value;    
-                const fStatus = this.dom.filterStatus.value;
-                const fStart = this.dom.filterDateStart.value;
-                const fEnd = this.dom.filterDateEnd.value;
-
-                const items = this.state.tickets.filter(t => {
-                    const matchText = (t.issue + t.location + (t.solution||'') + t.type).toLowerCase().includes(fText);
-                    const matchCode = fCode === '' || t.code === fCode;
-                    const matchLoc = fLoc === '' || t.location === fLoc;
-                    const matchStatus = fStatus === '' || t.status === fStatus;
-                    let matchDate = true;
-                    if (fStart && t.dateIn < fStart) matchDate = false;
-                    if (fEnd && t.dateIn > fEnd) matchDate = false;
-                    return matchText && matchCode && matchLoc && matchStatus && matchDate;
-                }).sort((a,b) => b.id - a.id);
-
-                this.state.filteredTickets = items; 
-
-                items.forEach(t => {
-                    const badgeClass = t.status === 'Pendiente' ? 'pending' : (t.status === 'Reparado' ? 'repaired' : 'norepaired');
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td><span class="badge ${badgeClass}">${t.status}</span></td>
-                        <td class="font-bold">${t.code}</td>
-                        <td>${t.type}</td>
-                        <td>${t.location}</td>
-                        <td>${this.formatDate(t.dateIn)}</td>
-                        <td>${t.dateOut ? this.formatDate(t.dateOut) : '-'}</td>
-                        <td class="text-secondary" style="font-size:0.8rem">${t.solution || t.issue}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            },
-
+            // --- FUNCIÓN DE REPORTE COMPLETA ---
             printReport(mode) {
                 const data = mode === 'view' ? this.state.filteredTickets : [...this.state.tickets].sort((a,b) => b.id - a.id);
                 if (!data || data.length === 0) { alert("No hay datos para generar el reporte."); return; }
 
-                const adminUser = this.state.users.find(u => u.role === 'admin');
-                const coordUser = this.state.users.find(u => u.role === 'user');
+                // Obtener nombres de los inputs de configuración (si están cargados) o usar defaults
+                const adminName = document.querySelector('[data-js="form-settings-admin"] [name="fullName"]').value || "OSWALDO GUEDEZ";
+                const adminJob = document.querySelector('[data-js="form-settings-admin"] [name="jobTitle"]').value || "JEFE DE ÁREA";
+                const coordName = document.querySelector('[data-js="form-settings-user"] [name="fullName"]').value || "FRANCISCO VELAZQUEZ";
+                const coordJob = document.querySelector('[data-js="form-settings-user"] [name="jobTitle"]').value || "COORDINADOR TIC";
 
                 const URL_LOGO_IZQUIERDO = './public/logo-fuerzas-armadas.avif'; 
                 const URL_LOGO_DERECHO = './public/logo-unefa.avif';
@@ -1067,10 +769,10 @@
                         rowsHTML += `
                             <tr>
                                 <td class="col-center">${num}</td>
-                                <td class="col-center">${this.formatDate(t.dateIn)}</td>
+                                <td class="col-center">${this.fmtDate(t.dateIn)}</td>
                                 <td class="col-center"><b>${t.code}</b><br>${t.type}</td>
                                 <td class="col-center">${t.location}</td>
-                                <td class="col-center">${t.dateOut ? this.formatDate(t.dateOut) : '-'}</td>
+                                <td class="col-center">${t.dateOut ? this.fmtDate(t.dateOut) : '-'}</td>
                                 <td class="col-left" style="font-size:8pt;">${t.solution || t.issue}</td>
                                 <td class="col-center" style="font-size:8pt;">${t.status}</td>
                             </tr>
@@ -1082,13 +784,13 @@
                         signaturesHTML = `
                             <div class="signatures">
                                 <div class="sign-box">
-                                    <div style="margin-top:5px; margin-bottom:2px; font-weight:normal;">${adminUser.fullName}</div>
-                                    ${adminUser.jobTitle}
-                                    <br><br><br><span style="font-weight:normal;font-size:8pt;">FIRMA Y SELLO</span>
+                                    <div style="margin-top:5px; margin-bottom:2px; font-weight:normal;">${adminName}</div>
+                                    ${adminJob}
+                                    <br><span style="font-weight:normal;font-size:8pt;">FIRMA Y SELLO</span>
                                 </div>
                                 <div class="sign-box">
-                                    <div style="margin-top:5px; margin-bottom:2px; font-weight:normal;">${coordUser.fullName}</div>
-                                    ${coordUser.jobTitle}
+                                    <div style="margin-top:5px; margin-bottom:2px; font-weight:normal;">${coordName}</div>
+                                    ${coordJob}
                                     <br><span style="font-weight:normal;font-size:8pt;">FIRMA Y SELLO</span>
                                 </div>
                             </div>
@@ -1138,63 +840,19 @@
                         <style>
                             @page { size: letter; margin: 0; }
                             body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #ccc; }
-                            
-                            .page { 
-                                width: 215.9mm; 
-                                height: 279.4mm; 
-                                background: white; 
-                                margin: 0 auto; 
-                                padding: 15mm; 
-                                position: relative; 
-                                page-break-after: always; 
-                                overflow: hidden; 
-                            }
-
-                            .header-container { 
-                                display: flex; 
-                                justify-content: space-between; 
-                                align-items: center; 
-                                height: 110px; 
-                                margin-bottom: 20px; 
-                                border-bottom: 2px solid #000; 
-                                padding-bottom: 10px; 
-                                overflow: hidden; 
-                            }
-
-                            .logo-box { 
-                                width: 90px; 
-                                height: 90px; 
-                                display: flex; 
-                                align-items: center; 
-                                justify-content: center; 
-                                flex-shrink: 0; 
-                            }
-
-                            .logo-box img { 
-                                width: 100%; 
-                                height: 100%; 
-                                object-fit: contain; 
-                            }
-
-                            .header-text { 
-                                flex: 1; 
-                                text-align: center; 
-                                font-weight: bold; 
-                                font-size: 8pt; 
-                                line-height: 1.2; 
-                                padding: 0 10px; 
-                            }
-
+                            .page { width: 215.9mm; height: 279.4mm; background: white; margin: 0 auto; padding: 15mm; position: relative; page-break-after: always; overflow: hidden; }
+                            .header-container { display: flex; justify-content: space-between; align-items: center; height: 110px; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; overflow: hidden; }
+                            .logo-box { width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+                            .logo-box img { width: 100%; height: 100%; object-fit: contain; }
+                            .header-text { flex: 1; text-align: center; font-weight: bold; font-size: 8pt; line-height: 1.2; padding: 0 10px; }
                             .section-title { font-weight: bold; margin-bottom: 10px; font-size: 11pt; text-align: center; text-decoration: underline; }
                             table { width: 100%; border-collapse: collapse; font-size: 9pt; }
                             th, td { border: 1px solid black; padding: 4px; vertical-align: middle; }
                             th { background: #f0f0f0; text-align: center; font-weight: bold; }
                             .col-center { text-align: center; }
                             .col-left { text-align: left; }
-                            
                             .signatures { margin-top: 50px; display: flex; justify-content: space-around; }
                             .sign-box { width: 40%; text-align: center; border-top: 1px solid black; padding-top: 5px; font-weight: bold; font-size: 9pt; }
-                            
                             .footer-info { position: absolute; bottom: 15mm; left: 15mm; right: 15mm; display: flex; justify-content: space-between; font-size: 8pt; border-top: 1px solid #ccc; padding-top: 5px; }
                         </style>
                     </head>
@@ -1210,69 +868,19 @@
                 }, 500);
             },
 
-            handleAddData(key, inputId) {
-                const input = document.getElementById(inputId);
-                const val = input.value.trim();
-                if (val && !this.state.config[key].includes(val)) {
-                    this.state.config[key].push(val);
-                    input.value = '';
-                    this.renderDatalists();
-                    this.renderDataManagement();
-                }
-            },
-            handleDeleteData(key, val) {
-                if(confirm(`¿Eliminar?`)) {
-                    this.state.config[key] = this.state.config[key].filter(x => x !== val);
-                    this.renderDatalists();
-                    this.renderDataManagement();
-                }
-            },
-            renderDataManagement() {
-                const render = (arr, key, el) => {
-                    el.innerHTML = '';
-                    arr.forEach(item => {
-                        const li = document.createElement('li');
-                        li.className = 'list-group-item';
-                        li.innerHTML = `<span>${item}</span><button class="btn-delete" data-val="${item}">&times;</button>`;
-                        li.querySelector('.btn-delete').addEventListener('click', () => this.handleDeleteData(key, item));
-                        el.appendChild(li);
-                    });
-                };
-                render(this.state.config.codes, 'codes', this.dom.listManageCodes);
-                render(this.state.config.locations, 'locations', this.dom.listManageLocs);
-                render(this.state.config.types, 'types', this.dom.listManageTypes);
-            },
-            renderDatalists() {
-                const fill = (el, arr) => el.innerHTML = arr.map(x => `<option value="${x}">`).join('');
-                fill(this.dom.listCodes, this.state.config.codes);
-                fill(this.dom.listLocs, this.state.config.locations);
-                this.dom.selectTypes.innerHTML = `<option value="">Seleccione...</option>` + this.state.config.types.map(x => `<option value="${x}">${x}</option>`).join('');
-                const createFilterOpts = (arr) => `<option value="">Todos</option>` + arr.map(x => `<option value="${x}">${x}</option>`).join('');
-                this.dom.filterCode.innerHTML = createFilterOpts(this.state.config.codes);
-                this.dom.filterLoc.innerHTML = createFilterOpts(this.state.config.locations);
-            },
-            renderDashboard() {
-                document.querySelector('[data-js="stat-pending"]').textContent = this.state.tickets.filter(t => t.status === 'Pendiente').length;
+            renderDash() {
+                document.querySelector('[data-js="stat-pending"]').textContent = this.state.tickets.filter(t=>t.status==='Pendiente').length;
                 document.querySelector('[data-js="stat-total"]').textContent = this.state.tickets.length;
-                document.querySelector('[data-js="stat-repaired"]').textContent = this.state.tickets.filter(t => t.status === 'Reparado').length;
+                document.querySelector('[data-js="stat-repaired"]').textContent = this.state.tickets.filter(t=>t.status==='Reparado').length;
             },
             updateTime() {
                 const now = new Date();
-                const todayStr = now.toISOString().split('T')[0];
-                document.querySelector('[data-js="current-date"]').textContent = now.toLocaleDateString('es-VE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                document.querySelectorAll('input[type="date"]').forEach(inp => { 
-                    inp.max = todayStr;
-                    if(!inp.value) inp.value = ''; 
-                });
+                document.querySelector('[data-js="current-date"]').textContent = now.toLocaleDateString();
+                document.querySelectorAll('input[type="date"]').forEach(i => { if(!i.value) i.value = now.toISOString().split('T')[0]; });
             },
-            formatDate(s) { if(!s) return ''; const p = s.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; },
-            loadMockData() {
-                this.state.tickets = [
-                    { id: 1, code: 'PC-LAB-01', type: 'Desktop', location: 'Laboratorio A', dateIn: '2025-10-01', dateOut: '2025-10-02', issue: 'No enciende', solution: 'Cambio de fuente', status: 'Reparado' },
-                    { id: 2, code: 'LAP-DOC-01', type: 'Laptop', location: 'Decanato', dateIn: '2025-10-05', dateOut: null, issue: 'Pantalla azul', solution: '', status: 'Pendiente' }
-                ];
-                this.state.filteredTickets = [...this.state.tickets];
-            }
+            initCharCounters() { document.querySelectorAll('textarea[maxlength]').forEach(txt => { const counter = document.createElement('div'); counter.className = 'char-counter'; counter.textContent = `0/${txt.getAttribute('maxlength')}`; txt.parentNode.appendChild(counter); txt.addEventListener('input', () => { counter.textContent = `${txt.value.length}/${txt.getAttribute('maxlength')}`; }); }); },
+            validateDates() { const start = this.dom.filterDateStart.value; const end = this.dom.filterDateEnd.value; const today = new Date().toISOString().split('T')[0]; if (start > today || end > today) { alert("Fechas futuras inválidas."); if(start > today) this.dom.filterDateStart.value = ''; if(end > today) this.dom.filterDateEnd.value = ''; return; } if (start && end && start > end) { alert("Fecha incorrecta."); this.dom.filterDateEnd.value = ''; } },
+            fmtDate(s) { if(!s) return '-'; const p = s.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; }
         };
     </script>
 </body>

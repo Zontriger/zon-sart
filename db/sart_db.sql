@@ -11,32 +11,48 @@ CREATE TABLE IF NOT EXISTS Usuario (
 );
 
 CREATE TABLE IF NOT EXISTS Periodo (
-    code TEXT PRIMARY KEY ,		-- Ej: "II-2025"
+    code TEXT PRIMARY KEY,		-- Ej: "II-2025"
     date_ini TEXT NOT NULL,		-- Tiempo Unix Timestamp
     date_end TEXT NOT NULL,
     is_current INTEGER DEFAULT 0 CHECK(is_current IN (0, 1)) -- 1 = Activo, 0 = Inactivo
 );
 
-CREATE TABLE IF NOT EXISTS Equipo (
-    code TEXT PRIMARY KEY,
-    area TEXT NOT NULL,
-    ubication TEXT NOT NULL,	-- Dónde está el equipo normalmente
+CREATE TABLE IF NOT EXISTS Ubicacion (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	building TEXT NOT NULL,
+	floor TEXT NOT NULL,
+	area TEXT NOT NULL,
+	room TEXT,
+	details TEXT
+);
+
+CREATE TABLE IF NOT EXISTS Dispositivo (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT UNIQUE,	-- Código, ej: 4034. Puede ser cambiado.
+	device_type TEXT NOT NULL,	-- Tipo de dispositivo, ej: PC, Mouse, Pendrive, ...
+    id_ubication INTEGER NOT NULL,
     os TEXT,
     ram TEXT,
     arch TEXT,
-    rom TEXT,
+    storage TEXT,
     processor TEXT,
-    serial TEXT
+	brand TEXT,		-- Marca del dispositivo
+	model TEXT,
+    serial TEXT,
+	details TEXT,	-- Más detalles del dispositivo
+	
+	FOREIGN KEY (id_ubication) REFERENCES Ubicacion(id)
+		ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Taller (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    code_equip TEXT NOT NULL, 
+    id_device TEXT NOT NULL, 
     status TEXT CHECK(status IN ('repaired', 'pending', 'unrepaired')) DEFAULT 'pending',
     date_in TEXT NOT NULL,        -- Tiempo Unix Timestamp
     date_out TEXT,                -- Puede ser NULL si el equipo sigue en taller
     details TEXT,
     
-    FOREIGN KEY (code_equip) REFERENCES Equipo(code)
+    FOREIGN KEY (id_device) REFERENCES Dispositivo(id)
 		ON DELETE NO ACTION ON UPDATE CASCADE
 );
