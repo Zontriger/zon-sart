@@ -251,8 +251,8 @@ func createSchema() {
 		status TEXT CHECK(status IN ('repaired', 'pending', 'unrepaired')) DEFAULT 'pending',
 		date_in TEXT NOT NULL,
 		date_out TEXT,
-		details TEXT,
-		solution TEXT,
+		details_in TEXT,
+		details_out TEXT,
 		FOREIGN KEY (id_device) REFERENCES Dispositivo(id) ON DELETE NO ACTION ON UPDATE CASCADE
 	);`
 
