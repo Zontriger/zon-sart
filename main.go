@@ -134,6 +134,8 @@ func main() {
 	http.HandleFunc("/api/tickets/finish", handleFinish)
 	http.HandleFunc("/api/config", handleConfig)
 	http.HandleFunc("/api/devices", handleDevices)
+	http.HandleFunc("/api/devices/floors", handleDeviceFloors)
+	http.HandleFunc("/api/devices/areas", handleDeviceAreas)
 	http.HandleFunc("/api/locations", handleLocations)
 	http.HandleFunc("/api/periods", handlePeriods)
 	http.HandleFunc("/api/periods/active", handleActivePeriod)
@@ -369,8 +371,11 @@ func insertPeriodIfMissing(code, start, end string) {
 func handleLogin(w http.ResponseWriter, r *http.Request) {
 	var creds LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
+		log.Printf("[ERROR] JSON inválido en login: %v", err)
 		http.Error(w, "Bad Request", 400); return
 	}
+
+	log.Printf("[DIAG] Intento de login: usuario=%s, rol=%s", creds.Username, creds.Role)
 
 	hash := hashPassword(creds.Password)
 	dbRole := creds.Role
@@ -381,9 +386,27 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 		creds.Username, hash, dbRole).Scan(&user.ID, &user.Username, &user.FullName, &user.JobTitle, &user.Role)
 
 	if err == sql.ErrNoRows {
+		log.Printf("[DIAG] Credenciales inválidas para usuario: %s", creds.Username)
 		http.Error(w, "Credenciales inválidas", 401); return
 	}
+	
 	if user.Role == "viewer" { user.Role = "user" }
+	
+	// Session cookie - válida 30 días
+	sessionToken := hashPassword(fmt.Sprintf("%d-%s-%d", user.ID, creds.Username, time.Now().Unix()))
+	cookie := &http.Cookie{
+		Name:     "sart_session",
+		Value:    sessionToken,
+		Path:     "/",
+		MaxAge:   30 * 24 * 60 * 60, // 30 días
+		HttpOnly: false,
+		SameSite: http.SameSiteLax,
+	}
+	http.SetCookie(w, cookie)
+	
+	log.Printf("[DIAG] Login exitoso para usuario: %s (ID=%d, Rol=%s)", user.Username, user.ID, user.Role)
+	
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
 }
 
@@ -458,6 +481,14 @@ func handleTickets(w http.ResponseWriter, r *http.Request) {
 		var req struct { DeviceID int64 `json:"deviceId"`; Code, DateIn, Issue string }
 		json.NewDecoder(r.Body).Decode(&req)
 		
+		// Validar que fecha ingreso no sea futura
+		today := time.Now().Format("2006-01-02")
+		if req.DateIn > today {
+			log.Printf("[DIAG] Intento de ingreso con fecha futura. Entrada: %s, Hoy: %s", req.DateIn, today)
+			http.Error(w, "La fecha de ingreso no puede ser mayor a hoy", 400)
+			return
+		}
+		
 		var devID int64
 		if req.DeviceID > 0 {
 			devID = req.DeviceID
@@ -466,6 +497,7 @@ func handleTickets(w http.ResponseWriter, r *http.Request) {
 			if err == sql.ErrNoRows { http.Error(w, "Código no encontrado", 400); return }
 		}
 		
+		log.Printf("[DIAG] Creando ticket para dispositivo %d en fecha %s", devID, req.DateIn)
 		db.Exec("INSERT INTO Taller (id_device, status, date_in, details) VALUES (?, 'pending', ?, ?)", devID, req.DateIn, req.Issue)
 		w.Write([]byte(`{"status":"ok"}`))
 	}
@@ -474,24 +506,38 @@ func handleTickets(w http.ResponseWriter, r *http.Request) {
 func handleFinish(w http.ResponseWriter, r *http.Request) {
 	var req struct { ID int; Status, DateOut, Solution string }
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Printf("[ERROR] JSON inválido en finish: %v", err)
 		http.Error(w, "Bad JSON", 400); return
 	}
+
+	log.Printf("[DIAG] Finalizando ticket ID=%d, Status=%s, DateOut=%s", req.ID, req.Status, req.DateOut)
 
 	dbStatus := "pending"
 	if req.Status == "Reparado" { dbStatus = "repaired" } else if req.Status == "No Reparado" { dbStatus = "unrepaired" }
 
-	db.Exec("UPDATE Taller SET status=?, date_out=?, solution=? WHERE id=?", dbStatus, req.DateOut, req.Solution, req.ID)
+	result, err := db.Exec("UPDATE Taller SET status=?, date_out=?, solution=? WHERE id=?", dbStatus, req.DateOut, req.Solution, req.ID)
+	if err != nil {
+		log.Printf("[ERROR] Error actualizando ticket: %v", err)
+		http.Error(w, "Error actualizando ticket: "+err.Error(), 500)
+		return
+	}
+	
+	affected, _ := result.RowsAffected()
+	log.Printf("[DIAG] Ticket finalizado. Filas afectadas: %d", affected)
+	
+	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(`{"status":"ok"}`))
 }
 
 func handleConfig(w http.ResponseWriter, r *http.Request) {
+	log.Printf("[DIAG] Cargando configuración...")
 	data := ConfigData{}
 	
 	// Función helper que evita pánicos cerrando rows correctamente
 	fill := func(q string, t *[]string) {
 		rows, err := db.Query(q)
 		if err != nil {
-			log.Println("Error en consulta config:", q, err)
+			log.Printf("[ERROR] Error en consulta config: %v", err)
 			return
 		}
 		defer rows.Close()
@@ -510,6 +556,10 @@ func handleConfig(w http.ResponseWriter, r *http.Request) {
 	fill("SELECT DISTINCT building FROM Ubicacion ORDER BY building", &data.Buildings)
 	fill("SELECT DISTINCT floor FROM Ubicacion ORDER BY floor", &data.Floors)
 	fill("SELECT DISTINCT area FROM Ubicacion ORDER BY area", &data.Areas)
+	
+	log.Printf("[DIAG] Configuración cargada: %d tipos, %d marcas, %d edificios", len(data.Types), len(data.Brands), len(data.Buildings))
+	
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -691,6 +741,70 @@ func handleActivePeriod(w http.ResponseWriter, r *http.Request) {
 	if err != nil { json.NewEncoder(w).Encode(nil); return }
 	p.IsCurrent = true
 	json.NewEncoder(w).Encode(p)
+}
+
+// --- NUEVOS HANDLERS PARA UBICACIÓN JERÁRQUICA ---
+
+func handleDeviceFloors(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	building := r.URL.Query().Get("building")
+	if building == "" {
+		http.Error(w, "Building required", 400)
+		return
+	}
+	
+	log.Printf("[DIAG] Buscando pisos para edificio: %s", building)
+	
+	rows, err := db.Query("SELECT DISTINCT floor FROM Ubicacion WHERE building = ? ORDER BY floor", building)
+	if err != nil {
+		log.Printf("[ERROR] Error buscando pisos: %v", err)
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	defer rows.Close()
+	
+	var floors []string
+	for rows.Next() {
+		var f string
+		rows.Scan(&f)
+		floors = append(floors, f)
+	}
+	if floors == nil { floors = []string{} }
+	
+	log.Printf("[DIAG] Pisos encontrados: %v", floors)
+	json.NewEncoder(w).Encode(floors)
+}
+
+func handleDeviceAreas(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	building := r.URL.Query().Get("building")
+	floor := r.URL.Query().Get("floor")
+	
+	if building == "" || floor == "" {
+		http.Error(w, "Building and floor required", 400)
+		return
+	}
+	
+	log.Printf("[DIAG] Buscando áreas para %s - %s", building, floor)
+	
+	rows, err := db.Query("SELECT DISTINCT area FROM Ubicacion WHERE building = ? AND floor = ? ORDER BY area", building, floor)
+	if err != nil {
+		log.Printf("[ERROR] Error buscando áreas: %v", err)
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	defer rows.Close()
+	
+	var areas []string
+	for rows.Next() {
+		var a string
+		rows.Scan(&a)
+		areas = append(areas, a)
+	}
+	if areas == nil { areas = []string{} }
+	
+	log.Printf("[DIAG] Áreas encontradas: %v", areas)
+	json.NewEncoder(w).Encode(areas)
 }
 
 func hashPassword(p string) string {

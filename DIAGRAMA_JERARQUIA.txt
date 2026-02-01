@@ -1,0 +1,232 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                 DIAGRAMA DE JERARQUÍA - SISTEMA SART                          ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+NIVEL 1: EDIFICIO
+════════════════════════════════════════════════════════════════════════════════
+
+    ┌─────────────────┐         ┌─────────────────┐
+    │   EDIFICIO 01   │         │   EDIFICIO 02   │
+    └─────────────────┘         └─────────────────┘
+            │                            │
+            ├── Pisos: 2                 ├── Pisos: 1
+            └── Áreas: 4                 └── Áreas: 3
+
+
+NIVEL 2: PISO (dentro de cada edificio)
+════════════════════════════════════════════════════════════════════════════════
+
+EDIFICIO 01:
+┌──────────────────────────────────────┐
+│         PISO 01 (Edificio 01)        │
+├──────────────────────────────────────┤
+│ Áreas:                               │
+│  • Área TIC         (3 dispositivos) │
+│  • Coordinación     (1 dispositivo)  │
+│  • Control Estudios (2 dispositivos) │
+│  • Archivo          (0 dispositivos) │
+└──────────────────────────────────────┘
+
+EDIFICIO 02:
+┌──────────────────────────────────────┐
+│         PISO 01 (Edificio 02)        │
+├──────────────────────────────────────┤
+│ Áreas:                               │
+│  • Control Estudios (3 dispositivos) │
+│  • Archivo          (4 dispositivos) │
+│  • Jefe de Área     (1 dispositivo)  │
+└──────────────────────────────────────┘
+
+
+NIVEL 3: ÁREA (dentro de cada piso)
+════════════════════════════════════════════════════════════════════════════════
+
+EDIFICIO 01 / PISO 01 / ÁREA TIC:
+┌──────────────────────────────────────┐
+│      Dispositivos en Área TIC        │
+├──────────────────────────────────────┤
+│ 1. PC - Soporte Técnico              │
+│    Marca: Dell                       │
+│    Modelo: Optiplex                  │
+│    Serial: CN-0N8176...              │
+│    OS: Linux                         │
+│                                      │
+│ 2. Modem - Soporte Técnico           │
+│    Marca: Huawei                     │
+│    Modelo: AR 157                    │
+│    Serial: 210235384810              │
+│                                      │
+│ 3. Switch - Cuarto de Redes          │
+│    Marca: TP-Link                    │
+│    Modelo: SF1016D                   │
+│    Serial: Y21CO30000672             │
+└──────────────────────────────────────┘
+
+
+FLUJO DE SELECCIÓN EN MODAL "AÑADIR AL TALLER"
+════════════════════════════════════════════════════════════════════════════════
+
+┌─ INICIO
+│
+├─► Usuario selecciona EDIFICIO
+│   └─► Sistema carga pisos de ese edificio
+│       └─► Dropdown "Piso" se llena
+│
+├─► Usuario selecciona PISO
+│   └─► Sistema carga áreas de ese piso
+│       └─► Dropdown "Área" se llena
+│
+├─► Usuario selecciona ÁREA
+│   └─► Sistema carga dispositivos de esa área
+│       └─► Dropdown "Seleccionar Dispositivo" se llena
+│           Formato: Tipo - Ubicación - Marca - Modelo - Serial
+│
+└─► Usuario selecciona DISPOSITIVO
+    └─► ID del dispositivo se guarda
+        └─► Puede proceder a completar ticket
+
+
+VALIDACIONES Y RESTRICCIONES
+════════════════════════════════════════════════════════════════════════════════
+
+✓ Un dispositivo pertenece a UNA SOLA ubicación
+✓ No puede cambiar de ubicación (inmutable)
+✓ Los dispositivos NO APARECEN en otros edificios
+✓ Las áreas NO APARECEN en otros pisos
+✓ Los pisos NO APARECEN en otros edificios
+
+Ejemplo INCORRECTO (que ahora está FIX):
+   - Edificio 01 → Ve pisos de Edificio 02 ❌ IMPOSIBLE AHORA
+   - Edificio 01 → Piso 01 → Ve áreas de Piso 02 ❌ IMPOSIBLE AHORA
+
+Ejemplo CORRECTO:
+   - Edificio 01 → Ve solo sus pisos (01, 02, etc.) ✅
+   - Edificio 01 → Piso 01 → Ve solo sus áreas ✅
+   - Dispositivos filtrados correctamente ✅
+
+
+ENDPOINTS API PARA JERARQUÍA
+════════════════════════════════════════════════════════════════════════════════
+
+GET /api/devices/floors?building=Edificio%2001
+    Retorna: ["Piso 01", "Piso 02"]
+    Logs: [DIAG] Buscando pisos para edificio: Edificio 01
+
+GET /api/devices/areas?building=Edificio%2001&floor=Piso%2001
+    Retorna: ["Área TIC", "Coordinación", "Control Estudios", "Archivo"]
+    Logs: [DIAG] Buscando áreas para Edificio 01 - Piso 01
+
+GET /api/devices?building=Edificio%2001&floor=Piso%2001&area=Área%20TIC
+    Retorna: [
+        {id: 1, type: "PC", brand: "Dell", model: "Optiplex", serial: "CN-0N8176...", location: "Soporte Técnico"},
+        {id: 2, type: "Modem", brand: "Huawei", ...},
+        ...
+    ]
+
+
+ESTRUCTURA DE BASE DE DATOS
+════════════════════════════════════════════════════════════════════════════════
+
+Tabla: Ubicacion
+┌─────────────────────────────────────────────────────────────┐
+│ id | building   | floor    | area              | room       │
+├─────────────────────────────────────────────────────────────┤
+│ 1  │ Edificio 01│ Piso 01  │ Área TIC          │ NULL       │
+│ 2  │ Edificio 01│ Piso 01  │ Área TIC          │ Soporte... │
+│ 3  │ Edificio 01│ Piso 01  │ Coordinación      │ Asistente  │
+│ 4  │ Edificio 02│ Piso 01  │ Control Estudios  │ Jefe Área  │
+└─────────────────────────────────────────────────────────────┘
+
+Tabla: Dispositivo
+┌──────────────────────────────────────────────────────────┐
+│ id │ device_type │ id_ubication │ brand │ model │ serial │
+├──────────────────────────────────────────────────────────┤
+│ 1  │ PC          │ 2            │ Dell  │ ---   │ 802...│
+│ 2  │ Modem       │ 2            │ Huawei│ AR 157│ 2102..│
+│ 3  │ Switch      │ 2            │ TP... │ SF10..│ Y21C..│
+└──────────────────────────────────────────────────────────┘
+
+RELACIÓN:
+- Dispositivo.id_ubication → Ubicacion.id
+- Un Ubicacion puede tener MUCHOS Dispositivos
+- Un Dispositivo solo puede estar en UNA Ubicacion
+
+
+FLUJO DE DATOS EN FRONTEND
+════════════════════════════════════════════════════════════════════════════════
+
+                        fetchModalDevices()
+                                │
+                ┌───────────────┼───────────────┐
+                │               │               │
+              Step1           Step2            Step3
+                │               │               │
+         [Edificio vacío?]  [Piso vacío?]   [Área vacío?]
+              │               │                 │
+             YES             YES               YES
+              │               │                 │
+         Fetch pisos    Fetch áreas        Fetch devices
+         for building   for building+      for building+
+                        floor              floor+area
+                │               │                 │
+                │               │                 │
+         Carga →   Carga →   Carga →
+         Select    Select     Select
+         "Piso"    "Área"     "Dispositivo"
+                │               │                 │
+                └───────────────┼───────────────┘
+                                │
+                    User completes form
+                                │
+                            Submit
+                                │
+                        Create Ticket
+
+
+DATOS DE PRUEBA
+════════════════════════════════════════════════════════════════════════════════
+
+Al iniciar, el sistema carga automáticamente:
+
+EDIFICIO 01:
+  Piso 01:
+    Área TIC:
+      - PC (Dell, Optiplex, Linux, 1GB RAM)
+      - Modem (Huawei, AR 157)
+      - Switch (TP-Link, SF1016D)
+    Coordinación:
+      - PC (Soporte Técnico)
+
+EDIFICIO 02:
+  Piso 01:
+    Control Estudios:
+      - PC (Jefe de Área)
+      - PC (Analista Ingreso)
+      - PC (Analista Ingreso)
+    Archivo:
+      - PC (vacío)
+      - PC (Acta Publicaciones)
+      - PC (Acta Publicaciones)
+      - PC (Jefe Área)
+
+Total: 13 dispositivos de prueba
+
+
+COMPORTAMIENTO ESPERADO
+════════════════════════════════════════════════════════════════════════════════
+
+✅ CORRECTO:
+   1. Selecciono Edificio 01 → Veo sus pisos
+   2. Selecciono Piso 01 → Veo sus áreas
+   3. Selecciono Área TIC → Veo sus 3 dispositivos
+   4. Selecciono dispositivo → ID se guarda
+
+❌ INCORRECTO (ANTES - AHORA ESTÁ FIJO):
+   1. Selecciono Edificio 01
+   2. Veo pisos de DIFERENTES edificios ❌
+   3. Cambio a Edificio 02
+   4. Veo MISMAS áreas de Edificio 01 ❌
+
+════════════════════════════════════════════════════════════════════════════════
+                            DIAGRAMA COMPLETADO
+════════════════════════════════════════════════════════════════════════════════

@@ -271,7 +271,7 @@
                     <h2 class="header-title" data-js="page-title">Inicio</h2>
                 </div>
                 <div class="header-user">
-                    <span class="header-role" data-js="user-role">ADMIN</span>
+                    <span class="header-role" data-js="user-role" style="text-transform: uppercase;">--</span>
                     <span class="header-date" data-js="current-date">--/--/----</span>
                 </div>
             </header>
@@ -450,7 +450,7 @@
                         </div>
                         <div class="mb-1"><label class="filter-label">Área</label><select id="ticket-filter-area"><option value="">Todas</option></select></div>
                         <div class="mb-1">
-                            <label class="filter-label">Seleccionar Dispositivo (Tipo - Marca - Código/Serial)</label>
+                            <label class="filter-label">Seleccionar Dispositivo (Tipo - Ubicación - Marca - Modelo - Serial)</label>
                             <select id="ticket-device-select" class="w-full" style="font-weight:bold;"><option value="">-- Seleccione Filtros Primero --</option></select>
                         </div>
                     </div>
@@ -496,7 +496,19 @@
         const app = {
             state: { user: null, tickets: [], filteredTickets: [], config: { codes: [], types: [], brands: [], os: [], locations: [], buildings: [], floors: [], areas: [] }, deviceFilters: { q: '', type: '', brand: '', os: '', building: '', floor: '', area: '', page: 1, limit: 10 }, deviceTimer: null, currentPeriodCode: '' },
             dom: {},
-            async init() { this.cacheDOM(); this.bindEvents(); this.updateTime(); this.dom.viewApp.classList.add('hidden'); this.dom.viewLogin.classList.remove('hidden'); this.initCharCounters(); },
+            async init() { 
+                console.log("[v0] Inicializando aplicación...");
+                this.cacheDOM(); 
+                this.bindEvents(); 
+                this.updateTime(); 
+                this.initCharCounters();
+                
+                // Intentar restaurar sesión
+                if(!this.checkSession()) {
+                    this.dom.viewApp.classList.add('hidden'); 
+                    this.dom.viewLogin.classList.remove('hidden');
+                }
+            },
             cacheDOM() {
                 const els = ['view-login', 'view-app', 'login-form', 'login-error', 'sidebar', 'user-role', 'modal-ticket', 'form-ticket', 'modal-finish', 'form-finish', 'modal-location', 'form-location', 'modal-device', 'form-device', 'tbody-workshop', 'tbody-history', 'tbody-devices', 'tbody-periods', 'dev-filter-q', 'dev-pagination-info', 'ticket-device-select', 'new-dev-location', 'form-settings-admin', 'form-settings-user'];
                 els.forEach(id => { const el = document.getElementById(id) || document.querySelector(`[data-js="${id}"]`); if(el) this.dom[id] = el; });
@@ -524,12 +536,33 @@
             },
             bindEvents() {
                 this.dom['login-form'].addEventListener('submit', e => { e.preventDefault(); this.login(new FormData(e.target)); });
-                document.querySelector('[data-action="logout"]').addEventListener('click', () => location.reload());
+                document.querySelector('[data-action="logout"]').addEventListener('click', () => {
+                    console.log("[v0] Cerrando sesión...");
+                    sessionStorage.removeItem('sart_user');
+                    location.reload();
+                });
                 this.dom.navLinks.forEach(l => l.addEventListener('click', e => { e.preventDefault(); this.nav(l.getAttribute('data-target')); }));
                 document.querySelectorAll('[data-action="toggle-sidebar"]').forEach(btn => btn.addEventListener('click', () => this.dom.sidebar.classList.toggle('is-open')));
-                document.querySelectorAll('[data-action="close-modals"]').forEach(b => b.addEventListener('click', () => document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'))));
+                document.querySelectorAll('[data-action="close-modals"]').forEach(b => b.addEventListener('click', () => {
+                    console.log("[v0] Cerrando modales");
+                    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'));
+                }));
                 
-                document.querySelector('[data-action="open-create-modal"]').addEventListener('click', () => { this.dom['modal-ticket'].classList.remove('hidden'); this.fetchModalDevices(); });
+                // Botones específicos para cerrar modales
+                document.querySelector('[data-action="close-modal-ticket"]').addEventListener('click', () => {
+                    console.log("[v0] Cerrando modal ticket");
+                    this.dom['modal-ticket'].classList.add('hidden');
+                });
+                document.querySelector('[data-action="close-modal-finish"]').addEventListener('click', () => {
+                    console.log("[v0] Cerrando modal finish");
+                    this.dom['modal-finish'].classList.add('hidden');
+                });
+                
+                document.querySelector('[data-action="open-create-modal"]').addEventListener('click', () => { 
+                    console.log("[v0] Abriendo modal ticket");
+                    this.dom['modal-ticket'].classList.remove('hidden'); 
+                    this.fetchModalDevices(); 
+                });
                 document.querySelector('[data-action="open-loc-modal"]').addEventListener('click', () => this.dom['modal-location'].classList.remove('hidden'));
                 document.querySelector('[data-action="open-dev-modal"]').addEventListener('click', () => { this.dom['modal-device'].classList.remove('hidden'); this.loadLocationsForSelect(); });
 
@@ -549,8 +582,18 @@
                 this.dom.devFilterBuild.addEventListener('change', triggerDevices);
                 this.dom.devFilterFloor.addEventListener('change', triggerDevices);
                 this.dom.devFilterArea.addEventListener('change', triggerDevices);
-                this.dom.devPrevBtn.addEventListener('click', () => { if(this.state.deviceFilters.page>1) { this.state.deviceFilters.page--; this.fetchDevices(); }});
-                this.dom.devNextBtn.addEventListener('click', () => { this.state.deviceFilters.page++; this.fetchDevices(); });
+                this.dom.devPrevBtn.addEventListener('click', () => { 
+                    if(this.state.deviceFilters.page > 1) { 
+                        console.log("[v0] Página anterior. Página actual:", this.state.deviceFilters.page);
+                        this.state.deviceFilters.page--; 
+                        this.fetchDevices(); 
+                    }
+                });
+                this.dom.devNextBtn.addEventListener('click', () => { 
+                    console.log("[v0] Página siguiente. Página actual:", this.state.deviceFilters.page);
+                    this.state.deviceFilters.page++; 
+                    this.fetchDevices(); 
+                });
 
                 // Ticket Filters
                 const loadModalDevices = () => this.fetchModalDevices();
@@ -577,16 +620,49 @@
             },
             async login(fd) {
                 try {
+                    console.log("[v0] Iniciando login...");
                     const res = await fetch('/api/login', { method:'POST', body: JSON.stringify(Object.fromEntries(fd)) });
-                    if(!res.ok) throw new Error();
+                    if(!res.ok) {
+                        console.log("[v0] Login fallido - respuesta no OK");
+                        throw new Error();
+                    }
                     this.state.user = await res.json();
+                    console.log("[v0] Login exitoso para usuario:", this.state.user.full_name);
+                    
+                    // Guardar sesión en localStorage
+                    sessionStorage.setItem('sart_user', JSON.stringify(this.state.user));
+                    
                     this.dom['view-login'].classList.add('hidden');
                     this.dom['view-app'].classList.remove('hidden');
-                    this.dom['user-role'].textContent = this.state.user.role === 'admin' ? 'ADMIN' : 'COORD';
+                    
+                    // Mostrar nombre completo en MAYÚSCULAS
+                    this.dom['user-role'].textContent = this.state.user.full_name.toUpperCase();
+                    console.log("[v0] Header actualizado con:", this.state.user.full_name.toUpperCase());
+                    
                     if(this.state.user.role === 'user') document.querySelectorAll('.admin-only').forEach(e => e.classList.add('hidden'));
                     else document.querySelectorAll('.admin-only').forEach(e => e.classList.remove('hidden'));
                     this.fetchData(); this.nav('home');
-                } catch(e) { this.dom['login-error'].classList.remove('hidden'); }
+                } catch(e) { 
+                    console.log("[v0] Error en login:", e);
+                    this.dom['login-error'].classList.remove('hidden'); 
+                }
+            },
+            checkSession() {
+                console.log("[v0] Verificando sesión...");
+                const stored = sessionStorage.getItem('sart_user');
+                if(stored) {
+                    this.state.user = JSON.parse(stored);
+                    console.log("[v0] Sesión restaurada para:", this.state.user.full_name);
+                    this.dom['view-login'].classList.add('hidden');
+                    this.dom['view-app'].classList.remove('hidden');
+                    this.dom['user-role'].textContent = this.state.user.full_name.toUpperCase();
+                    if(this.state.user.role === 'user') document.querySelectorAll('.admin-only').forEach(e => e.classList.add('hidden'));
+                    else document.querySelectorAll('.admin-only').forEach(e => e.classList.remove('hidden'));
+                    this.fetchData();
+                    this.nav('home');
+                    return true;
+                }
+                return false;
             },
             nav(target) {
                 document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden'));
@@ -620,11 +696,13 @@
                 this.dom.filterLoc.innerHTML = createOpts(this.state.config.locations);
             },
             async fetchTickets() {
+                console.log("[v0] Cargando tickets...");
                 const res = await fetch('/api/tickets');
                 const tickets = await res.json();
                 this.state.tickets = tickets;
-                this.dom['tbody-workshop'].innerHTML = tickets.filter(t=>t.status==='Pendiente').map(t => `<tr><td>${t.code}</td><td>${t.type}</td><td>${t.issue}</td><td>${this.fmtDate(t.dateIn)}</td><td><button class="btn-success btn-sm" onclick="app.openFinish(${t.id})">Finalizar</button></td></tr>`).join('');
-                this.dom['tbody-history'].innerHTML = tickets.map(t => `<tr><td><span class="badge ${t.status==='Pendiente'?'pending':'repaired'}">${t.status}</span></td><td>${t.code}</td><td>${t.type}</td><td>${t.location}</td><td>${this.fmtDate(t.dateIn)}</td><td>${t.dateOut?this.fmtDate(t.dateOut):'-'}</td><td>${t.solution||t.issue}</td></tr>`).join('');
+                console.log("[v0] Tickets cargados:", tickets.length);
+                this.renderWorkshop();
+                this.renderHistory();
                 this.renderDash();
             },
             async fetchDevices() {
@@ -632,9 +710,16 @@
                 const building = this.dom.devFilterBuild.value;
                 const floor = this.dom.devFilterFloor.value;
                 const area = this.dom.devFilterArea.value;
-                const query = `page=${f.page}&limit=${f.limit}&q=${f.q}&type=${this.dom.devFilterType.value}&brand=${this.dom.devFilterBrand.value}&os=${this.dom.devFilterOS.value}&building=${building}&floor=${floor}&area=${area}`;
+                const q = this.dom['dev-filter-q'].value || '';
+                
+                console.log("[v0] Cargando dispositivos - Página:", f.page, "Q:", q);
+                
+                const query = `page=${f.page}&limit=${f.limit}&q=${encodeURIComponent(q)}&type=${this.dom.devFilterType.value}&brand=${this.dom.devFilterBrand.value}&os=${this.dom.devFilterOS.value}&building=${encodeURIComponent(building)}&floor=${encodeURIComponent(floor)}&area=${encodeURIComponent(area)}`;
                 const res = await fetch(`/api/devices?${query}`);
                 const data = await res.json();
+                
+                console.log("[v0] Respuesta dispositivos:", data.total, "registros,", "página", data.page);
+                
                 this.dom['tbody-devices'].innerHTML = (data.data||[]).map(d => {
                     const typeLower = d.type.toLowerCase();
                     let badgeClass = 'dev-other';
@@ -644,17 +729,64 @@
                     else if (typeLower.includes('impresora')) badgeClass = 'dev-printer';
                     return `<tr><td class="font-bold text-primary">${d.code}</td><td><span class="dev-badge ${badgeClass}">${d.type}</span></td><td>${d.brand} ${d.model}</td><td>${d.serial}</td><td>${d.location}</td><td>${d.os}</td></tr>`;
                 }).join('');
-                document.getElementById('dev-pagination-info').textContent = `Pág ${data.page} de ${Math.ceil(data.total/data.limit)} (${data.total})`;
+                
+                const totalPages = Math.ceil(data.total / data.limit);
+                document.getElementById('dev-pagination-info').textContent = `Pág ${data.page} de ${totalPages} (${data.total})`;
+                
+                // Actualizar estado de botones
+                this.dom.devPrevBtn.disabled = data.page <= 1;
+                this.dom.devNextBtn.disabled = data.page >= totalPages;
+                
+                console.log("[v0] Botones: Anterior disabled=", this.dom.devPrevBtn.disabled, ", Siguiente disabled=", this.dom.devNextBtn.disabled);
             },
             async fetchModalDevices() {
                 const b = this.dom.ticketFilterBuild.value;
                 const f = this.dom.ticketFilterFloor.value;
                 const a = document.getElementById('ticket-filter-area').value;
-                const res = await fetch(`/api/devices?limit=100&building=${b}&floor=${f}&area=${a}`);
-                const data = await res.json();
                 const sel = document.getElementById('ticket-device-select');
-                if(!data.data || data.data.length === 0) { sel.innerHTML = '<option value="">No hay equipos</option>'; return; }
-                sel.innerHTML = '<option value="">-- Seleccione --</option>' + data.data.map(d => `<option value="${d.id}" data-code="${d.code}">${d.type} - ${d.brand} ${d.model} [${d.code}]</option>`).join('');
+                
+                console.log("[v0] Cargando dispositivos - Edificio:", b, "Piso:", f, "Área:", a);
+                
+                // Si no hay edificio seleccionado, limpiar todo
+                if(!b) {
+                    sel.innerHTML = '<option value="">-- Seleccione Edificio Primero --</option>';
+                    return;
+                }
+                
+                // Si hay edificio pero no piso, cargar pisos
+                if(b && !f) {
+                    console.log("[v0] Cargando pisos para edificio:", b);
+                    const floorsRes = await fetch(`/api/devices/floors?building=${encodeURIComponent(b)}`);
+                    const floors = await floorsRes.json();
+                    console.log("[v0] Pisos cargados:", floors);
+                    const floorSelect = this.dom.ticketFilterFloor;
+                    floorSelect.innerHTML = '<option value="">-- Seleccione Piso --</option>' + (floors||[]).map(fl => `<option value="${fl}">${fl}</option>`).join('');
+                    sel.innerHTML = '<option value="">-- Seleccione Piso Primero --</option>';
+                    return;
+                }
+                
+                // Si hay piso pero no área, cargar áreas
+                if(f && !a) {
+                    console.log("[v0] Cargando áreas para piso:", f);
+                    const areasRes = await fetch(`/api/devices/areas?building=${encodeURIComponent(b)}&floor=${encodeURIComponent(f)}`);
+                    const areas = await areasRes.json();
+                    console.log("[v0] Áreas cargadas:", areas);
+                    const areaSelect = document.getElementById('ticket-filter-area');
+                    areaSelect.innerHTML = '<option value="">-- Seleccione Área --</option>' + (areas||[]).map(ar => `<option value="${ar}">${ar}</option>`).join('');
+                    sel.innerHTML = '<option value="">-- Seleccione Área Primero --</option>';
+                    return;
+                }
+                
+                // Cargar dispositivos finales
+                const res = await fetch(`/api/devices?limit=100&building=${encodeURIComponent(b)}&floor=${encodeURIComponent(f)}&area=${encodeURIComponent(a)}`);
+                const data = await res.json();
+                console.log("[v0] Dispositivos cargados:", data.data ? data.data.length : 0);
+                
+                if(!data.data || data.data.length === 0) { 
+                    sel.innerHTML = '<option value="">No hay equipos en esta ubicación</option>'; 
+                    return; 
+                }
+                sel.innerHTML = '<option value="">-- Seleccione --</option>' + data.data.map(d => `<option value="${d.id}" data-code="${d.code}">${d.type} - ${d.location} - ${d.brand} - ${d.model} - ${d.serial}</option>`).join('');
             },
             async loadLocationsForSelect() {
                 const res = await fetch('/api/locations');
@@ -671,14 +803,45 @@
                 alert("Dispositivo creado"); document.querySelector('[data-action="close-modals"]').click(); this.fetchDevices(); this.fetchConfig();
             },
             async saveTicket(fd) {
-                const d = Object.fromEntries(fd); d.deviceId = parseInt(d.deviceId);
-                await fetch('/api/tickets', { method:'POST', body: JSON.stringify(d) });
-                alert("Ticket creado"); document.querySelector('[data-action="close-modals"]').click(); this.fetchTickets();
+                const d = Object.fromEntries(fd); 
+                d.deviceId = parseInt(d.deviceId);
+                
+                console.log("[v0] Guardando ticket - Fecha ingreso:", d.fecha);
+                
+                // Validar fecha
+                const today = new Date().toISOString().split('T')[0];
+                if(d.fecha > today) {
+                    console.log("[v0] Fecha futura rechazada:", d.fecha);
+                    alert("La fecha de ingreso no puede ser mayor a hoy");
+                    return;
+                }
+                
+                const res = await fetch('/api/tickets', { method:'POST', body: JSON.stringify(d) });
+                if(!res.ok) {
+                    const err = await res.text();
+                    console.log("[v0] Error creando ticket:", err);
+                    alert("Error: " + err);
+                    return;
+                }
+                alert("Ticket creado"); 
+                document.querySelector('[data-action="close-modals"]').click(); 
+                this.fetchTickets();
             },
             async finishTicket(fd) {
-                const d = Object.fromEntries(fd); d.id = parseInt(d.id);
-                await fetch('/api/tickets/finish', { method:'POST', body: JSON.stringify(d) });
-                document.querySelector('.modal-overlay:not(.hidden)').classList.add('hidden'); this.fetchTickets();
+                const d = Object.fromEntries(fd); 
+                d.id = parseInt(d.id);
+                console.log("[v0] Finalizando ticket ID:", d.id, "- Estado:", d.status, "- Fecha salida:", d.date_out);
+                
+                const res = await fetch('/api/tickets/finish', { method:'POST', body: JSON.stringify(d) });
+                if(!res.ok) {
+                    console.log("[v0] Error finalizando ticket");
+                    alert("Error al finalizar el ticket");
+                    return;
+                }
+                
+                console.log("[v0] Ticket finalizado exitosamente");
+                document.querySelector('.modal-overlay:not(.hidden)').classList.add('hidden'); 
+                this.fetchTickets();
             },
             openFinish(id) {
                 const t = this.state.tickets.find(x => x.id === id);
@@ -710,8 +873,24 @@
             },
             async updPeriod(code) {
                 const ini = document.getElementById(`ini-${code}`).value, end = document.getElementById(`end-${code}`).value;
+                console.log("[v0] Actualizando período", code, "- Inicio:", ini, "- Fin:", end);
+                
+                // Validar que las fechas sean válidas
+                if(!ini || !end) {
+                    alert("Las fechas de inicio y fin son obligatorias");
+                    return;
+                }
+                
                 const res = await fetch('/api/periods', { method:'PUT', body:JSON.stringify({code, date_ini:ini, date_end:end})});
-                if(res.ok) { alert('Actualizado'); this.fetchPeriod(); } else { const t=await res.text(); alert('Error: ' + t); }
+                if(res.ok) { 
+                    console.log("[v0] Período actualizado exitosamente");
+                    alert('Período actualizado'); 
+                    this.fetchPeriod(); 
+                } else { 
+                    const t = await res.text(); 
+                    console.log("[v0] Error actualizando período:", t);
+                    alert('Error: ' + t); 
+                }
             },
             async fetchUsers() {
                 const res = await fetch('/api/users'); const users = await res.json();
@@ -880,6 +1059,36 @@
             },
             initCharCounters() { document.querySelectorAll('textarea[maxlength]').forEach(txt => { const counter = document.createElement('div'); counter.className = 'char-counter'; counter.textContent = `0/${txt.getAttribute('maxlength')}`; txt.parentNode.appendChild(counter); txt.addEventListener('input', () => { counter.textContent = `${txt.value.length}/${txt.getAttribute('maxlength')}`; }); }); },
             validateDates() { const start = this.dom.filterDateStart.value; const end = this.dom.filterDateEnd.value; const today = new Date().toISOString().split('T')[0]; if (start > today || end > today) { alert("Fechas futuras inválidas."); if(start > today) this.dom.filterDateStart.value = ''; if(end > today) this.dom.filterDateEnd.value = ''; return; } if (start && end && start > end) { alert("Fecha incorrecta."); this.dom.filterDateEnd.value = ''; } },
+            renderHistory() {
+                console.log("[v0] Renderizando historial con filtros...");
+                const textF = (this.dom.filterText.value || '').toLowerCase();
+                const codeF = this.dom.filterCode.value;
+                const locF = this.dom.filterLoc.value;
+                const statusF = this.dom.filterStatus.value;
+                const dateStartF = this.dom.filterDateStart.value;
+                const dateEndF = this.dom.filterDateEnd.value;
+                
+                this.state.filteredTickets = this.state.tickets.filter(t => {
+                    if(textF && !JSON.stringify(t).toLowerCase().includes(textF)) return false;
+                    if(codeF && t.code !== codeF) return false;
+                    if(locF && t.location !== locF) return false;
+                    if(statusF && t.status !== statusF) return false;
+                    if(dateStartF && t.dateIn < dateStartF) return false;
+                    if(dateEndF && t.dateIn > dateEndF) return false;
+                    return true;
+                });
+                
+                console.log("[v0] Historial filtrado:", this.state.filteredTickets.length, "de", this.state.tickets.length);
+                this.dom['tbody-history'].innerHTML = this.state.filteredTickets.map(t => `<tr><td><span class="badge ${t.status==='Pendiente'?'pending':t.status==='Reparado'?'repaired':'norepaired'}">${t.status}</span></td><td>${t.code}</td><td>${t.type}</td><td>${t.location}</td><td>${this.fmtDate(t.dateIn)}</td><td>${t.dateOut?this.fmtDate(t.dateOut):'-'}</td><td>${t.solution||t.issue}</td></tr>`).join('');
+            },
+            renderWorkshop(searchTerm = '') {
+                console.log("[v0] Renderizando taller con búsqueda:", searchTerm);
+                const pending = this.state.tickets.filter(t => t.status === 'Pendiente');
+                const filtered = searchTerm ? pending.filter(t => JSON.stringify(t).toLowerCase().includes(searchTerm.toLowerCase())) : pending;
+                
+                console.log("[v0] Taller - Mostrando", filtered.length, "de", pending.length, "equipos pendientes");
+                this.dom['tbody-workshop'].innerHTML = filtered.map(t => `<tr><td>${t.code}</td><td>${t.type}</td><td>${t.issue}</td><td>${this.fmtDate(t.dateIn)}</td><td><button class="btn-success btn-sm" onclick="app.openFinish(${t.id})">Finalizar</button></td></tr>`).join('');
+            },
             fmtDate(s) { if(!s) return '-'; const p = s.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; }
         };
     </script>
