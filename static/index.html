@@ -357,8 +357,8 @@
                         <div><label class="filter-label">Edificio</label><select id="filter-building"></select></div>
                         <div><label class="filter-label">Piso</label><select id="filter-floor-h"></select></div>
                         <div><label class="filter-label">Área</label><select id="filter-area-h"></select></div>
-                        <div><label class="filter-label">Después de</label><input type="date" id="filter-date-start"></div>
-                        <div><label class="filter-label">Antes de</label><input type="date" id="filter-date-end"></div>
+                        <div><label class="filter-label">Después de</label><input type="date" id="filter-date-start" value=""></div>
+                        <div><label class="filter-label">Antes de</label><input type="date" id="filter-date-end" value=""></div>
                     </div>
                     <div class="table-responsive">
                         <table class="table">
@@ -388,10 +388,10 @@
                             <div><label class="filter-label">S.O.</label><select id="dev-filter-os"><option value="">Todos</option></select></div>
                         </div>
                         <div class="table-responsive mb-2">
-                            <table class="table">
-                                <thead><tr><th>Código</th><th>Tipo</th><th>Marca / Modelo</th><th>Serial</th><th>Ubicación</th><th>S.O.</th></tr></thead>
-                                <tbody data-js="tbody-devices"></tbody>
-                            </table>
+                        <table class="table">
+                            <thead><tr><th>Código</th><th>Tipo</th><th>Marca / Modelo</th><th>Serial</th><th>Ubicación</th><th>S.O.</th><th>Acciones</th></tr></thead>
+                            <tbody data-js="tbody-devices"></tbody>
+                        </table>
                         </div>
                         <div class="pagination-container">
                             <span class="page-info" id="dev-pagination-info"></span>
@@ -986,6 +986,29 @@
                 const tickets = await res.json();
                 this.state.tickets = tickets;
                 console.log("[v0] Tickets cargados:", tickets.length);
+                
+                // Actualizar opciones de filtro en Historial basado en datos reales
+                if(this.dom.filterType) {
+                    const types = this.extractUniqueValues(tickets, 'type');
+                    this.dom.filterType.innerHTML = '<option value="">Todos</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
+                }
+                if(this.dom.filterBrand) {
+                    const brands = this.extractUniqueValues(tickets, 'brand');
+                    this.dom.filterBrand.innerHTML = '<option value="">Todos</option>' + brands.map(b => `<option value="${b}">${b}</option>`).join('');
+                }
+                if(this.dom.filterBuilding) {
+                    const buildings = this.extractUniqueValues(tickets, 'location').map(loc => loc.split(' - ')[0]);
+                    this.dom.filterBuilding.innerHTML = '<option value="">Todos</option>' + buildings.map(b => `<option value="${b}">${b}</option>`).join('');
+                }
+                if(this.dom.filterFloorH) {
+                    const floors = this.extractUniqueValues(tickets, 'location').map(loc => loc.split(' - ')[1]).filter(f => f);
+                    this.dom.filterFloorH.innerHTML = '<option value="">Todos</option>' + floors.map(f => `<option value="${f}">${f}</option>`).join('');
+                }
+                if(this.dom.filterAreaH) {
+                    const areas = this.extractUniqueValues(tickets, 'location').map(loc => loc.split(' - ')[2]).filter(a => a);
+                    this.dom.filterAreaH.innerHTML = '<option value="">Todos</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
+                }
+                
                 this.renderWorkshop();
                 this.renderHistory();
                 this.renderDash();
@@ -1012,7 +1035,21 @@
                     else if (typeLower.includes('laptop')) badgeClass = 'dev-laptop';
                     else if (typeLower.includes('switch')||typeLower.includes('modem')) badgeClass = 'dev-network';
                     else if (typeLower.includes('impresora')) badgeClass = 'dev-printer';
-                    return `<tr><td class="font-bold text-primary">${d.code}</td><td><span class="dev-badge ${badgeClass}">${d.type}</span></td><td>${d.brand} ${d.model}</td><td>${d.serial}</td><td>${d.location}</td><td>${d.os}</td></tr>`;
+                    return `<tr>
+                        <td class="font-bold text-primary">${d.code}</td>
+                        <td><span class="dev-badge ${badgeClass}">${d.type}</span></td>
+                        <td>${d.brand} ${d.model}</td>
+                        <td>${d.serial}</td>
+                        <td>${d.location}</td>
+                        <td>${d.os}</td>
+                        <td>
+                            <div class="action-group">
+                                <button class="btn-icon" title="Editar" onclick="app.editDevice(${d.id})">✏️</button>
+                                <button class="btn-icon" title="Ver detalles" onclick="app.viewDevice(${d.id})">👁️</button>
+                                <button class="btn-icon" title="Eliminar" onclick="app.deleteDevice(${d.id})">🗑️</button>
+                            </div>
+                        </td>
+                    </tr>`;
                 }).join('');
                 
                 const totalPages = Math.ceil(data.total / data.limit);
@@ -1121,6 +1158,7 @@
                 event.preventDefault();
                 const selectEl = document.getElementById(selectId);
                 const inputEl = document.getElementById('input-' + selectId);
+                const toggleBtn = event.target;
                 
                 if(!selectEl || !inputEl) return false;
                 
@@ -1131,12 +1169,14 @@
                     inputEl.classList.add('hidden');
                     selectEl.classList.remove('hidden');
                     selectEl.focus();
+                    toggleBtn.textContent = '+ Agregar';
                 } else {
                     // Cambiar a input (ocultar select)
                     selectEl.classList.add('hidden');
                     inputEl.classList.remove('hidden');
                     inputEl.value = '';
                     inputEl.focus();
+                    toggleBtn.textContent = 'Cancelar';
                 }
                 
                 return false;
@@ -1144,6 +1184,28 @@
             initSpecialSelects() {
                 console.log("[v0] Inicializando selects especiales");
                 // Los inputs están ocultos por defecto, los selects visibles
+            },
+            editDevice(deviceId) {
+                console.log("[v0] Editando dispositivo ID:", deviceId);
+                const device = this.state.tickets.find(d => d.id === deviceId) || {};
+                // TODO: Abrir modal con datos pre-rellenos
+                alert("Editar dispositivo: " + deviceId);
+            },
+            viewDevice(deviceId) {
+                console.log("[v0] Viendo detalles dispositivo ID:", deviceId);
+                // TODO: Abrir modal con todos los detalles
+                alert("Ver detalles: " + deviceId);
+            },
+            deleteDevice(deviceId) {
+                console.log("[v0] Eliminando dispositivo ID:", deviceId);
+                if(confirm("¿Está seguro de eliminar este dispositivo?")) {
+                    fetch(`/api/devices/${deviceId}`, { method: 'DELETE' }).then(res => {
+                        if(res.ok) {
+                            alert("Dispositivo eliminado");
+                            this.fetchDevices();
+                        }
+                    });
+                }
             },
             async saveLocation(fd) {
                 const data = Object.fromEntries(fd);
@@ -1290,6 +1352,11 @@
             async saveTicket(fd) {
                 const d = Object.fromEntries(fd); 
                 d.deviceId = parseInt(d.deviceId);
+                // Renombrar 'issue' a 'details_in' para que coincida con la BD
+                if(d.issue) {
+                    d.details_in = d.issue;
+                    delete d.issue;
+                }
                 
                 console.log("[v0] Guardando ticket - Fecha ingreso:", d.fecha);
                 
@@ -1309,12 +1376,18 @@
                     return;
                 }
                 alert("Ticket creado"); 
-                document.querySelector('[data-action="close-modals"]').click(); 
-                this.fetchTickets();
+                document.querySelector('[data-action="close-modals"]').click();
+                // Actualizar dinámicamente sin recargar
+                await this.fetchTickets();
             },
             async finishTicket(fd) {
                 const d = Object.fromEntries(fd); 
                 d.id = parseInt(d.id);
+                // Renombrar 'solution' a 'details_out' para que coincida con la BD
+                if(d.solution) {
+                    d.details_out = d.solution;
+                    delete d.solution;
+                }
                 console.log("[v0] Finalizando ticket ID:", d.id, "- Estado:", d.status, "- Fecha salida:", d.date_out);
                 
                 const res = await fetch('/api/tickets/finish', { method:'POST', body: JSON.stringify(d) });
@@ -1325,8 +1398,9 @@
                 }
                 
                 console.log("[v0] Ticket finalizado exitosamente");
-                document.querySelector('.modal-overlay:not(.hidden)').classList.add('hidden'); 
-                this.fetchTickets();
+                document.querySelector('.modal-overlay:not(.hidden)').classList.add('hidden');
+                // Actualizar dinámicamente sin recargar
+                await this.fetchTickets();
             },
             openFinish(id) {
                 const t = this.state.tickets.find(x => x.id === id);
@@ -1336,6 +1410,11 @@
                     f.querySelector('[name=date_out]').value = new Date().toISOString().split('T')[0];
                     this.dom['modal-finish'].classList.remove('hidden'); 
                 }
+            },
+            extractUniqueValues(tickets, field) {
+                // Extrae valores únicos de un campo de la lista de tickets
+                const values = tickets.filter(t => t[field]).map(t => t[field]);
+                return [...new Set(values)].sort();
             },
             async fetchPeriod() {
                 console.log("[v0] Buscando período académico activo...");
@@ -1362,13 +1441,29 @@
                     document.querySelector('[data-render="current-period"]').textContent = activePeriod.code;
                     document.querySelector('[data-render="period-ini"]').textContent = this.fmtDate(activePeriod.date_ini);
                     document.querySelector('[data-render="period-end"]').textContent = this.fmtDate(activePeriod.date_end);
-                    const now = new Date().getTime(), start = new Date(activePeriod.date_ini).getTime(), end = new Date(activePeriod.date_end).getTime();
-                    let pct = ((now-start)/(end-start))*100;
-                    if(pct<0) pct=0; if(pct>100) pct=100;
-                    document.querySelector('.progress-bar').style.width = `${pct}%`;
                     
-                    console.log("[v0] Período activo seleccionado:", activePeriod.code);
-                    this.dom['tbody-periods'].innerHTML = allP.map(x => `<tr><td>${x.code}${x.code === activePeriod.code ? ' <span style="color:var(--color-success); font-weight:bold;">(ACTUAL)</span>' : ''}</td><td><input type="date" id="ini-${x.code}" value="${x.date_ini}"></td><td><input type="date" id="end-${x.code}" value="${x.date_end}"></td><td><button class="btn-sm btn-success" onclick="app.updPeriod('${x.code}')">Guardar</button></td></tr>`).join('');
+                    // Calcular porcentaje: (hoy - inicio) / (fin - inicio) * 100
+                    const todayDate = new Date().toISOString().split('T')[0];
+                    const startDate = activePeriod.date_ini;
+                    const endDate = activePeriod.date_end;
+                    
+                    const now = new Date(todayDate + 'T00:00:00').getTime();
+                    const start = new Date(startDate + 'T00:00:00').getTime();
+                    const end = new Date(endDate + 'T00:00:00').getTime();
+                    
+                    let pct = ((now - start) / (end - start)) * 100;
+                    if(pct < 0) pct = 0;
+                    if(pct > 100) pct = 100;
+                    
+                    document.querySelector('.progress-bar').style.width = `${pct}%`;
+                    console.log("[v0] Período activo:", activePeriod.code, "- Progreso:", Math.round(pct) + "%");
+                    // SOLO mostrar el período académico activo
+                    this.dom['tbody-periods'].innerHTML = `<tr>
+                        <td>${activePeriod.code} <span style="color:var(--color-success); font-weight:bold;">(ACTUAL)</span></td>
+                        <td><input type="date" id="ini-${activePeriod.code}" value="${activePeriod.date_ini}" data-month="${activePeriod.date_ini.slice(0, 7)}"></td>
+                        <td><input type="date" id="end-${activePeriod.code}" value="${activePeriod.date_end}" data-month="${activePeriod.date_end.slice(0, 7)}"></td>
+                        <td><button class="btn-sm btn-success" onclick="app.updPeriod('${activePeriod.code}')">Guardar</button></td>
+                    </tr>`;
                 } else {
                     console.log("[v0] Error: No hay ningún período definido en la base de datos");
                     document.querySelector('[data-render="current-period"]').textContent = "Sin Período";
@@ -1376,12 +1471,25 @@
                 }
             },
             async updPeriod(code) {
-                const ini = document.getElementById(`ini-${code}`).value, end = document.getElementById(`end-${code}`).value;
+                const iniInput = document.getElementById(`ini-${code}`);
+                const endInput = document.getElementById(`end-${code}`);
+                const ini = iniInput.value;
+                const end = endInput.value;
+                const origMonth = iniInput.dataset.month; // YYYY-MM original
+                
                 console.log("[v0] Actualizando período", code, "- Inicio:", ini, "- Fin:", end);
                 
                 // Validar que las fechas sean válidas
                 if(!ini || !end) {
                     alert("Las fechas de inicio y fin son obligatorias");
+                    return;
+                }
+                
+                // Validar que NO cambien mes ni año, solo el día
+                const newMonth = ini.slice(0, 7);
+                if(newMonth !== origMonth) {
+                    alert("Solo puede cambiar el día, no puede cambiar mes ni año");
+                    iniInput.value = iniInput.dataset.originalValue;
                     return;
                 }
                 
@@ -1589,15 +1697,15 @@
                 });
                 
                 console.log("[v0] Historial filtrado:", this.state.filteredTickets.length, "de", this.state.tickets.length);
-                this.dom['tbody-history'].innerHTML = this.state.filteredTickets.map(t => `<tr><td><span class="badge ${t.status==='Pendiente'?'pending':t.status==='Reparado'?'repaired':'norepaired'}">${t.status}</span></td><td>${t.code}</td><td>${t.type}</td><td>${t.location}</td><td>${this.fmtDate(t.dateIn)}</td><td>${t.dateOut?this.fmtDate(t.dateOut):'-'}</td><td>${t.solution||t.issue}</td></tr>`).join('');
+                this.dom['tbody-history'].innerHTML = this.state.filteredTickets.map(t => `<tr><td><span class="badge ${t.status==='Pendiente'?'pending':t.status==='Reparado'?'repaired':'norepaired'}">${t.status}</span></td><td>${t.code}</td><td>${t.type}</td><td>${t.location}</td><td>${this.fmtDate(t.dateIn)}</td><td>${t.dateOut?this.fmtDate(t.dateOut):'-'}</td><td>${t.details_out || t.solution || '-'}</td></tr>`).join('');
             },
             renderWorkshop(searchTerm = '') {
                 console.log("[v0] Renderizando taller con búsqueda:", searchTerm);
-                const pending = this.state.tickets.filter(t => t.status === 'Pendiente');
+                const pending = this.state.tickets.filter(t => t.status === 'pending');
                 const filtered = searchTerm ? pending.filter(t => JSON.stringify(t).toLowerCase().includes(searchTerm.toLowerCase())) : pending;
                 
                 console.log("[v0] Taller - Mostrando", filtered.length, "de", pending.length, "equipos pendientes");
-                this.dom['tbody-workshop'].innerHTML = filtered.map(t => `<tr><td>${t.code}</td><td>${t.type}</td><td>${t.issue}</td><td>${this.fmtDate(t.dateIn)}</td><td><button class="btn-success btn-sm" onclick="app.openFinish(${t.id})">Finalizar</button></td></tr>`).join('');
+                this.dom['tbody-workshop'].innerHTML = filtered.map(t => `<tr><td>${t.code}</td><td>${t.type}</td><td>${t.details_in || t.issue || '-'}</td><td>${this.fmtDate(t.dateIn)}</td><td><button class="btn-success btn-sm" onclick="app.openFinish(${t.id})">Finalizar</button></td></tr>`).join('');
             },
             fmtDate(s) { if(!s) return '-'; const p = s.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; }
         };
