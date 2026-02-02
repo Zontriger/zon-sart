@@ -100,14 +100,18 @@ type Period struct {
 }
 
 type ConfigData struct {
-	Codes     []string `json:"codes"`
-	Types     []string `json:"types"`
-	Brands    []string `json:"brands"`
-	OS        []string `json:"os"`
-	Locations []string `json:"locations"`
-	Buildings []string `json:"buildings"`
-	Floors    []string `json:"floors"`
-	Areas     []string `json:"areas"`
+	Codes         []string `json:"codes"`
+	Types         []string `json:"types"`
+	Brands        []string `json:"brands"`
+	OS            []string `json:"os"`
+	Locations     []string `json:"locations"`
+	Buildings     []string `json:"buildings"`
+	Floors        []string `json:"floors"`
+	Areas         []string `json:"areas"`
+	Rams          []string `json:"rams"`
+	Processors    []string `json:"processors"`
+	Architectures []string `json:"architectures"`
+	Storages      []string `json:"storages"`
 }
 
 type LocationFull struct {
@@ -511,6 +515,31 @@ func handleTickets(w http.ResponseWriter, r *http.Request) {
 		log.Printf("[DIAG] Creando ticket para dispositivo %d en fecha %s", devID, req.DateIn)
 		db.Exec("INSERT INTO Taller (id_device, status, date_in, details_in) VALUES (?, 'pending', ?, ?)", devID, req.DateIn, req.DetailsIn)
 		w.Write([]byte(`{"status":"ok"}`))
+	} else if r.Method == "DELETE" {
+		// Extraer ID del path /api/tickets/{id}
+		parts := strings.Split(r.URL.Path, "/")
+		if len(parts) < 4 {
+			http.Error(w, "ID requerido", 400)
+			return
+		}
+		ticketID := parts[3]
+		
+		log.Printf("[DIAG] Eliminando ticket ID: %s", ticketID)
+		result, err := db.Exec("DELETE FROM Taller WHERE id = ?", ticketID)
+		if err != nil {
+			log.Printf("[ERROR] Error eliminando ticket: %v", err)
+			http.Error(w, "Error eliminando ticket", 500)
+			return
+		}
+		
+		affected, _ := result.RowsAffected()
+		if affected == 0 {
+			http.Error(w, "Ticket no encontrado", 404)
+			return
+		}
+		
+		log.Printf("[DIAG] Ticket eliminado exitosamente")
+		w.Write([]byte(`{"status":"ok"}`))
 	}
 }
 
@@ -572,8 +601,12 @@ func handleConfig(w http.ResponseWriter, r *http.Request) {
 	fill("SELECT DISTINCT building FROM Ubicacion ORDER BY building", &data.Buildings)
 	fill("SELECT DISTINCT floor FROM Ubicacion ORDER BY floor", &data.Floors)
 	fill("SELECT DISTINCT area FROM Ubicacion ORDER BY area", &data.Areas)
+	fill("SELECT DISTINCT ram FROM Dispositivo WHERE ram IS NOT NULL AND ram != ''", &data.Rams)
+	fill("SELECT DISTINCT processor FROM Dispositivo WHERE processor IS NOT NULL AND processor != ''", &data.Processors)
+	fill("SELECT DISTINCT architecture FROM Dispositivo WHERE architecture IS NOT NULL AND architecture != ''", &data.Architectures)
+	fill("SELECT DISTINCT storage FROM Dispositivo WHERE storage IS NOT NULL AND storage != ''", &data.Storages)
 	
-	log.Printf("[DIAG] Configuración cargada: %d tipos, %d marcas, %d edificios", len(data.Types), len(data.Brands), len(data.Buildings))
+	log.Printf("[DIAG] Configuración cargada: %d tipos, %d marcas, %d edificios, %d RAMs, %d procesadores", len(data.Types), len(data.Brands), len(data.Buildings), len(data.Rams), len(data.Processors))
 	
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)

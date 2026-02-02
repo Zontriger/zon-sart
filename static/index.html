@@ -362,7 +362,7 @@
                     </div>
                     <div class="table-responsive">
                         <table class="table">
-                            <thead><tr><th>Estado</th><th>Código</th><th>Tipo</th><th>Ubicación</th><th>Entrada</th><th>Salida</th><th>Detalles</th></tr></thead>
+                            <thead><tr><th>Estado</th><th>Código</th><th>Tipo</th><th>Ubicación</th><th>Entrada</th><th>Salida</th><th>Detalles</th><th>Acciones</th></tr></thead>
                             <tbody data-js="tbody-history"></tbody>
                         </table>
                     </div>
@@ -544,12 +544,27 @@
                                 <span class="filter-label text-primary mb-1">Seleccionar Ubicación</span>
                                 <div class="grid-2 gap-2 mb-2">
                                     <div>
-                                        <label class="filter-label">Edificio (Obligatorio)</label>
-                                        <select id="new-dev-building" required class="w-full"><option value="">-- Seleccione --</option></select>
+                                        <label class="filter-label">Modelo</label>
+                                        <input type="text" name="model" class="w-full">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Campos Avanzados -->
+                            <div class="mb-3 p-2 border rounded" style="background:#f9fafb;">
+                                <span class="filter-label text-primary mb-1">Especificaciones Técnicas</span>
+                                <div class="grid-2 gap-2 mb-2">
+                                    <div>
+                                        <label class="filter-label">Serial</label>
+                                        <input type="text" name="serial" class="w-full">
                                     </div>
                                     <div>
-                                        <label class="filter-label">Piso</label>
-                                        <select id="new-dev-floor" class="w-full"><option value="">-- Seleccione --</option></select>
+                                        <div class="flex justify-between items-center mb-1">
+                                            <label class="filter-label">S.O.</label>
+                                            <a href="#" class="special-select-toggle" data-target="new-dev-os" onclick="return app.toggleSpecialSelect(event, 'new-dev-os')" style="color:#f59e0b; text-decoration:none; font-size:0.8rem; font-weight:bold;">+ Agregar</a>
+                                        </div>
+                                        <select name="os" id="new-dev-os" class="w-full special-select-select"><option value="">-- Seleccione --</option></select>
+                                        <input type="text" id="input-new-dev-os" class="w-full special-select-input hidden" placeholder="Nuevo S.O.">
                                     </div>
                                 </div>
                                 <div class="grid-2 gap-2 mb-2">
@@ -677,6 +692,10 @@
                 this.bindEvents(); 
                 this.updateTime(); 
                 this.initCharCounters();
+                
+                // Forzar que los inputs de fecha estén vacíos
+                if(this.dom.filterDateStart) this.dom.filterDateStart.value = '';
+                if(this.dom.filterDateEnd) this.dom.filterDateEnd.value = '';
                 
                 // Intentar restaurar sesión
                 if(!this.checkSession()) {
@@ -976,9 +995,17 @@
                 if(this.dom.filterFloorH) this.dom.filterFloorH.innerHTML = createOpts(this.state.config.floors);
                 if(this.dom.filterAreaH) this.dom.filterAreaH.innerHTML = createOpts(this.state.config.areas);
                 
-                // Inicializar selects especiales y localizaciones
-                this.loadLocationsForSelect();
-                this.initSpecialSelects();
+                // Poblar selects de especificaciones técnicas en modal de dispositivo
+                const createOptsNoAll = (arr) => (arr||[]).map(x => `<option value="${x}">${x}</option>`).join('');
+                const ramSelect = document.getElementById('new-dev-ram');
+                const processorSelect = document.getElementById('new-dev-processor');
+                const architectureSelect = document.getElementById('new-dev-architecture');
+                const storageSelect = document.getElementById('new-dev-storage');
+                
+                if(ramSelect && this.state.config.rams) ramSelect.innerHTML = '<option value="">-- Seleccione --</option>' + createOptsNoAll(this.state.config.rams);
+                if(processorSelect && this.state.config.processors) processorSelect.innerHTML = '<option value="">-- Seleccione --</option>' + createOptsNoAll(this.state.config.processors);
+                if(architectureSelect && this.state.config.architectures) architectureSelect.innerHTML = '<option value="">-- Seleccione --</option>' + createOptsNoAll(this.state.config.architectures);
+                if(storageSelect && this.state.config.storages) storageSelect.innerHTML = '<option value="">-- Seleccione --</option>' + createOptsNoAll(this.state.config.storages);
             },
             async fetchTickets() {
                 console.log("[v0] Cargando tickets...");
@@ -1207,6 +1234,62 @@
                     });
                 }
             },
+            viewTicketDetails(ticketId) {
+                console.log("[v0] Viendo detalles del ticket ID:", ticketId);
+                const ticket = this.state.tickets.find(t => t.id === ticketId);
+                if(!ticket) return;
+                
+                const details = `
+                    <strong>Código:</strong> ${ticket.code}<br>
+                    <strong>Tipo:</strong> ${ticket.type}<br>
+                    <strong>Ubicación:</strong> ${ticket.location}<br>
+                    <strong>Fecha Entrada:</strong> ${this.fmtDate(ticket.dateIn)}<br>
+                    <strong>Fecha Salida:</strong> ${ticket.dateOut ? this.fmtDate(ticket.dateOut) : 'Aún en taller'}<br>
+                    <strong>Falla Reportada:</strong> ${ticket.details_in || ticket.issue || '-'}<br>
+                    <strong>Solución:</strong> ${ticket.details_out || ticket.solution || '-'}<br>
+                    <strong>Estado:</strong> ${ticket.status}
+                `;
+                
+                // Crear modal temporal para mostrar detalles
+                const modal = document.createElement('div');
+                modal.className = 'modal-overlay';
+                modal.innerHTML = `
+                    <div class="modal-container" style="max-width: 500px;">
+                        <div class="modal-header">
+                            <h3>Detalles del Ticket #${ticketId}</h3>
+                            <button onclick="this.closest('.modal-overlay').remove()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            ${details}
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cerrar</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            },
+            editTicket(ticketId) {
+                console.log("[v0] Editando ticket ID:", ticketId);
+                const ticket = this.state.tickets.find(t => t.id === ticketId);
+                if(!ticket) return;
+                
+                // TODO: Abrir modal de edición con datos pre-rellenos
+                alert("Función de edición en desarrollo. Ticket ID: " + ticketId);
+            },
+            deleteTicket(ticketId) {
+                console.log("[v0] Eliminando ticket ID:", ticketId);
+                if(confirm("¿Está seguro de eliminar este ticket?")) {
+                    fetch(`/api/tickets/${ticketId}`, { method: 'DELETE' }).then(res => {
+                        if(res.ok) {
+                            alert("Ticket eliminado");
+                            this.fetchTickets();
+                        } else {
+                            alert("Error al eliminar ticket");
+                        }
+                    });
+                }
+            },
             async saveLocation(fd) {
                 const data = Object.fromEntries(fd);
                 console.log("[v0] Guardando ubicación:", data);
@@ -1421,19 +1504,24 @@
                 const allP = await (await fetch('/api/periods')).json();
                 const today = new Date().toISOString().split('T')[0];
                 
-                // Buscar período activo: donde hoy >= fecha_inicio Y hoy < fecha_próximo_período
+                console.log("[v0] Fecha actual:", today);
+                console.log("[v0] Períodos disponibles:", allP.map(p => `${p.code} (${p.date_ini} - ${p.date_end})`));
+                
+                // LÓGICA CORRECTA: El período activo es el último que ya inició (date_ini <= hoy)
+                // No importa si ya terminó, seguirá siendo el activo hasta que inicie el siguiente
                 let activePeriod = null;
-                for(let i = 0; i < allP.length; i++) {
-                    if(today >= allP[i].date_ini && (i === allP.length - 1 || today < allP[i + 1].date_ini)) {
+                for(let i = allP.length - 1; i >= 0; i--) {
+                    if(today >= allP[i].date_ini) {
                         activePeriod = allP[i];
+                        console.log("[v0] Período activo encontrado:", activePeriod.code, "porque hoy >=", activePeriod.date_ini);
                         break;
                     }
                 }
                 
-                // Si no hay período activo, usar el más reciente
+                // Si no hay ningún período iniciado, usar el primero
                 if(!activePeriod && allP.length > 0) {
-                    activePeriod = allP[allP.length - 1];
-                    console.log("[v0] No hay período exacto para hoy, usando período más reciente");
+                    activePeriod = allP[0];
+                    console.log("[v0] No hay período iniciado, usando el primero:", activePeriod.code);
                 }
                 
                 if(activePeriod) {
@@ -1697,7 +1785,22 @@
                 });
                 
                 console.log("[v0] Historial filtrado:", this.state.filteredTickets.length, "de", this.state.tickets.length);
-                this.dom['tbody-history'].innerHTML = this.state.filteredTickets.map(t => `<tr><td><span class="badge ${t.status==='Pendiente'?'pending':t.status==='Reparado'?'repaired':'norepaired'}">${t.status}</span></td><td>${t.code}</td><td>${t.type}</td><td>${t.location}</td><td>${this.fmtDate(t.dateIn)}</td><td>${t.dateOut?this.fmtDate(t.dateOut):'-'}</td><td>${t.details_out || t.solution || '-'}</td></tr>`).join('');
+                this.dom['tbody-history'].innerHTML = this.state.filteredTickets.map(t => `<tr>
+                    <td><span class="badge ${t.status==='Pendiente'?'pending':t.status==='Reparado'?'repaired':'norepaired'}">${t.status}</span></td>
+                    <td>${t.code}</td>
+                    <td>${t.type}</td>
+                    <td>${t.location}</td>
+                    <td>${this.fmtDate(t.dateIn)}</td>
+                    <td>${t.dateOut?this.fmtDate(t.dateOut):'-'}</td>
+                    <td>${t.details_out || t.solution || '-'}</td>
+                    <td>
+                        <div class="action-group">
+                            <button class="btn-icon" title="Ver detalles" onclick="app.viewTicketDetails(${t.id})">👁️</button>
+                            ${t.status === 'Pendiente' ? `<button class="btn-icon" title="Editar" onclick="app.editTicket(${t.id})">✏️</button>` : ''}
+                            <button class="btn-icon" title="Eliminar" onclick="app.deleteTicket(${t.id})">🗑️</button>
+                        </div>
+                    </td>
+                </tr>`).join('');
             },
             renderWorkshop(searchTerm = '') {
                 console.log("[v0] Renderizando taller con búsqueda:", searchTerm);
