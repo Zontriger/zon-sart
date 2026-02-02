@@ -400,7 +400,7 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		MaxAge:   30 * 24 * 60 * 60, // 30 días
 		HttpOnly: false,
-		SameSite: http.SameSiteLax,
+		SameSite: http.SameSiteLaxMode,
 	}
 	http.SetCookie(w, cookie)
 	
