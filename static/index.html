@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,718 +27,2203 @@
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { background-color: var(--color-bg); color: var(--color-text); height: 100vh; overflow: hidden; }
-
-        .hidden { display: none !important; }
-        .text-primary { color: var(--color-primary); }
-        .text-secondary { color: var(--color-text-light); }
-        .text-danger { color: var(--color-danger); }
-        .text-sm { font-size: 0.85rem; }
-        .font-bold { font-weight: bold; }
-        .uppercase { text-transform: uppercase; }
-        .block { display: block; }
-        .mb-1 { margin-bottom: 0.5rem; }
-        .mb-2 { margin-bottom: 1rem; }
-        .mb-3 { margin-bottom: 1.5rem; }
-        .mt-2 { margin-top: 1rem; }
-        .w-full { width: 100%; }
-        .flex { display: flex; }
-        .flex-col { flex-direction: column; }
-        .items-center { align-items: center; }
-        .justify-between { justify-content: space-between; }
-        .gap-1 { gap: 0.5rem; }
-        .gap-2 { gap: 1rem; }
-        .p-2 { padding: 0.5rem; }
-        .border { border: 1px solid var(--border-color); }
-        .rounded { border-radius: var(--radius); }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
-        .overflow-y-auto { overflow-y: auto; }
-
-        .filter-grid { 
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.8rem; align-items: end;
-            background-color: #f8fafc; padding: 1rem; border-radius: var(--radius); border: 1px solid var(--border-color); margin-bottom: 1rem;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
         }
-        
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        button { cursor: pointer; border: none; border-radius: var(--radius); font-weight: 600; padding: 0.6rem 1.2rem; transition: background 0.2s; font-size: 0.9rem; }
-        .btn-primary { background-color: var(--color-primary); color: white; } .btn-primary:hover { background-color: var(--color-primary-dark); }
-        .btn-secondary { background-color: #e5e7eb; color: var(--color-text); } .btn-secondary:hover { background-color: #d1d5db; }
-        .btn-success { background-color: var(--color-success); color: white; } .btn-warning { background-color: var(--color-warning); color: white; }
-        .btn-danger { background-color: var(--color-danger); color: white; }
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .text-primary {
+            color: var(--color-primary);
+        }
+
+        .text-secondary {
+            color: var(--color-text-light);
+        }
+
+        .text-danger {
+            color: var(--color-danger);
+        }
+
+        .text-sm {
+            font-size: 0.85rem;
+        }
+
+        .font-bold {
+            font-weight: bold;
+        }
+
+        .uppercase {
+            text-transform: uppercase;
+        }
+
+        .block {
+            display: block;
+        }
+
+        .mb-1 {
+            margin-bottom: 0.5rem;
+        }
+
+        .mb-2 {
+            margin-bottom: 1rem;
+        }
+
+        .mb-3 {
+            margin-bottom: 1.5rem;
+        }
+
+        .mt-2 {
+            margin-top: 1rem;
+        }
+
+        .w-full {
+            width: 100%;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .flex-col {
+            flex-direction: column;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .gap-1 {
+            gap: 0.5rem;
+        }
+
+        .gap-2 {
+            gap: 1rem;
+        }
+
+        .p-2 {
+            padding: 0.5rem;
+        }
+
+        .border {
+            border: 1px solid var(--border-color);
+        }
+
+        .rounded {
+            border-radius: var(--radius);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .overflow-y-auto {
+            overflow-y: auto;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 0.8rem;
+            align-items: end;
+            background-color: #f8fafc;
+            padding: 1rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 600;
+            padding: 0.6rem 1.2rem;
+            transition: background 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--color-primary-dark);
+        }
+
+        .btn-secondary {
+            background-color: #e5e7eb;
+            color: var(--color-text);
+        }
+
+        .btn-secondary:hover {
+            background-color: #d1d5db;
+        }
+
+        .btn-success {
+            background-color: var(--color-success);
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: var(--color-warning);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--color-danger);
+            color: white;
+        }
 
         .btn-logout {
-            width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(255,255,255,0.2); background-color: transparent; color: rgba(255,255,255,0.7); display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background-color: transparent;
+            color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
         }
-        .btn-logout:hover { background-color: rgba(0,0,0,0.2); color: var(--color-white); border-color: rgba(255,255,255,0.4); }
 
-        .header-actions { display: flex; gap: 0.5rem; align-items: center; }
-        .btn-report-red { background-color: var(--color-danger); color: white; padding: 0.4rem 0.8rem; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; border-radius: 4px; }
-        .btn-report-red:hover { background-color: #b91c1c; }
-        .btn-report-dark { background-color: var(--color-dark); color: white; padding: 0.4rem 0.8rem; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; border-radius: 4px; }
-        .btn-report-dark:hover { background-color: #000; }
-        .btn-clean { background: var(--color-white); border: 1px solid var(--border-color); color: var(--color-text); padding: 0.4rem 0.8rem; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 0.85rem; }
-        .btn-clean:hover { background-color: #f3f4f6; color: var(--color-danger); border-color: var(--color-danger); }
+        .btn-logout:hover {
+            background-color: rgba(0, 0, 0, 0.2);
+            color: var(--color-white);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
 
-        .btn-sm { padding: 0.3rem 0.6rem; }
-        .btn-icon { background: transparent; color: inherit; padding: 0.5rem; display: flex; align-items: center; justify-content: center; }
-        .btn-icon:hover { background-color: rgba(0,0,0,0.05); border-radius: 50%; }
-        .btn-delete { color: var(--color-danger); background: none; font-size: 1.2rem; line-height: 1; padding: 0 0.5rem; }
-        .action-group { display: flex; gap: 0.25rem; justify-content: center; }
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
 
-        input, select, textarea { width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius); outline: none; font-size: 0.85rem; background: var(--color-white); }
-        input:focus, select:focus, textarea:focus { border-color: var(--color-primary); box-shadow: 0 0 0 2px rgba(0, 51, 102, 0.1); }
-        textarea { resize: vertical; min-height: 80px; max-height: 200px; }
-        .char-counter { font-size: 0.7rem; color: var(--color-text-light); text-align: right; margin-top: 2px; }
-        .filter-label { font-size: 0.7rem; font-weight: bold; color: var(--color-text-light); margin-bottom: 0.3rem; display: block; text-transform: uppercase; }
+        .btn-report-red {
+            background-color: var(--color-danger);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 4px;
+        }
 
-        .card { background: var(--color-white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.5rem; margin-bottom: 1.5rem; height: 100%; display: flex; flex-direction: column; }
-        .card-header { border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
-        .card-header-title { color: var(--color-primary); font-weight: bold; font-size: 1.1rem; }
-        .card-body-scroll { flex: 1; overflow-y: auto; }
+        .btn-report-red:hover {
+            background-color: #b91c1c;
+        }
 
-        .login-wrapper { position: fixed; inset: 0; background-color: var(--color-primary); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .login-box { background: var(--color-white); padding: 2.5rem; border-radius: 12px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); }
-        .login-logo { width: 80px; height: 80px; background: var(--color-white); border: 4px solid var(--color-secondary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: var(--color-primary); }
-        .login-title { color: var(--color-primary); font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: bold; }
-        .login-subtitle { color: var(--color-text-light); font-size: 0.9rem; margin-bottom: 1.5rem; }
-        .form-label { display: block; font-size: 0.8rem; font-weight: bold; color: var(--color-primary); margin-bottom: 0.25rem; text-transform: uppercase; text-align: left; }
-        .login-error-msg { color: var(--color-danger); font-size: 0.85rem; margin-top: 1rem; }
+        .btn-report-dark {
+            background-color: var(--color-dark);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 4px;
+        }
 
-        .app-layout { display: flex; height: 100%; }
-        .sidebar { width: var(--sidebar-width); background-color: var(--color-primary); color: var(--color-white); display: flex; flex-direction: column; transition: transform 0.3s; z-index: 50; }
-        .sidebar-header { height: var(--header-height); display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; background-color: rgba(0,0,0,0.2); font-weight: bold; letter-spacing: 1px; }
-        .sidebar-menu { list-style: none; padding-top: 1rem; flex: 1; }
-        .nav-link { padding: 0.8rem 1.5rem; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.2s; font-size: 0.9rem; color: rgba(255,255,255,0.7); text-decoration: none; }
-        .nav-link:hover, .nav-link.active { background-color: rgba(212, 175, 55, 0.15); color: var(--color-secondary); border-left: 4px solid var(--color-secondary); }
-        .sidebar-footer { padding: 1rem; background-color: rgba(0,0,0,0.2); }
+        .btn-report-dark:hover {
+            background-color: #000;
+        }
 
-        .main-content { flex: 1; display: flex; flex-direction: column; background-color: var(--color-bg); overflow: hidden; position: relative; }
-        .top-header { height: var(--header-height); background: var(--color-white); display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
-        .header-title { color: var(--color-primary); font-size: 1.25rem; font-weight: bold; }
-        .header-user { text-align: right; }
-        .header-role { display: block; color: var(--color-primary); font-size: 0.9rem; font-weight: bold; }
-        .header-date { font-size: 0.75rem; color: var(--color-text-light); }
-        .content-area { flex: 1; overflow-y: auto; padding: 1.5rem; }
+        .btn-clean {
+            background: var(--color-white);
+            border: 1px solid var(--border-color);
+            color: var(--color-text);
+            padding: 0.4rem 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            font-size: 0.85rem;
+        }
 
-        .table-responsive { width: 100%; overflow-x: auto; border: 1px solid var(--border-color); border-radius: var(--radius); }
-        .table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        .table thead { background-color: #f9fafb; color: var(--color-text-light); text-transform: uppercase; font-size: 0.75rem; }
-        .table th, .table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); text-align: left; }
-        .table-empty { padding: 2rem; text-align: center; color: var(--color-text-light); }
-        
-        .badge { padding: 0.25rem 0.5rem; border-radius: 99px; font-size: 0.75rem; font-weight: bold; }
-        .badge.pending { background-color: #FEF3C7; color: #D97706; }
-        .badge.repaired { background-color: #D1FAE5; color: #059669; }
-        .badge.norepaired { background-color: #FEE2E2; color: #DC2626; }
+        .btn-clean:hover {
+            background-color: #f3f4f6;
+            color: var(--color-danger);
+            border-color: var(--color-danger);
+        }
+
+        .btn-sm {
+            padding: 0.3rem 0.6rem;
+        }
+
+        .btn-icon {
+            background: transparent;
+            color: inherit;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-icon:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+            border-radius: 50%;
+        }
+
+        .btn-delete {
+            color: var(--color-danger);
+            background: none;
+            font-size: 1.2rem;
+            line-height: 1;
+            padding: 0 0.5rem;
+        }
+
+        .action-group {
+            display: flex;
+            gap: 0.25rem;
+            justify-content: center;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            outline: none;
+            font-size: 0.85rem;
+            background: var(--color-white);
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 2px rgba(0, 51, 102, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+            max-height: 200px;
+        }
+
+        .char-counter {
+            font-size: 0.7rem;
+            color: var(--color-text-light);
+            text-align: right;
+            margin-top: 2px;
+        }
+
+        .filter-label {
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: var(--color-text-light);
+            margin-bottom: 0.3rem;
+            display: block;
+            text-transform: uppercase;
+        }
+
+        .card {
+            background: var(--color-white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-header {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.8rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header-title {
+            color: var(--color-primary);
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .card-body-scroll {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .login-wrapper {
+            position: fixed;
+            inset: 0;
+            background-color: var(--color-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .login-box {
+            background: var(--color-white);
+            padding: 2.5rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            background: var(--color-white);
+            border: 4px solid var(--color-secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: var(--color-primary);
+        }
+
+        .login-title {
+            color: var(--color-primary);
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .login-subtitle {
+            color: var(--color-text-light);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--color-primary);
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            text-align: left;
+        }
+
+        .login-error-msg {
+            color: var(--color-danger);
+            font-size: 0.85rem;
+            margin-top: 1rem;
+        }
+
+        .app-layout {
+            display: flex;
+            height: 100%;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--color-primary);
+            color: var(--color-white);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s;
+            z-index: 50;
+        }
+
+        .sidebar-header {
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding-top: 1rem;
+            flex: 1;
+        }
+
+        .nav-link {
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background-color: rgba(212, 175, 55, 0.15);
+            color: var(--color-secondary);
+            border-left: 4px solid var(--color-secondary);
+        }
+
+        .sidebar-footer {
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--color-bg);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .top-header {
+            height: var(--header-height);
+            background: var(--color-white);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .header-title {
+            color: var(--color-primary);
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .header-user {
+            text-align: right;
+        }
+
+        .header-role {
+            display: block;
+            color: var(--color-primary);
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .header-date {
+            font-size: 0.75rem;
+            color: var(--color-text-light);
+        }
+
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .table thead {
+            background-color: #f9fafb;
+            color: var(--color-text-light);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        .table-empty {
+            padding: 2rem;
+            text-align: center;
+            color: var(--color-text-light);
+        }
+
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .badge.pending {
+            background-color: #FEF3C7;
+            color: #D97706;
+        }
+
+        .badge.repaired {
+            background-color: #D1FAE5;
+            color: #059669;
+        }
+
+        .badge.norepaired {
+            background-color: #FEE2E2;
+            color: #DC2626;
+        }
 
         /* BADGES DISPOSITIVOS */
-        .dev-badge { padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
-        .dev-pc { background: #e0f2fe; color: #0369a1; }
-        .dev-laptop { background: #f0fdf4; color: #15803d; }
-        .dev-printer { background: #fef3c7; color: #b45309; }
-        .dev-network { background: #f3e8ff; color: #7e22ce; }
-        .dev-other { background: #f3f4f6; color: #4b5563; }
+        .dev-badge {
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
-        .stat-card { border-top: 4px solid transparent; height: auto; }
-        .stat-card.gold { border-color: var(--color-secondary); }
-        .stat-card.green { border-color: var(--color-success); }
-        .stat-card.blue { border-color: var(--color-primary); }
-        .stat-label { font-size: 0.75rem; text-transform: uppercase; color: var(--color-text-light); display: block; }
-        .stat-value { font-size: 2rem; font-weight: bold; color: var(--color-text); margin-top: 0.5rem; }
+        .dev-pc {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
 
-        .pagination-container { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
-        .page-info { font-size: 0.9rem; color: var(--color-text-light); }
-        .page-btn { padding: 0.4rem 0.8rem; border: 1px solid var(--border-color); background: white; border-radius: var(--radius); cursor: pointer; }
-        .page-btn:hover:not(:disabled) { background-color: #f3f4f6; }
-        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .dev-laptop {
+            background: #f0fdf4;
+            color: #15803d;
+        }
 
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 2000; }
-        .modal-container { background: var(--color-white); width: 100%; max-width: 600px; border-radius: var(--radius); overflow: hidden; animation: fadeIn 0.2s; display: flex; flex-direction: column; max-height: 90vh; }
-        .modal-header { background: var(--color-primary); color: var(--color-white); padding: 1rem; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
-        .modal-body { padding: 1.5rem; overflow-y: auto; }
-        .modal-footer { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
-        .ticket-info-box { background: #f0f7ff; padding: 0.75rem; border-radius: 4px; margin-bottom: 1rem; }
-    
-        .card.period { grid-column: span 1; padding: 1rem; background-image: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark)); color: var(--color-white); border-top: none !important; }
-        @media (min-width: 1024px) { .card.period { grid-column: span 2; } }
-        .card.period .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-        .card.period .header h2 { font-size: 1.1rem; font-weight: bold; color: white; }
-        .card.period .content { display: grid; grid-template-columns: auto 1fr; gap: 1rem; align-items: center; }
-        .card.period .content h2[data-render="current-period"] { font-size: 1.8rem; font-weight: 800; line-height: 1; }
-        .card.period .progress-and-dates { display: flex; flex-direction: column; justify-content: center; gap: 0.2rem; width: 100%; }
-        .card.period .dates { display: flex; justify-content: space-between; font-size: 0.8rem; opacity: 0.9; }
-        .card.period .progress-bar-wrapper { position: relative; border-radius: 9999px; overflow: hidden; width: 100%; height: 1.2rem; background: rgba(255,255,255,0.2); }
-        .card.period .progress-bar { height: 100%; border-radius: 9999px; background: var(--color-secondary); width: 0%; transition: width 1s ease-in-out; }
-        .card.period .progress-bar-wrapper p { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; color: var(--color-white); text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
-        
-        .sidebar-toggle-btn { display: none; } 
-        .sidebar-close-btn { display: none; }
+        .dev-printer {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .dev-network {
+            background: #f3e8ff;
+            color: #7e22ce;
+        }
+
+        .dev-other {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            border-top: 4px solid transparent;
+            height: auto;
+        }
+
+        .stat-card.gold {
+            border-color: var(--color-secondary);
+        }
+
+        .stat-card.green {
+            border-color: var(--color-success);
+        }
+
+        .stat-card.blue {
+            border-color: var(--color-primary);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--color-text-light);
+            display: block;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--color-text);
+            margin-top: 0.5rem;
+        }
+
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .page-info {
+            font-size: 0.9rem;
+            color: var(--color-text-light);
+        }
+
+        .page-btn {
+            padding: 0.4rem 0.8rem;
+            border: 1px solid var(--border-color);
+            background: white;
+            border-radius: var(--radius);
+            cursor: pointer;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background-color: #f3f4f6;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-container {
+            background: var(--color-white);
+            width: 100%;
+            max-width: 600px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            animation: fadeIn 0.2s;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+        }
+
+        .modal-header {
+            background: var(--color-primary);
+            color: var(--color-white);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .ticket-info-box {
+            background: #f0f7ff;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .card.period {
+            grid-column: span 1;
+            padding: 1rem;
+            background-image: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+            color: var(--color-white);
+            border-top: none !important;
+        }
+
+        @media (min-width: 1024px) {
+            .card.period {
+                grid-column: span 2;
+            }
+        }
+
+        .card.period .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card.period .header h2 {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .card.period .content {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .card.period .content h2[data-render="current-period"] {
+            font-size: 1.8rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .card.period .progress-and-dates {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 0.2rem;
+            width: 100%;
+        }
+
+        .card.period .dates {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .card.period .progress-bar-wrapper {
+            position: relative;
+            border-radius: 9999px;
+            overflow: hidden;
+            width: 100%;
+            height: 1.2rem;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .card.period .progress-bar {
+            height: 100%;
+            border-radius: 9999px;
+            background: var(--color-secondary);
+            width: 0%;
+            transition: width 1s ease-in-out;
+        }
+
+        .card.period .progress-bar-wrapper p {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: var(--color-white);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .sidebar-toggle-btn {
+            display: none;
+        }
+
+        .sidebar-close-btn {
+            display: none;
+        }
+
         @media (max-width: 768px) {
-            .sidebar { position: absolute; height: 100%; transform: translateX(-100%); }
-            .sidebar.is-open { transform: translateX(0); }
-            .sidebar-toggle-btn { display: block; margin-right: 1rem; }
-            .sidebar-close-btn { display: block; }
-            .grid-2, .grid-3 { grid-template-columns: 1fr; } 
-            .header-user { display: none; }
-            .action-group { flex-direction: column; }
-            .filter-grid { grid-template-columns: 1fr; }
-            .header-actions { flex-wrap: wrap; justify-content: flex-end; }
+            .sidebar {
+                position: absolute;
+                height: 100%;
+                transform: translateX(-100%);
+            }
+
+            .sidebar.is-open {
+                transform: translateX(0);
+            }
+
+            .sidebar-toggle-btn {
+                display: block;
+                margin-right: 1rem;
+            }
+
+            .sidebar-close-btn {
+                display: block;
+            }
+
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .header-user {
+                display: none;
+            }
+
+            .action-group {
+                flex-direction: column;
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-actions {
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
         }
     </style>
 </head>
-<body>
 
-    <!-- LOGIN -->
-    <section id="view-login" class="login-wrapper">
+<body>
+    <!-- LOGIN PANEL -->
+    <div id="login-panel" class="login-wrapper">
         <div class="login-box">
-            <div class="login-logo">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
-            </div>
-            <h2 class="login-title">SART</h2>
-            <p class="login-subtitle">UNEFA Núcleo Miranda</p>
-            
-            <form data-js="login-form">
-                <div class="mb-2">
+            <div class="login-logo">🔐</div>
+            <h1 class="login-title">SART</h1>
+            <p class="login-subtitle">Sistema de Soporte Tecnológico</p>
+            <form id="login-form" style="display: flex; flex-direction: column; gap: 1rem;">
+                <div>
                     <label class="form-label">Usuario</label>
-                    <input type="text" name="username" placeholder="admin / user" required>
+                    <input type="text" id="login-username" placeholder="admin" />
                 </div>
-                <div class="mb-2">
+                <div>
                     <label class="form-label">Contraseña</label>
-                    <input type="password" name="password" placeholder="••••••" required>
+                    <input type="password" id="login-password" placeholder="••••" />
                 </div>
-                <div class="mb-2">
+                <div>
                     <label class="form-label">Rol</label>
-                    <select name="role">
+                    <select id="login-role">
                         <option value="admin">Administrador</option>
-                        <option value="user">Consultor</option>
+                        <option value="viewer">Visualizador</option>
                     </select>
                 </div>
-                <button type="submit" class="btn-primary w-full mt-2">INGRESAR</button>
-                <p data-js="login-error" class="login-error-msg hidden">Credenciales inválidas</p>
+                <button type="submit" class="btn-primary">Ingresar</button>
+                <div class="login-error-msg" id="login-error"></div>
             </form>
         </div>
-    </section>
+    </div>
 
-    <!-- APP -->
-    <div id="view-app" class="app-layout hidden">
-        <aside class="sidebar" data-js="sidebar">
+    <!-- APP LAYOUT -->
+    <div class="app-layout hidden">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
             <div class="sidebar-header">
-                <span>SART</span>
-                <button class="btn-icon sidebar-close-btn" data-action="toggle-sidebar">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                </button>
+                <span>☰ SART</span>
+                <button class="btn-icon sidebar-close-btn">✕</button>
             </div>
             <nav class="sidebar-menu">
-                <a href="#" class="nav-link active" data-target="home">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
-                    Inicio
-                </a>
-                <a href="#" class="nav-link" data-target="workshop">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
-                    Taller
-                </a>
-                <a href="#" class="nav-link" data-target="history">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                    Historial
-                </a>
-                <a href="#" class="nav-link admin-only" data-target="data">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path><path d="M21 5c0 1.66-4 3-9 3s-9-1.34-9-3"></path></svg>
-                    Inventario
-                </a>
-                <a href="#" class="nav-link admin-only" data-target="settings">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.18-.08a2 2 0 0 0-2 2v.44a2 2 0 0 0 2 2h.18a2 2 0 0 1 1.73 1l.25.43a2 2 0 0 1 0 2l-.08.18a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.18.08a2 2 0 0 0 2-2v-.44a2 2 0 0 0-2-2h-.18a2 2 0 0 1-1.73-1l-.25-.43a2 2 0 0 1 0-2l.08-.18a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                    Configuración
-                </a>
+                <a class="nav-link active" data-module="dashboard">📊 Dashboard</a>
+                <a class="nav-link" data-module="inventory">📦 Inventario</a>
+                <a class="nav-link" data-module="workshop">🔧 Taller</a>
+                <a class="nav-link" data-module="reports">📄 Reportes</a>
+                <a class="nav-link" data-module="admin">⚙️ Administración</a>
             </nav>
             <div class="sidebar-footer">
-                <button data-action="logout" class="btn-logout">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                    Cerrar Sesión
-                </button>
+                <button class="btn-logout" id="logout-btn">Cerrar Sesión</button>
             </div>
         </aside>
 
+        <!-- MAIN CONTENT -->
         <main class="main-content">
             <header class="top-header">
-                <div class="flex items-center">
-                    <button class="btn-icon sidebar-toggle-btn" data-action="toggle-sidebar">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-                    </button>
-                    <h2 class="header-title" data-js="page-title">Inicio</h2>
+                <div>
+                    <button class="btn-icon sidebar-toggle-btn">☰</button>
+                    <span class="header-title" id="page-title">Dashboard</span>
                 </div>
                 <div class="header-user">
-                    <span class="header-role" data-js="user-role">ADMIN</span>
-                    <span class="header-date" data-js="current-date">--/--/----</span>
+                    <span class="header-role" id="user-role">Admin</span>
+                    <span class="header-date" id="current-date"></span>
                 </div>
             </header>
 
             <div class="content-area">
-                <div id="section-home" class="view-section fade-in">
+                <!-- DASHBOARD MODULE -->
+                <div class="module hidden" data-module="dashboard">
                     <div class="stats-grid">
-                        <div class="card stat-card gold">
-                            <span class="stat-label">En Taller</span>
-                            <div class="stat-value" data-js="stat-pending">0</div>
+                        <div class="card stat-card blue">
+                            <span class="stat-label">Equipos en Taller</span>
+                            <span class="stat-value" id="stat-pending">0</span>
                         </div>
                         <div class="card stat-card green">
-                            <span class="stat-label">Reparados (Mes)</span>
-                            <div class="stat-value" data-js="stat-repaired">0</div>
+                            <span class="stat-label">Reparados Este Mes</span>
+                            <span class="stat-value" id="stat-repaired">0</span>
                         </div>
-                        <div class="card stat-card blue">
-                            <span class="stat-label">Total Histórico</span>
-                            <div class="stat-value" data-js="stat-total">0</div>
+                        <div class="card stat-card gold">
+                            <span class="stat-label">Total Atendidos</span>
+                            <span class="stat-value" id="stat-total">0</span>
                         </div>
-                        <article class="card period">
+                    </div>
+
+                    <div class="stats-grid" style="margin-top: 1.5rem;">
+                        <div class="card period">
                             <div class="header">
-                                <h2> Período Académico </h2>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 14v2.2l1.6 1"/><path d="M16 2v4"/><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/><path d="M3 10h5"/><path d="M8 2v4"/><circle cx="16" cy="16" r="6"/></svg>
+                                <h2>Período Actual</h2>
                             </div>
                             <div class="content">
-                                <h2 data-render="current-period">--</h2>
+                                <h2 data-render="current-period">I-2026</h2>
                                 <div class="progress-and-dates">
-                                    <div class="dates">
-                                        <p data-render="period-ini">--</p>
-                                        <p data-render="period-end">--</p>
-                                    </div>
                                     <div class="progress-bar-wrapper">
-                                        <div data-component="progress-bar" data-name="period-progress-bar" class="progress-bar"></div>
-                                        <p data-render="progress-percent" data-target="period-progress-bar"></p>
+                                        <div class="progress-bar" id="progress-bar"></div>
+                                        <p id="progress-percent">0%</p>
+                                    </div>
+                                    <div class="dates">
+                                        <span id="period-start">01/01/2026</span>
+                                        <span id="period-end">30/06/2026</span>
                                     </div>
                                 </div>
                             </div>
-                        </article>
+                        </div>
                     </div>
                 </div>
 
-                <div id="section-workshop" class="view-section hidden fade-in">
+                <!-- INVENTORY MODULE -->
+                <div class="module hidden" data-module="inventory">
+                    <div class="filter-grid">
+                        <div>
+                            <label class="filter-label">Búsqueda</label>
+                            <input type="text" id="device-search" placeholder="Serial, código, marca...">
+                        </div>
+                        <div>
+                            <label class="filter-label">Tipo</label>
+                            <select id="device-type-filter">
+                                <option value="">Todos</option>
+                                <option value="PC">PC</option>
+                                <option value="Laptop">Laptop</option>
+                                <option value="Impresora">Impresora</option>
+                                <option value="Monitor">Monitor</option>
+                            </select>
+                        </div>
+                        <button class="btn-primary" id="add-device-btn">+ Nuevo Dispositivo</button>
+                        <button class="btn-secondary" id="clear-device-filter">Limpiar</button>
+                    </div>
+
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-header-title">Gestión de Taller</h3>
-                            <button class="btn-success admin-only" data-action="open-create-modal" style="display:flex; align-items:center; gap:5px;">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                Añadir
-                            </button>
-                        </div>
-                        <div class="flex justify-between items-center mb-2">
-                            <input type="text" placeholder="Buscar..." class="w-full" style="max-width: 300px;" data-js="search-workshop">
+                            <h3 class="card-header-title">Inventario de Dispositivos</h3>
                         </div>
                         <div class="table-responsive">
                             <table class="table">
-                                <thead><tr><th>Código</th><th>Equipo</th><th>Falla Reportada</th><th>Fecha Ingreso</th><th class="admin-only text-center">Acciones</th></tr></thead>
-                                <tbody data-js="tbody-workshop"></tbody>
-                            </table>
-                        </div>
-                        <div data-js="empty-workshop" class="table-empty hidden">No hay equipos pendientes en el taller.</div>
-                    </div>
-                </div>
-
-                <div id="section-history" class="view-section hidden fade-in">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-header-title">Historial y Reportes</h3>
-                            <div class="header-actions">
-                                <button class="btn-clean" data-action="clean-filters" title="Limpiar Filtros">Limpiar filtros</button>
-                                <button class="btn-report-red" onclick="app.printReport('view')">Exportar Vista</button>
-                                <button class="btn-report-dark" onclick="app.printReport('all')">Exportar Todo</button>
-                            </div>
-                        </div>
-                        <div class="filter-grid">
-                            <div><label class="filter-label">Búsqueda General</label><input type="text" id="filter-text" placeholder="Buscar..."></div>
-                            <div><label class="filter-label">Código</label><select id="filter-code"></select></div>
-                            <div><label class="filter-label">Ubicación</label><select id="filter-loc"></select></div>
-                            <div><label class="filter-label">Estado</label><select id="filter-status"><option value="">Todos</option><option value="Reparado">Reparado</option><option value="No Reparado">No Reparado</option><option value="Pendiente">Pendiente</option></select></div>
-                            <div><label class="filter-label">Después de:</label><input type="date" id="filter-date-start"></div>
-                            <div><label class="filter-label">Antes de:</label><input type="date" id="filter-date-end"></div>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead><tr><th>Estado</th><th>Código</th><th>Tipo</th><th>Ubicación</th><th>Entrada</th><th>Salida</th><th>Detalles</th></tr></thead>
-                                <tbody data-js="tbody-history"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="section-data" class="view-section hidden fade-in">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-header-title">Inventario</h3>
-                            <div style="display:flex; gap:10px;">
-                                <button class="btn-secondary" data-action="open-loc-modal">+ Ubicación</button>
-                                <button class="btn-success" data-action="open-dev-modal">+ Dispositivo</button>
-                            </div>
-                        </div>
-                        <div class="filter-grid">
-                            <div><label class="filter-label">Búsqueda General</label><input type="text" id="dev-filter-q" placeholder="Buscar..."></div>
-                            <div><label class="filter-label">Tipo de Equipo</label><select id="dev-filter-type"><option value="">Todos</option></select></div>
-                            <div><label class="filter-label">Edificio</label><select id="dev-filter-building"><option value="">Todos</option></select></div>
-                            <div><label class="filter-label">Piso</label><select id="dev-filter-floor"><option value="">Todos</option></select></div>
-                            <div><label class="filter-label">Área</label><select id="dev-filter-area"><option value="">Todas</option></select></div>
-                            <div><label class="filter-label">Marca</label><select id="dev-filter-brand"><option value="">Todas</option></select></div>
-                            <div><label class="filter-label">S.O.</label><select id="dev-filter-os"><option value="">Todos</option></select></div>
-                        </div>
-                        <div class="table-responsive mb-2">
-                            <table class="table">
-                                <thead><tr><th>Código</th><th>Tipo</th><th>Marca / Modelo</th><th>Serial</th><th>Ubicación</th><th>S.O.</th></tr></thead>
-                                <tbody data-js="tbody-devices"></tbody>
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Tipo</th>
+                                        <th>Marca</th>
+                                        <th>Modelo</th>
+                                        <th>Ubicación</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="devices-table">
+                                    <tr class="table-empty"><td colspan="7">Cargando...</td></tr>
+                                </tbody>
                             </table>
                         </div>
                         <div class="pagination-container">
-                            <span class="page-info" id="dev-pagination-info"></span>
-                            <div class="flex gap-1">
-                                <button class="page-btn" id="dev-prev-btn" disabled>&laquo;</button>
-                                <button class="page-btn" id="dev-next-btn" disabled>&raquo;</button>
+                            <span class="page-info" id="device-page-info">Página 1</span>
+                            <div>
+                                <button class="page-btn" id="prev-page">← Anterior</button>
+                                <button class="page-btn" id="next-page">Siguiente →</button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div id="section-settings" class="view-section hidden fade-in">
-                    <div class="card">
-                        <div class="card-header"><h3 class="card-header-title">Configuración</h3></div>
-                        <div class="grid-2 mb-3">
-                            <form class="p-2 border rounded" data-js="form-settings-admin">
-                                <h4 class="mb-2 font-bold text-primary">Perfil Administrador</h4>
-                                <div class="mb-2"><label class="filter-label">Nombre Completo</label><input type="text" name="fullName" required></div>
-                                <div class="mb-2"><label class="filter-label">Cargo</label><input type="text" name="jobTitle" required></div>
-                                <div class="mb-2"><label class="filter-label">Usuario</label><input type="text" name="username" required></div>
-                                <div class="mb-2"><label class="filter-label">Nueva Contraseña</label><input type="password" name="password"></div>
-                                <button type="submit" class="btn-primary w-full">Guardar Cambios Admin</button>
-                            </form>
-                            <form class="p-2 border rounded" data-js="form-settings-user">
-                                <h4 class="mb-2 font-bold text-secondary">Perfil Coordinador</h4>
-                                <div class="mb-2"><label class="filter-label">Nombre Completo</label><input type="text" name="fullName" required></div>
-                                <div class="mb-2"><label class="filter-label">Cargo</label><input type="text" name="jobTitle" required></div>
-                                <div class="mb-2"><label class="filter-label">Usuario</label><input type="text" name="username" required></div>
-                                <div class="mb-2"><label class="filter-label">Nueva Contraseña</label><input type="password" name="password"></div>
-                                <button type="submit" class="btn-primary w-full">Guardar Cambios Coord.</button>
-                            </form>
+                <!-- WORKSHOP MODULE -->
+                <div class="module hidden" data-module="workshop">
+                    <div class="filter-grid">
+                        <div>
+                            <label class="filter-label">Estado</label>
+                            <select id="ticket-status-filter">
+                                <option value="">Todos</option>
+                                <option value="pending">Pendiente</option>
+                                <option value="repaired">Reparado</option>
+                                <option value="unrepaired">No Reparable</option>
+                            </select>
                         </div>
-                        <div class="p-2 border rounded">
-                            <h4 class="mb-2 font-bold text-primary">Período Académico Activo</h4>
-                            <p class="mb-2 text-sm text-secondary">Edite solo las fechas del período activo actual.</p>
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <thead><tr><th>Período</th><th>Inicio</th><th>Fin</th><th>Acción</th></tr></thead>
-                                    <tbody data-js="tbody-periods"></tbody>
-                                </table>
+                        <input type="date" id="ticket-date-filter" class="filter-label" placeholder="Fecha">
+                        <button class="btn-primary" id="add-ticket-btn">+ Nuevo Ticket</button>
+                        <button class="btn-secondary" id="clear-ticket-filter">Limpiar</button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-header-title">Tickets de Taller</h3>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Equipo</th>
+                                        <th>Ubicación</th>
+                                        <th>Entrada</th>
+                                        <th>Salida</th>
+                                        <th>Detalles</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tickets-table">
+                                    <tr class="table-empty"><td colspan="8">Cargando...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- REPORTS MODULE -->
+                <div class="module hidden" data-module="reports">
+                    <div class="filter-grid">
+                        <div>
+                            <label class="filter-label">Desde</label>
+                            <input type="date" id="report-date-from">
+                        </div>
+                        <div>
+                            <label class="filter-label">Hasta</label>
+                            <input type="date" id="report-date-to">
+                        </div>
+                        <div>
+                            <label class="filter-label">Estado</label>
+                            <select id="report-status-filter">
+                                <option value="">Todos</option>
+                                <option value="pending">Pendiente</option>
+                                <option value="repaired">Reparado</option>
+                                <option value="unrepaired">No Reparable</option>
+                            </select>
+                        </div>
+                        <button class="btn-report-red" id="print-report-btn">🖨️ Generar Reporte</button>
+                        <button class="btn-report-dark" id="preview-report-btn">👁️ Vista Previa</button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-header-title">Historial General</h3>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Equipo</th>
+                                        <th>Entrada</th>
+                                        <th>Salida</th>
+                                        <th>Detalle Entrada</th>
+                                        <th>Detalle Salida</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reports-table">
+                                    <tr class="table-empty"><td colspan="7">Cargando...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ADMIN MODULE -->
+                <div class="module hidden" data-module="admin">
+                    <div class="grid-2">
+                        <!-- Maestros de Datos -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-header-title">Marcas</h3>
+                            </div>
+                            <div class="card-body-scroll">
+                                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                                    <input type="text" id="brand-input" placeholder="Nueva marca" style="flex: 1;">
+                                    <button class="btn-primary btn-sm" id="add-brand-btn">+</button>
+                                </div>
+                                <div id="brands-list"></div>
                             </div>
                         </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-header-title">Sistemas Operativos</h3>
+                            </div>
+                            <div class="card-body-scroll">
+                                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                                    <input type="text" id="os-input" placeholder="Nuevo SO" style="flex: 1;">
+                                    <button class="btn-primary btn-sm" id="add-os-btn">+</button>
+                                </div>
+                                <div id="os-list"></div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-header-title">Ubicaciones</h3>
+                            </div>
+                            <button class="btn-primary" id="add-location-btn" style="margin-bottom: 1rem;">+ Nueva Ubicación</button>
+                            <div class="card-body-scroll" id="locations-list"></div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-header-title">Períodos Académicos</h3>
+                            </div>
+                            <button class="btn-primary" id="add-period-btn" style="margin-bottom: 1rem;">+ Nuevo Período</button>
+                            <div class="card-body-scroll" id="periods-list"></div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="margin-top: 1.5rem;">
+                        <div class="card-header">
+                            <h3 class="card-header-title">Configuración Institucional</h3>
+                        </div>
+                        <form id="settings-form" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div data-js="form-settings-admin">
+                                <label class="form-label">Nombre del Jefe de Área</label>
+                                <input type="text" name="fullName" placeholder="OSWALDO GUEDEZ">
+                            </div>
+                            <div data-js="form-settings-admin">
+                                <label class="form-label">Cargo del Jefe de Área</label>
+                                <input type="text" name="jobTitle" placeholder="JEFE DE ÁREA">
+                            </div>
+                            <div data-js="form-settings-user">
+                                <label class="form-label">Nombre del Coordinador</label>
+                                <input type="text" name="fullName" placeholder="FRANCISCO VELAZQUEZ">
+                            </div>
+                            <div data-js="form-settings-user">
+                                <label class="form-label">Cargo del Coordinador</label>
+                                <input type="text" name="jobTitle" placeholder="COORDINADOR TIC">
+                            </div>
+                            <button type="submit" class="btn-primary" style="grid-column: 1 / -1;">Guardar Configuración</button>
+                        </form>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- MODAL NUEVO EQUIPO REDISEÑADO CON BÚSQUEDA -->
-    <div id="modal-ticket" class="modal-overlay hidden">
+    <!-- MODALS -->
+    <!-- Modal: Add Device -->
+    <div class="modal-overlay hidden" id="modal-add-device">
         <div class="modal-container">
             <div class="modal-header">
-                <strong class="font-bold" data-js="modal-ticket-title">Añadir al Taller</strong>
-                <button data-action="close-modal-ticket" class="btn-icon text-white"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                <h2>Nuevo Dispositivo</h2>
+                <button class="btn-icon" onclick="document.getElementById('modal-add-device').classList.add('hidden')">✕</button>
             </div>
-            <div class="modal-body">
-                <form data-js="form-ticket">
-                    <div class="p-2 border rounded mb-2" style="background:#f9fafb;">
-                        <span class="filter-label text-primary mb-1">Buscar en Inventario</span>
-                        <div class="grid-2 mb-1">
-                            <div><label class="filter-label">Edificio</label><select id="ticket-filter-build"><option value="">Todos</option></select></div>
-                            <div><label class="filter-label">Piso</label><select id="ticket-filter-floor"><option value="">Todos</option></select></div>
-                        </div>
-                        <div class="mb-1"><label class="filter-label">Área</label><select id="ticket-filter-area"><option value="">Todas</option></select></div>
-                        <div class="mb-1">
-                            <label class="filter-label">Seleccionar Dispositivo (Tipo - Marca - Código/Serial)</label>
-                            <select id="ticket-device-select" class="w-full" style="font-weight:bold;"><option value="">-- Seleccione Filtros Primero --</option></select>
-                        </div>
+            <form id="form-add-device" class="modal-body">
+                <div class="grid-2">
+                    <div>
+                        <label class="form-label">Código (BN)</label>
+                        <input type="text" name="code" placeholder="BN-1234">
                     </div>
-                    <input type="hidden" name="deviceId" id="ticket-selected-id">
-                    <input type="hidden" name="code" id="ticket-selected-code"> 
-                    <div class="mb-2"><label class="filter-label">Fecha Ingreso</label><input type="date" name="fecha" required></div>
-                    <div class="mb-3">
-                        <label class="filter-label">Descripción de la Falla</label>
-                        <textarea name="falla" rows="3" maxlength="300" required placeholder="Describa el problema..."></textarea>
+                    <div>
+                        <label class="form-label">Tipo</label>
+                        <select name="type" id="device-type-select">
+                            <option value="">Seleccionar...</option>
+                        </select>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn-secondary" data-action="close-modal-ticket">Cancelar</button>
-                        <button type="submit" class="btn-primary">Guardar Datos</button>
+                    <div>
+                        <label class="form-label">Marca</label>
+                        <select name="id_brand" id="device-brand-select">
+                            <option value="">Seleccionar...</option>
+                        </select>
                     </div>
-                </form>
-            </div>
+                    <div>
+                        <label class="form-label">Modelo</label>
+                        <select name="id_model" id="device-model-select">
+                            <option value="">Seleccionar...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Serial</label>
+                        <input type="text" name="serial" placeholder="CN-0N8176...">
+                    </div>
+                    <div>
+                        <label class="form-label">SO</label>
+                        <select name="id_os" id="device-os-select">
+                            <option value="">Seleccionar...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Procesador</label>
+                        <select name="id_processor" id="device-processor-select">
+                            <option value="">Seleccionar...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">RAM</label>
+                        <select name="id_ram" id="device-ram-select">
+                            <option value="">Seleccionar...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Almacenamiento</label>
+                        <select name="id_storage" id="device-storage-select">
+                            <option value="">Seleccionar...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Arquitectura</label>
+                        <select name="arch">
+                            <option value="">Seleccionar...</option>
+                            <option value="32 bits">32 bits</option>
+                            <option value="64 bits">64 bits</option>
+                        </select>
+                    </div>
+                    <div style="grid-column: 1 / -1;">
+                        <label class="form-label">Ubicación</label>
+                        <select name="locationId" id="device-location-select">
+                            <option value="">Seleccionar...</option>
+                        </select>
+                    </div>
+                    <div style="grid-column: 1 / -1;">
+                        <label class="form-label">Detalles Adicionales</label>
+                        <textarea name="details" placeholder="Especificaciones adicionales..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="document.getElementById('modal-add-device').classList.add('hidden')">Cancelar</button>
+                    <button type="submit" class="btn-primary">Guardar</button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <!-- MODAL FINALIZAR -->
-    <div id="modal-finish" class="modal-overlay hidden"><div class="modal-container"><div class="modal-header"><strong class="font-bold">Finalizar Servicio</strong><button data-action="close-modal-finish" class="btn-icon text-white"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div><div class="modal-body"><form data-js="form-finish"><input type="hidden" name="id"><div class="ticket-info-box"><span class="filter-label">Equipo</span><span class="font-bold text-primary block" data-js="modal-code-display">PC-00X</span><span class="text-secondary text-sm" data-js="modal-desc-display">...</span></div><div class="mb-2"><label class="filter-label">Estatus Final</label><select name="status"><option value="Reparado">Reparado</option><option value="No Reparado">No Reparado</option></select></div><div class="mb-2"><label class="filter-label">Fecha de Salida</label><input type="date" name="date_out" required></div><div class="mb-2"><label class="filter-label">Solución / Observaciones</label><textarea name="solution" rows="3" maxlength="300" required></textarea></div><div class="modal-footer"><button type="button" class="btn-secondary" data-action="close-modal-finish">Cancelar</button><button type="submit" class="btn-success">Finalizar</button></div></form></div></div></div>
+    <!-- Modal: Add Ticket -->
+    <div class="modal-overlay hidden" id="modal-add-ticket">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>Nuevo Ticket de Taller</h2>
+                <button class="btn-icon" onclick="document.getElementById('modal-add-ticket').classList.add('hidden')">✕</button>
+            </div>
+            <form id="form-add-ticket" class="modal-body">
+                <div class="ticket-info-box">
+                    <p><strong>Paso 1:</strong> Seleccione el edificio, piso, área y dispositivo</p>
+                </div>
+                <div class="grid-2">
+                    <div>
+                        <label class="form-label">Edificio</label>
+                        <select id="ticket-building-select">
+                            <option value="">Seleccionar...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Piso</label>
+                        <select id="ticket-floor-select">
+                            <option value="">Seleccionar...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Área</label>
+                        <select id="ticket-area-select">
+                            <option value="">Seleccionar...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Dispositivo</label>
+                        <select name="device_id" id="ticket-device-select">
+                            <option value="">Seleccionar...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid-2" style="margin-top: 1rem;">
+                    <div>
+                        <label class="form-label">Fecha de Entrada</label>
+                        <input type="date" name="date_in" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Descripción de la Falla</label>
+                        <textarea name="details_in" placeholder="Detalles del problema..." style="grid-column: 1 / -1;"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="document.getElementById('modal-add-ticket').classList.add('hidden')">Cancelar</button>
+                    <button type="submit" class="btn-primary">Crear Ticket</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    <!-- MODAL NUEVA UBICACIÓN -->
-    <div id="modal-location" class="modal-overlay hidden"><div class="modal-container"><div class="modal-header"><strong>Nueva Ubicación</strong><button data-action="close-modals" style="background:none; border:none; color:white; font-size:1.5rem;">&times;</button></div><div class="modal-body"><form data-js="form-location">
-        <div class="grid-2 mb-2"><div><label class="filter-label">Edificio</label><input type="text" name="building" required placeholder="Ej. Edificio 01"></div><div><label class="filter-label">Piso</label><input type="text" name="floor" required placeholder="Ej. Piso 02"></div></div>
-        <div class="grid-2 mb-2"><div><label class="filter-label">Área</label><input type="text" name="area" required placeholder="Ej. Laboratorio"></div><div><label class="filter-label">Habitación (Opcional)</label><input type="text" name="room" placeholder="Ej. Lab A"></div></div>
-        <div class="modal-footer"><button type="submit" class="btn-primary">Crear Ubicación</button></div>
-    </form></div></div></div>
+    <!-- Modal: Finish Ticket -->
+    <div class="modal-overlay hidden" id="modal-finish-ticket">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>Cerrar Ticket</h2>
+                <button class="btn-icon" onclick="document.getElementById('modal-finish-ticket').classList.add('hidden')">✕</button>
+            </div>
+            <form id="form-finish-ticket" class="modal-body">
+                <input type="hidden" name="ticket_id">
+                <div class="grid-2">
+                    <div style="grid-column: 1 / -1;">
+                        <label class="form-label">Estado</label>
+                        <select name="status" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="repaired">Reparado</option>
+                            <option value="unrepaired">No Reparable</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Fecha de Salida</label>
+                        <input type="date" name="date_out" required>
+                    </div>
+                    <div style="grid-column: 1 / -1;">
+                        <label class="form-label">Descripción de la Solución</label>
+                        <textarea name="details_out" placeholder="Detalle de la reparación realizada..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="document.getElementById('modal-finish-ticket').classList.add('hidden')">Cancelar</button>
+                    <button type="submit" class="btn-primary">Cerrar Ticket</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    <!-- MODAL NUEVO DISPOSITIVO -->
-    <div id="modal-device" class="modal-overlay hidden"><div class="modal-container"><div class="modal-header"><strong>Nuevo Dispositivo</strong><button data-action="close-modals" style="background:none; border:none; color:white; font-size:1.5rem;">&times;</button></div><div class="modal-body"><form data-js="form-device">
-        <div class="mb-2"><label class="filter-label">Ubicación (Obligatorio)</label><select name="locationId" id="new-dev-location" required class="w-full"><option value="">Cargando...</option></select></div>
-        <div class="grid-2 mb-2"><div><label class="filter-label">Tipo (Obligatorio)</label><input type="text" name="type" required list="list-types"></div><div><label class="filter-label">Código</label><input type="text" name="code"></div></div>
-        <div class="grid-2 mb-2"><div><label class="filter-label">Marca</label><input type="text" name="brand"></div><div><label class="filter-label">Modelo</label><input type="text" name="model"></div></div>
-        <div class="grid-2 mb-2"><div><label class="filter-label">Serial</label><input type="text" name="serial"></div><div><label class="filter-label">S.O.</label><input type="text" name="os"></div></div>
-        <datalist id="list-types"></datalist>
-        <div class="modal-footer"><button type="submit" class="btn-primary">Crear Dispositivo</button></div>
-    </form></div></div></div>
+    <!-- Modal: Add Location -->
+    <div class="modal-overlay hidden" id="modal-add-location">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>Nueva Ubicación</h2>
+                <button class="btn-icon" onclick="document.getElementById('modal-add-location').classList.add('hidden')">✕</button>
+            </div>
+            <form id="form-add-location" class="modal-body">
+                <div class="grid-2">
+                    <div style="grid-column: 1 / -1;">
+                        <label class="form-label">Edificio</label>
+                        <input type="text" name="building" placeholder="Edificio 01" required>
+                    </div>
+                    <div style="grid-column: 1 / -1;">
+                        <label class="form-label">Piso</label>
+                        <input type="text" name="floor" placeholder="Piso 01" required>
+                    </div>
+                    <div style="grid-column: 1 / -1;">
+                        <label class="form-label">Área</label>
+                        <input type="text" name="area" placeholder="Área TIC" required>
+                    </div>
+                    <div style="grid-column: 1 / -1;">
+                        <label class="form-label">Habitación / Oficina (Opcional)</label>
+                        <input type="text" name="room" placeholder="Oficina del Director">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="document.getElementById('modal-add-location').classList.add('hidden')">Cancelar</button>
+                    <button type="submit" class="btn-primary">Crear Ubicación</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Add Period -->
+    <div class="modal-overlay hidden" id="modal-add-period">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>Nuevo Período Académico</h2>
+                <button class="btn-icon" onclick="document.getElementById('modal-add-period').classList.add('hidden')">✕</button>
+            </div>
+            <form id="form-add-period" class="modal-body">
+                <div class="grid-2">
+                    <div style="grid-column: 1 / -1;">
+                        <label class="form-label">Código (Ej: I-2026)</label>
+                        <input type="text" name="code" placeholder="I-2026" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Fecha Inicio (YYYY-MM-DD)</label>
+                        <input type="date" name="date_ini" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Fecha Fin (YYYY-MM-DD)</label>
+                        <input type="date" name="date_end" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="document.getElementById('modal-add-period').classList.add('hidden')">Cancelar</button>
+                    <button type="submit" class="btn-primary">Crear Período</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => { app.init(); });
-        
+
         const app = {
-            state: { user: null, tickets: [], filteredTickets: [], config: { codes: [], types: [], brands: [], os: [], locations: [], buildings: [], floors: [], areas: [] }, deviceFilters: { q: '', type: '', brand: '', os: '', building: '', floor: '', area: '', page: 1, limit: 10 }, deviceTimer: null, currentPeriodCode: '' },
-            dom: {},
-            async init() { this.cacheDOM(); this.bindEvents(); this.updateTime(); this.dom.viewApp.classList.add('hidden'); this.dom.viewLogin.classList.remove('hidden'); this.initCharCounters(); },
-            cacheDOM() {
-                const els = ['view-login', 'view-app', 'login-form', 'login-error', 'sidebar', 'user-role', 'modal-ticket', 'form-ticket', 'modal-finish', 'form-finish', 'modal-location', 'form-location', 'modal-device', 'form-device', 'tbody-workshop', 'tbody-history', 'tbody-devices', 'tbody-periods', 'dev-filter-q', 'dev-pagination-info', 'ticket-device-select', 'new-dev-location', 'form-settings-admin', 'form-settings-user'];
-                els.forEach(id => { const el = document.getElementById(id) || document.querySelector(`[data-js="${id}"]`); if(el) this.dom[id] = el; });
-                this.dom.navLinks = document.querySelectorAll('.nav-link');
-                this.dom.ticketFilterBuild = document.getElementById('ticket-filter-build');
-                this.dom.ticketFilterFloor = document.getElementById('ticket-filter-floor');
-                this.dom.ticketFilterArea = document.getElementById('ticket-filter-area');
-                this.dom.ticketSelectedId = document.getElementById('ticket-selected-id');
-                this.dom.ticketSelectedCode = document.getElementById('ticket-selected-code');
-                this.dom.devFilterType = document.getElementById('dev-filter-type');
-                this.dom.devFilterBrand = document.getElementById('dev-filter-brand');
-                this.dom.devFilterOS = document.getElementById('dev-filter-os');
-                this.dom.devFilterBuild = document.getElementById('dev-filter-building');
-                this.dom.devFilterFloor = document.getElementById('dev-filter-floor');
-                this.dom.devFilterArea = document.getElementById('dev-filter-area');
-                this.dom.devPrevBtn = document.getElementById('dev-prev-btn');
-                this.dom.devNextBtn = document.getElementById('dev-next-btn');
-                this.dom.listCodes = document.getElementById('list-codigos');
-                this.dom.filterText = document.getElementById('filter-text');
-                this.dom.filterCode = document.getElementById('filter-code');
-                this.dom.filterLoc = document.getElementById('filter-loc');
-                this.dom.filterStatus = document.getElementById('filter-status');
-                this.dom.filterDateStart = document.getElementById('filter-date-start');
-                this.dom.filterDateEnd = document.getElementById('filter-date-end');
+            state: {
+                user: null,
+                tickets: [],
+                filteredTickets: [],
+                devices: [],
+                locations: [],
+                config: {},
+                currentPage: 1,
+                itemsPerPage: 10,
+                activeModule: 'dashboard'
             },
-            bindEvents() {
-                this.dom['login-form'].addEventListener('submit', e => { e.preventDefault(); this.login(new FormData(e.target)); });
-                document.querySelector('[data-action="logout"]').addEventListener('click', () => location.reload());
-                this.dom.navLinks.forEach(l => l.addEventListener('click', e => { e.preventDefault(); this.nav(l.getAttribute('data-target')); }));
-                document.querySelectorAll('[data-action="toggle-sidebar"]').forEach(btn => btn.addEventListener('click', () => this.dom.sidebar.classList.toggle('is-open')));
-                document.querySelectorAll('[data-action="close-modals"]').forEach(b => b.addEventListener('click', () => document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'))));
-                
-                document.querySelector('[data-action="open-create-modal"]').addEventListener('click', () => { this.dom['modal-ticket'].classList.remove('hidden'); this.fetchModalDevices(); });
-                document.querySelector('[data-action="open-loc-modal"]').addEventListener('click', () => this.dom['modal-location'].classList.remove('hidden'));
-                document.querySelector('[data-action="open-dev-modal"]').addEventListener('click', () => { this.dom['modal-device'].classList.remove('hidden'); this.loadLocationsForSelect(); });
 
-                this.dom['form-ticket'].addEventListener('submit', e => { e.preventDefault(); this.saveTicket(new FormData(e.target)); });
-                this.dom['form-finish'].addEventListener('submit', e => { e.preventDefault(); this.finishTicket(new FormData(e.target)); });
-                this.dom['form-location'].addEventListener('submit', e => { e.preventDefault(); this.saveLocation(new FormData(e.target)); });
-                this.dom['form-device'].addEventListener('submit', e => { e.preventDefault(); this.saveDevice(new FormData(e.target)); });
-                this.dom['form-settings-admin'].addEventListener('submit', e => { e.preventDefault(); this.updateUser(new FormData(e.target), 'admin'); });
-                this.dom['form-settings-user'].addEventListener('submit', e => { e.preventDefault(); this.updateUser(new FormData(e.target), 'user'); });
-
-                // Filters
-                const triggerDevices = () => { this.state.deviceFilters.page = 1; this.fetchDevices(); };
-                this.dom['dev-filter-q'].addEventListener('keyup', () => { clearTimeout(this.state.deviceTimer); this.state.deviceTimer = setTimeout(triggerDevices, 400); });
-                this.dom.devFilterType.addEventListener('change', triggerDevices);
-                this.dom.devFilterBrand.addEventListener('change', triggerDevices);
-                this.dom.devFilterOS.addEventListener('change', triggerDevices);
-                this.dom.devFilterBuild.addEventListener('change', triggerDevices);
-                this.dom.devFilterFloor.addEventListener('change', triggerDevices);
-                this.dom.devFilterArea.addEventListener('change', triggerDevices);
-                this.dom.devPrevBtn.addEventListener('click', () => { if(this.state.deviceFilters.page>1) { this.state.deviceFilters.page--; this.fetchDevices(); }});
-                this.dom.devNextBtn.addEventListener('click', () => { this.state.deviceFilters.page++; this.fetchDevices(); });
-
-                // Ticket Filters
-                const loadModalDevices = () => this.fetchModalDevices();
-                this.dom.ticketFilterBuild.addEventListener('change', loadModalDevices);
-                this.dom.ticketFilterFloor.addEventListener('change', loadModalDevices);
-                document.getElementById('ticket-filter-area').addEventListener('change', loadModalDevices);
-                document.getElementById('ticket-device-select').addEventListener('change', (e) => {
-                    const opt = e.target.options[e.target.selectedIndex];
-                    this.dom.ticketSelectedId.value = e.target.value;
-                    this.dom.ticketSelectedCode.value = opt.dataset.code || '';
-                });
-
-                // History Filters
-                document.querySelector('[data-js="search-workshop"]').addEventListener('keyup', (e) => this.renderWorkshop(e.target.value));
-                const triggerHistory = () => { this.validateDates(); this.renderHistory(); };
-                this.dom.filterText.addEventListener('keyup', triggerHistory); this.dom.filterCode.addEventListener('change', triggerHistory);
-                this.dom.filterLoc.addEventListener('change', triggerHistory); this.dom.filterStatus.addEventListener('change', triggerHistory);
-                this.dom.filterDateStart.addEventListener('change', triggerHistory); this.dom.filterDateEnd.addEventListener('change', triggerHistory);
-                document.querySelector('[data-action="clean-filters"]').addEventListener('click', () => { 
-                    this.dom.filterText.value = ''; this.dom.filterCode.value = ''; this.dom.filterLoc.value = ''; 
-                    this.dom.filterStatus.value = ''; this.dom.filterDateStart.value = ''; this.dom.filterDateEnd.value = ''; 
-                    this.renderHistory(); 
-                });
-            },
-            async login(fd) {
-                try {
-                    const res = await fetch('/api/login', { method:'POST', body: JSON.stringify(Object.fromEntries(fd)) });
-                    if(!res.ok) throw new Error();
-                    this.state.user = await res.json();
-                    this.dom['view-login'].classList.add('hidden');
-                    this.dom['view-app'].classList.remove('hidden');
-                    this.dom['user-role'].textContent = this.state.user.role === 'admin' ? 'ADMIN' : 'COORD';
-                    if(this.state.user.role === 'user') document.querySelectorAll('.admin-only').forEach(e => e.classList.add('hidden'));
-                    else document.querySelectorAll('.admin-only').forEach(e => e.classList.remove('hidden'));
-                    this.fetchData(); this.nav('home');
-                } catch(e) { this.dom['login-error'].classList.remove('hidden'); }
-            },
-            nav(target) {
-                document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden'));
-                document.getElementById(`section-${target}`).classList.remove('hidden');
-                this.dom.navLinks.forEach(l => l.classList.remove('active'));
-                document.querySelector(`[data-target="${target}"]`).classList.add('active');
-                if(target === 'home') this.renderDash();
-            },
-            async fetchData() {
-                this.fetchConfig();
-                this.fetchTickets();
-                this.fetchPeriod();
-                this.fetchUsers();
-                this.fetchDevices();
-            },
-            async fetchConfig() {
-                const res = await fetch('/api/config');
-                this.state.config = await res.json();
-                const createOpts = (arr) => `<option value="">Todos</option>` + (arr||[]).map(x => `<option value="${x}">${x}</option>`).join('');
-                this.dom.devFilterType.innerHTML = createOpts(this.state.config.types);
-                this.dom.devFilterBrand.innerHTML = createOpts(this.state.config.brands);
-                this.dom.devFilterOS.innerHTML = createOpts(this.state.config.os);
-                this.dom.devFilterBuild.innerHTML = createOpts(this.state.config.buildings);
-                this.dom.devFilterFloor.innerHTML = createOpts(this.state.config.floors);
-                this.dom.devFilterArea.innerHTML = createOpts(this.state.config.areas);
-                this.dom.ticketFilterBuild.innerHTML = createOpts(this.state.config.buildings);
-                this.dom.ticketFilterFloor.innerHTML = createOpts(this.state.config.floors);
-                document.getElementById('ticket-filter-area').innerHTML = createOpts(this.state.config.areas);
-                this.dom.listCodes.innerHTML = (this.state.config.codes||[]).map(c=>`<option value="${c}">`).join('');
-                this.dom.filterCode.innerHTML = createOpts(this.state.config.codes);
-                this.dom.filterLoc.innerHTML = createOpts(this.state.config.locations);
-            },
-            async fetchTickets() {
-                const res = await fetch('/api/tickets');
-                const tickets = await res.json();
-                this.state.tickets = tickets;
-                this.dom['tbody-workshop'].innerHTML = tickets.filter(t=>t.status==='Pendiente').map(t => `<tr><td>${t.code}</td><td>${t.type}</td><td>${t.issue}</td><td>${this.fmtDate(t.dateIn)}</td><td><button class="btn-success btn-sm" onclick="app.openFinish(${t.id})">Finalizar</button></td></tr>`).join('');
-                this.dom['tbody-history'].innerHTML = tickets.map(t => `<tr><td><span class="badge ${t.status==='Pendiente'?'pending':'repaired'}">${t.status}</span></td><td>${t.code}</td><td>${t.type}</td><td>${t.location}</td><td>${this.fmtDate(t.dateIn)}</td><td>${t.dateOut?this.fmtDate(t.dateOut):'-'}</td><td>${t.solution||t.issue}</td></tr>`).join('');
-                this.renderDash();
-            },
-            async fetchDevices() {
-                const f = this.state.deviceFilters;
-                const building = this.dom.devFilterBuild.value;
-                const floor = this.dom.devFilterFloor.value;
-                const area = this.dom.devFilterArea.value;
-                const query = `page=${f.page}&limit=${f.limit}&q=${f.q}&type=${this.dom.devFilterType.value}&brand=${this.dom.devFilterBrand.value}&os=${this.dom.devFilterOS.value}&building=${building}&floor=${floor}&area=${area}`;
-                const res = await fetch(`/api/devices?${query}`);
-                const data = await res.json();
-                this.dom['tbody-devices'].innerHTML = (data.data||[]).map(d => {
-                    const typeLower = d.type.toLowerCase();
-                    let badgeClass = 'dev-other';
-                    if (typeLower.includes('pc')||typeLower.includes('desktop')) badgeClass = 'dev-pc';
-                    else if (typeLower.includes('laptop')) badgeClass = 'dev-laptop';
-                    else if (typeLower.includes('switch')||typeLower.includes('modem')) badgeClass = 'dev-network';
-                    else if (typeLower.includes('impresora')) badgeClass = 'dev-printer';
-                    return `<tr><td class="font-bold text-primary">${d.code}</td><td><span class="dev-badge ${badgeClass}">${d.type}</span></td><td>${d.brand} ${d.model}</td><td>${d.serial}</td><td>${d.location}</td><td>${d.os}</td></tr>`;
-                }).join('');
-                document.getElementById('dev-pagination-info').textContent = `Pág ${data.page} de ${Math.ceil(data.total/data.limit)} (${data.total})`;
-            },
-            async fetchModalDevices() {
-                const b = this.dom.ticketFilterBuild.value;
-                const f = this.dom.ticketFilterFloor.value;
-                const a = document.getElementById('ticket-filter-area').value;
-                const res = await fetch(`/api/devices?limit=100&building=${b}&floor=${f}&area=${a}`);
-                const data = await res.json();
-                const sel = document.getElementById('ticket-device-select');
-                if(!data.data || data.data.length === 0) { sel.innerHTML = '<option value="">No hay equipos</option>'; return; }
-                sel.innerHTML = '<option value="">-- Seleccione --</option>' + data.data.map(d => `<option value="${d.id}" data-code="${d.code}">${d.type} - ${d.brand} ${d.model} [${d.code}]</option>`).join('');
-            },
-            async loadLocationsForSelect() {
-                const res = await fetch('/api/locations');
-                const data = await res.json();
-                document.getElementById('new-dev-location').innerHTML = data.map(l => `<option value="${l.id}">${l.fullText}</option>`).join('');
-            },
-            async saveLocation(fd) {
-                await fetch('/api/locations', { method:'POST', body: JSON.stringify(Object.fromEntries(fd)) });
-                alert("Ubicación creada"); document.querySelector('[data-action="close-modals"]').click(); this.fetchConfig();
-            },
-            async saveDevice(fd) {
-                const data = Object.fromEntries(fd); data.locationId = parseInt(data.locationId);
-                await fetch('/api/devices', { method:'POST', body: JSON.stringify(data) });
-                alert("Dispositivo creado"); document.querySelector('[data-action="close-modals"]').click(); this.fetchDevices(); this.fetchConfig();
-            },
-            async saveTicket(fd) {
-                const d = Object.fromEntries(fd); d.deviceId = parseInt(d.deviceId);
-                await fetch('/api/tickets', { method:'POST', body: JSON.stringify(d) });
-                alert("Ticket creado"); document.querySelector('[data-action="close-modals"]').click(); this.fetchTickets();
-            },
-            async finishTicket(fd) {
-                const d = Object.fromEntries(fd); d.id = parseInt(d.id);
-                await fetch('/api/tickets/finish', { method:'POST', body: JSON.stringify(d) });
-                document.querySelector('.modal-overlay:not(.hidden)').classList.add('hidden'); this.fetchTickets();
-            },
-            openFinish(id) {
-                const t = this.state.tickets.find(x => x.id === id);
-                if(t) { 
-                    const f = this.dom['form-finish']; f.reset();
-                    f.querySelector('[name=id]').value = id; 
-                    f.querySelector('[name=date_out]').value = new Date().toISOString().split('T')[0];
-                    this.dom['modal-finish'].classList.remove('hidden'); 
-                }
-            },
-            async fetchPeriod() {
-                const res = await fetch('/api/periods/active'); const p = await res.json();
-                if(p) {
-                    this.state.currentPeriodCode = p.code;
-                    document.querySelector('[data-render="current-period"]').textContent = p.code;
-                    document.querySelector('[data-render="period-ini"]').textContent = this.fmtDate(p.date_ini);
-                    document.querySelector('[data-render="period-end"]').textContent = this.fmtDate(p.date_end);
-                    const now = new Date().getTime(), start = new Date(p.date_ini).getTime(), end = new Date(p.date_end).getTime();
-                    let pct = ((now-start)/(end-start))*100;
-                    if(pct<0) pct=0; if(pct>100) pct=100;
-                    document.querySelector('.progress-bar').style.width = `${pct}%`;
-                    
-                    const allP = await (await fetch('/api/periods')).json();
-                    this.dom['tbody-periods'].innerHTML = allP.filter(x => x.code === p.code).map(x => `<tr><td>${x.code}</td><td><input type="date" id="ini-${x.code}" value="${x.date_ini}"></td><td><input type="date" id="end-${x.code}" value="${x.date_end}"></td><td><button class="btn-sm btn-success" onclick="app.updPeriod('${x.code}')">Guardar</button></td></tr>`).join('');
+            // --- INITIALIZACIÓN ---
+            async init() {
+                const user = sessionStorage.getItem('user');
+                if (user) {
+                    this.state.user = JSON.parse(user);
+                    this.showApp();
+                    await this.loadConfig();
+                    await this.loadData();
+                    this.setupEventListeners();
+                    this.updateDateTime();
+                    setInterval(() => this.updateDateTime(), 60000);
                 } else {
-                    document.querySelector('[data-render="current-period"]').textContent = "Sin Período";
-                    this.dom['tbody-periods'].innerHTML = '<tr><td colspan="4">No hay período activo.</td></tr>';
+                    this.showLogin();
+                    this.setupLoginListener();
                 }
             },
-            async updPeriod(code) {
-                const ini = document.getElementById(`ini-${code}`).value, end = document.getElementById(`end-${code}`).value;
-                const res = await fetch('/api/periods', { method:'PUT', body:JSON.stringify({code, date_ini:ini, date_end:end})});
-                if(res.ok) { alert('Actualizado'); this.fetchPeriod(); } else { const t=await res.text(); alert('Error: ' + t); }
+
+            showLogin() {
+                document.getElementById('login-panel').classList.remove('hidden');
+                document.querySelector('.app-layout').classList.add('hidden');
             },
-            async fetchUsers() {
-                const res = await fetch('/api/users'); const users = await res.json();
-                const admin = users.find(u=>u.role==='admin'), user = users.find(u=>u.role==='user');
-                const fa = this.dom['form-settings-admin'], fu = this.dom['form-settings-user'];
-                if(admin) { fa.querySelector('[name=fullName]').value = admin.full_name; fa.querySelector('[name=username]').value = admin.username; fa.querySelector('[name=jobTitle]').value = admin.job_title; }
-                if(user) { fu.querySelector('[name=fullName]').value = user.full_name; fu.querySelector('[name=username]').value = user.username; fu.querySelector('[name=jobTitle]').value = user.job_title; }
+
+            showApp() {
+                document.getElementById('login-panel').classList.add('hidden');
+                document.querySelector('.app-layout').classList.remove('hidden');
+                document.getElementById('user-role').textContent = this.state.user.role === 'admin' ? '👤 Administrador' : '👁️ Visualizador';
             },
-            async updateUser(fd, role) {
-                const d = Object.fromEntries(fd); d.targetRole = role;
-                const res = await fetch('/api/users', { method:'PUT', body:JSON.stringify(d)});
-                if(res.ok) alert('Usuario actualizado'); else alert('Error');
+
+            setupLoginListener() {
+                document.getElementById('login-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const username = document.getElementById('login-username').value;
+                    const password = document.getElementById('login-password').value;
+                    const role = document.getElementById('login-role').value;
+
+                    try {
+                        const res = await fetch('/api/login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ username, password, role })
+                        });
+                        if (res.ok) {
+                            const user = await res.json();
+                            this.state.user = user;
+                            sessionStorage.setItem('user', JSON.stringify(user));
+                            this.showApp();
+                            await this.loadConfig();
+                            await this.loadData();
+                            this.setupEventListeners();
+                            this.updateDateTime();
+                            setInterval(() => this.updateDateTime(), 60000);
+                        } else {
+                            document.getElementById('login-error').textContent = 'Credenciales inválidas';
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        document.getElementById('login-error').textContent = 'Error al conectar';
+                    }
+                });
             },
-            
+
+            // --- SETUP DE EVENTOS ---
+            setupEventListeners() {
+                // Navigation
+                document.querySelectorAll('[data-module]').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        if (e.target.tagName === 'A') {
+                            this.switchModule(e.target.dataset.module);
+                        }
+                    });
+                });
+
+                // Logout
+                document.getElementById('logout-btn').addEventListener('click', () => {
+                    sessionStorage.removeItem('user');
+                    location.reload();
+                });
+
+                // Devices
+                document.getElementById('add-device-btn').addEventListener('click', () => {
+                    document.getElementById('modal-add-device').classList.remove('hidden');
+                });
+                document.getElementById('form-add-device').addEventListener('submit', (e) => this.handleAddDevice(e));
+                document.getElementById('device-search').addEventListener('input', () => this.filterDevices());
+                document.getElementById('device-type-filter').addEventListener('change', () => this.filterDevices());
+                document.getElementById('clear-device-filter').addEventListener('click', () => {
+                    document.getElementById('device-search').value = '';
+                    document.getElementById('device-type-filter').value = '';
+                    this.filterDevices();
+                });
+                document.getElementById('prev-page').addEventListener('click', () => this.prevPage());
+                document.getElementById('next-page').addEventListener('click', () => this.nextPage());
+
+                // Tickets
+                document.getElementById('add-ticket-btn').addEventListener('click', () => {
+                    this.loadTicketModal();
+                });
+                document.getElementById('form-add-ticket').addEventListener('submit', (e) => this.handleAddTicket(e));
+                document.getElementById('ticket-status-filter').addEventListener('change', () => this.loadTickets());
+                document.getElementById('clear-ticket-filter').addEventListener('click', () => {
+                    document.getElementById('ticket-status-filter').value = '';
+                    document.getElementById('ticket-date-filter').value = '';
+                    this.loadTickets();
+                });
+
+                // Reports
+                document.getElementById('report-date-from').addEventListener('change', () => this.applyReportFilters());
+                document.getElementById('report-date-to').addEventListener('change', () => this.applyReportFilters());
+                document.getElementById('report-status-filter').addEventListener('change', () => this.applyReportFilters());
+                document.getElementById('print-report-btn').addEventListener('click', () => this.printReport('print'));
+                document.getElementById('preview-report-btn').addEventListener('click', () => this.printReport('view'));
+
+                // Admin
+                if (this.state.user.role === 'admin') {
+                    document.getElementById('add-brand-btn').addEventListener('click', () => this.handleAddMaster('Marca', 'brand'));
+                    document.getElementById('add-os-btn').addEventListener('click', () => this.handleAddMaster('SO', 'os'));
+                    document.getElementById('add-location-btn').addEventListener('click', () => {
+                        document.getElementById('modal-add-location').classList.remove('hidden');
+                    });
+                    document.getElementById('form-add-location').addEventListener('submit', (e) => this.handleAddLocation(e));
+                    document.getElementById('add-period-btn').addEventListener('click', () => {
+                        document.getElementById('modal-add-period').classList.remove('hidden');
+                    });
+                    document.getElementById('form-add-period').addEventListener('submit', (e) => this.handleAddPeriod(e));
+                    document.getElementById('settings-form').addEventListener('submit', (e) => this.handleSaveSettings(e));
+                }
+
+                // Sidebar toggle
+                document.querySelector('.sidebar-toggle-btn').addEventListener('click', () => {
+                    document.querySelector('.sidebar').classList.add('is-open');
+                });
+                document.querySelector('.sidebar-close-btn').addEventListener('click', () => {
+                    document.querySelector('.sidebar').classList.remove('is-open');
+                });
+            },
+
+            // --- MÓDULOS DE NAVEGACIÓN ---
+            switchModule(module) {
+                this.state.activeModule = module;
+                document.querySelectorAll('.module').forEach(m => m.classList.add('hidden'));
+                document.querySelector(`[data-module="${module}"]`).classList.remove('hidden');
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                document.querySelector(`[data-module="${module}"]`).classList.add('active');
+
+                const titles = {
+                    'dashboard': '📊 Dashboard',
+                    'inventory': '📦 Inventario',
+                    'workshop': '🔧 Taller',
+                    'reports': '📄 Reportes',
+                    'admin': '⚙️ Administración'
+                };
+                document.getElementById('page-title').textContent = titles[module];
+
+                if (module === 'dashboard') this.loadDashboard();
+                else if (module === 'inventory') this.loadDevices();
+                else if (module === 'workshop') this.loadTickets();
+                else if (module === 'reports') this.loadReports();
+                else if (module === 'admin') this.loadAdmin();
+            },
+
+            // --- CARGA DE DATOS ---
+            async loadConfig() {
+                try {
+                    const res = await fetch('/api/config');
+                    this.state.config = await res.json();
+                    this.populateSelects();
+                } catch (err) {
+                    console.error('Error loading config:', err);
+                }
+            },
+
+            async loadData() {
+                await this.loadDevices();
+                await this.loadTickets();
+                await this.loadLocations();
+            },
+
+            async loadDevices() {
+                try {
+                    const res = await fetch(`/api/devices?page=${this.state.currentPage}&limit=${this.state.itemsPerPage}`);
+                    const data = await res.json();
+                    this.state.devices = data.data || [];
+                    this.renderDevicesTable();
+                    document.getElementById('device-page-info').textContent = `Página ${data.page} de ${Math.ceil(data.total / data.limit)}`;
+                } catch (err) {
+                    console.error('Error loading devices:', err);
+                }
+            },
+
+            async loadTickets() {
+                try {
+                    const res = await fetch('/api/tickets');
+                    this.state.tickets = await res.json() || [];
+                    this.state.filteredTickets = [...this.state.tickets];
+                    this.applyTicketFilters();
+                    this.renderTicketsTable();
+                    this.updateDashboardStats();
+                } catch (err) {
+                    console.error('Error loading tickets:', err);
+                }
+            },
+
+            async loadLocations() {
+                try {
+                    const res = await fetch('/api/locations');
+                    this.state.locations = await res.json() || [];
+                } catch (err) {
+                    console.error('Error loading locations:', err);
+                }
+            },
+
+            // --- RENDERING ---
+            renderDevicesTable() {
+                const tbody = document.getElementById('devices-table');
+                if (this.state.devices.length === 0) {
+                    tbody.innerHTML = '<tr class="table-empty"><td colspan="7">No hay dispositivos</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = this.state.devices.map(d => `
+                    <tr>
+                        <td>${d.code || '---'}</td>
+                        <td><span class="dev-badge dev-${d.type.toLowerCase()}">${d.type}</span></td>
+                        <td>${d.brand || '---'}</td>
+                        <td>${d.model || '---'}</td>
+                        <td>${d.location}</td>
+                        <td>${d.os || '---'}</td>
+                        <td>
+                            <div class="action-group">
+                                <button class="btn-icon" onclick="app.editDevice(${d.id})">✏️</button>
+                                <button class="btn-delete" onclick="app.deleteDevice(${d.id})">🗑️</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            },
+
+            renderTicketsTable() {
+                const tbody = document.getElementById('tickets-table');
+                if (this.state.filteredTickets.length === 0) {
+                    tbody.innerHTML = '<tr class="table-empty"><td colspan="8">No hay tickets</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = this.state.filteredTickets.map(t => `
+                    <tr>
+                        <td>${t.id}</td>
+                        <td>${t.code} (${t.type})</td>
+                        <td>${t.location.building} - ${t.location.area}</td>
+                        <td>${t.dateIn}</td>
+                        <td>${t.dateOut || '-'}</td>
+                        <td style="font-size: 0.85rem;">${t.detailsIn || '-'}</td>
+                        <td><span class="badge ${t.status}">${t.status}</span></td>
+                        <td>
+                            <div class="action-group">
+                                ${t.status === 'pending' ? `<button class="btn-primary btn-sm" onclick="app.openFinishModal(${t.id})">Cerrar</button>` : ''}
+                                <button class="btn-delete" onclick="app.deleteTicket(${t.id})">🗑️</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            },
+
+            // --- HANDLERS ---
+            async handleAddDevice(e) {
+                e.preventDefault();
+                const form = new FormData(document.getElementById('form-add-device'));
+                const data = {
+                    code: form.get('code') || null,
+                    type: form.get('type'),
+                    locationId: parseInt(form.get('locationId')),
+                    id_brand: form.get('id_brand') ? parseInt(form.get('id_brand')) : null,
+                    id_model: form.get('id_model') ? parseInt(form.get('id_model')) : null,
+                    id_os: form.get('id_os') ? parseInt(form.get('id_os')) : null,
+                    id_processor: form.get('id_processor') ? parseInt(form.get('id_processor')) : null,
+                    id_ram: form.get('id_ram') ? parseInt(form.get('id_ram')) : null,
+                    id_storage: form.get('id_storage') ? parseInt(form.get('id_storage')) : null,
+                    architecture: form.get('arch') || null,
+                    serial: form.get('serial') || null,
+                    details: form.get('details') || null
+                };
+
+                try {
+                    const res = await fetch('/api/devices', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    if (res.ok) {
+                        alert('Dispositivo creado');
+                        document.getElementById('modal-add-device').classList.add('hidden');
+                        document.getElementById('form-add-device').reset();
+                        await this.loadDevices();
+                    } else {
+                        alert('Error al crear dispositivo');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Error: ' + err.message);
+                }
+            },
+
+            async handleAddTicket(e) {
+                e.preventDefault();
+                const form = new FormData(document.getElementById('form-add-ticket'));
+                const data = {
+                    deviceId: parseInt(form.get('device_id')),
+                    dateIn: form.get('date_in'),
+                    detailsIn: form.get('details_in') || null
+                };
+
+                try {
+                    const res = await fetch('/api/tickets', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    if (res.ok) {
+                        alert('Ticket creado');
+                        document.getElementById('modal-add-ticket').classList.add('hidden');
+                        document.getElementById('form-add-ticket').reset();
+                        await this.loadTickets();
+                    } else if (res.status === 409) {
+                        alert('Duplicado: Este equipo ya tiene un ticket abierto');
+                    } else {
+                        alert('Error al crear ticket');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Error: ' + err.message);
+                }
+            },
+
+            async deleteDevice(id) {
+                if (confirm('¿Eliminar este dispositivo?')) {
+                    try {
+                        await fetch(`/api/devices/${id}`, { method: 'DELETE' });
+                        await this.loadDevices();
+                    } catch (err) {
+                        alert('Error: ' + err.message);
+                    }
+                }
+            },
+
+            async deleteTicket(id) {
+                if (confirm('¿Eliminar este ticket?')) {
+                    try {
+                        await fetch(`/api/tickets/${id}`, { method: 'DELETE' });
+                        await this.loadTickets();
+                    } catch (err) {
+                        alert('Error: ' + err.message);
+                    }
+                }
+            },
+
+            async loadTicketModal() {
+                document.getElementById('modal-add-ticket').classList.remove('hidden');
+                await this.loadBuildingsForTicket();
+            },
+
+            async loadBuildingsForTicket() {
+                const buildings = [...new Set(this.state.locations.map(l => l.building))];
+                const select = document.getElementById('ticket-building-select');
+                select.innerHTML = '<option value="">Seleccionar...</option>' + 
+                    buildings.map(b => `<option value="${b}">${b}</option>`).join('');
+                
+                select.addEventListener('change', () => this.loadFloorsForTicket());
+            },
+
+            async loadFloorsForTicket() {
+                const building = document.getElementById('ticket-building-select').value;
+                const floors = [...new Set(this.state.locations.filter(l => l.building === building).map(l => l.floor))];
+                const select = document.getElementById('ticket-floor-select');
+                select.innerHTML = '<option value="">Seleccionar...</option>' + 
+                    floors.map(f => `<option value="${f}">${f}</option>`).join('');
+                select.addEventListener('change', () => this.loadAreasForTicket());
+            },
+
+            async loadAreasForTicket() {
+                const building = document.getElementById('ticket-building-select').value;
+                const floor = document.getElementById('ticket-floor-select').value;
+                const areas = [...new Set(this.state.locations.filter(l => l.building === building && l.floor === floor).map(l => l.area))];
+                const select = document.getElementById('ticket-area-select');
+                select.innerHTML = '<option value="">Seleccionar...</option>' + 
+                    areas.map(a => `<option value="${a}">${a}</option>`).join('');
+                select.addEventListener('change', () => this.loadDevicesForTicket());
+            },
+
+            async loadDevicesForTicket() {
+                const building = document.getElementById('ticket-building-select').value;
+                const floor = document.getElementById('ticket-floor-select').value;
+                const area = document.getElementById('ticket-area-select').value;
+                
+                const devices = this.state.devices.filter(d => 
+                    d.building === building && d.floor === floor && d.area === area
+                );
+                
+                const select = document.getElementById('ticket-device-select');
+                select.innerHTML = '<option value="">Seleccionar...</option>' + 
+                    devices.map(d => `<option value="${d.id}">${d.type} - ${d.brand} ${d.model} (${d.serial || '---'})</option>`).join('');
+            },
+
+            openFinishModal(ticketId) {
+                document.querySelector('[name="ticket_id"]').value = ticketId;
+                document.getElementById('modal-finish-ticket').classList.remove('hidden');
+                document.getElementById('form-finish-ticket').addEventListener('submit', (e) => this.handleFinishTicket(e));
+            },
+
+            async handleFinishTicket(e) {
+                e.preventDefault();
+                const ticketId = document.querySelector('[name="ticket_id"]').value;
+                const status = document.querySelector('[name="status"]').value;
+                const dateOut = document.querySelector('[name="date_out"]').value;
+                const detailsOut = document.querySelector('[name="details_out"]').value;
+
+                try {
+                    const res = await fetch('/api/tickets/finish', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: parseInt(ticketId), status, dateOut, detailsOut })
+                    });
+                    if (res.ok) {
+                        alert('Ticket cerrado');
+                        document.getElementById('modal-finish-ticket').classList.add('hidden');
+                        await this.loadTickets();
+                    } else {
+                        alert('Error al cerrar ticket');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Error: ' + err.message);
+                }
+            },
+
+            async handleAddLocation(e) {
+                e.preventDefault();
+                const form = new FormData(document.getElementById('form-add-location'));
+                const data = {
+                    building: form.get('building'),
+                    floor: form.get('floor'),
+                    area: form.get('area'),
+                    room: form.get('room') || ''
+                };
+
+                try {
+                    const res = await fetch('/api/locations/create', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    if (res.ok) {
+                        alert('Ubicación creada');
+                        document.getElementById('modal-add-location').classList.add('hidden');
+                        document.getElementById('form-add-location').reset();
+                        await this.loadLocations();
+                    } else {
+                        alert('Error al crear ubicación');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Error: ' + err.message);
+                }
+            },
+
+            async handleAddPeriod(e) {
+                e.preventDefault();
+                const form = new FormData(document.getElementById('form-add-period'));
+                const data = {
+                    code: form.get('code'),
+                    date_ini: form.get('date_ini'),
+                    date_end: form.get('date_end')
+                };
+
+                try {
+                    const res = await fetch('/api/periods', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    if (res.ok) {
+                        alert('Período creado');
+                        document.getElementById('modal-add-period').classList.add('hidden');
+                        document.getElementById('form-add-period').reset();
+                    } else {
+                        alert('Error al crear período');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Error: ' + err.message);
+                }
+            },
+
+            async handleAddMaster(label, table) {
+                const value = prompt(`Nuevo ${label}:`);
+                if (!value) return;
+
+                try {
+                    const res = await fetch(`/api/${table === 'brand' ? 'brands' : 'os'}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ [table === 'brand' ? 'brand' : 'os']: value })
+                    });
+                    if (res.ok) {
+                        await this.loadConfig();
+                        alert(`${label} agregado`);
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            },
+
+            async handleSaveSettings(e) {
+                e.preventDefault();
+                const adminName = document.querySelector('[data-js="form-settings-admin"] [name="fullName"]').value;
+                const adminJob = document.querySelector('[data-js="form-settings-admin"] [name="jobTitle"]').value;
+                const coordName = document.querySelector('[data-js="form-settings-user"] [name="fullName"]').value;
+                const coordJob = document.querySelector('[data-js="form-settings-user"] [name="jobTitle"]').value;
+
+                localStorage.setItem('sart_admin_name', adminName);
+                localStorage.setItem('sart_admin_job', adminJob);
+                localStorage.setItem('sart_coord_name', coordName);
+                localStorage.setItem('sart_coord_job', coordJob);
+
+                alert('Configuración guardada');
+            },
+
+            // --- FILTROS Y BÚSQUEDA ---
+            filterDevices() {
+                const search = document.getElementById('device-search').value.toLowerCase();
+                const type = document.getElementById('device-type-filter').value;
+
+                this.state.devices = this.state.devices.filter(d => {
+                    const matchSearch = !search || d.code.toLowerCase().includes(search) || 
+                                       d.serial.toLowerCase().includes(search) ||
+                                       d.brand.toLowerCase().includes(search);
+                    const matchType = !type || d.type === type;
+                    return matchSearch && matchType;
+                });
+
+                this.state.currentPage = 1;
+                this.renderDevicesTable();
+            },
+
+            applyTicketFilters() {
+                const status = document.getElementById('ticket-status-filter').value;
+                const date = document.getElementById('ticket-date-filter').value;
+
+                this.state.filteredTickets = this.state.tickets.filter(t => {
+                    const matchStatus = !status || t.status === status;
+                    const matchDate = !date || t.dateIn === date;
+                    return matchStatus && matchDate;
+                });
+            },
+
+            prevPage() {
+                if (this.state.currentPage > 1) {
+                    this.state.currentPage--;
+                    this.loadDevices();
+                }
+            },
+
+            nextPage() {
+                this.state.currentPage++;
+                this.loadDevices();
+            },
+
+            // --- POPULADORES DE SELECT ---
+            populateSelects() {
+                const cfg = this.state.config;
+
+                // Device form
+                document.getElementById('device-type-select').innerHTML = '<option value="">Seleccionar...</option>' +
+                    cfg.types.map(t => `<option value="${t}">${t}</option>`).join('');
+                
+                document.getElementById('device-brand-select').innerHTML = '<option value="">Seleccionar...</option>' +
+                    cfg.brands.map(b => `<option value="${b}">${b}</option>`).join('');
+                
+                document.getElementById('device-os-select').innerHTML = '<option value="">Seleccionar...</option>' +
+                    cfg.os.map(o => `<option value="${o}">${o}</option>`).join('');
+                
+                if (cfg.processors) {
+                    document.getElementById('device-processor-select').innerHTML = '<option value="">Seleccionar...</option>' +
+                        cfg.processors.map(p => `<option value="${p}">${p}</option>`).join('');
+                }
+                
+                if (cfg.rams) {
+                    document.getElementById('device-ram-select').innerHTML = '<option value="">Seleccionar...</option>' +
+                        cfg.rams.map(r => `<option value="${r}">${r}</option>`).join('');
+                }
+                
+                if (cfg.storages) {
+                    document.getElementById('device-storage-select').innerHTML = '<option value="">Seleccionar...</option>' +
+                        cfg.storages.map(s => `<option value="${s}">${s}</option>`).join('');
+                }
+
+                // Location select
+                document.getElementById('device-location-select').innerHTML = '<option value="">Seleccionar...</option>' +
+                    this.state.locations.map(l => `<option value="${l.id}">${l.building} - ${l.floor} - ${l.area} ${l.room ? '- ' + l.room : ''}</option>`).join('');
+            },
+
+            // --- DASHBOARD ---
+            async loadDashboard() {
+                this.updateDashboardStats();
+                await this.loadPeriodInfo();
+            },
+
+            updateDashboardStats() {
+                const pending = this.state.tickets.filter(t => t.status === 'pending').length;
+                const month = new Date().getMonth() + 1;
+                const year = new Date().getFullYear();
+                const repaired = this.state.tickets.filter(t => 
+                    t.status === 'repaired' && t.dateOut.startsWith(`${year}-${String(month).padStart(2, '0')}`)
+                ).length;
+                const total = this.state.tickets.length;
+
+                document.getElementById('stat-pending').textContent = pending;
+                document.getElementById('stat-repaired').textContent = repaired;
+                document.getElementById('stat-total').textContent = total;
+            },
+
+            async loadPeriodInfo() {
+                try {
+                    const res = await fetch('/api/periods/active');
+                    const period = await res.json();
+                    if (period.code) {
+                        document.querySelector('[data-render="current-period"]').textContent = period.code;
+                        const [y, m, d] = period.date_ini.split('-');
+                        const [y2, m2, d2] = period.date_end.split('-');
+                        document.getElementById('period-start').textContent = `${d}/${m}/${y}`;
+                        document.getElementById('period-end').textContent = `${d2}/${m2}/${y2}`;
+                        
+                        const start = new Date(period.date_ini);
+                        const end = new Date(period.date_end);
+                        const now = new Date();
+                        const total = end - start;
+                        const elapsed = now - start;
+                        const percent = Math.min(100, Math.round((elapsed / total) * 100));
+                        
+                        document.getElementById('progress-bar').style.width = percent + '%';
+                        document.getElementById('progress-percent').textContent = percent + '%';
+                    }
+                } catch (err) {
+                    console.error('Error loading period:', err);
+                }
+            },
+
+            // --- REPORTES ---
+            async loadReports() {
+                try {
+                    const res = await fetch('/api/tickets');
+                    this.state.tickets = await res.json() || [];
+                    this.state.filteredTickets = [...this.state.tickets];
+                    this.applyReportFilters();
+                    this.renderReportsTable();
+                } catch (err) {
+                    console.error(err);
+                }
+            },
+
+            applyReportFilters() {
+                const from = document.getElementById('report-date-from').value;
+                const to = document.getElementById('report-date-to').value;
+                const status = document.getElementById('report-status-filter').value;
+
+                this.state.filteredTickets = this.state.tickets.filter(t => {
+                    const matchFrom = !from || t.dateIn >= from;
+                    const matchTo = !to || t.dateIn <= to;
+                    const matchStatus = !status || t.status === status;
+                    return matchFrom && matchTo && matchStatus;
+                });
+            },
+
+            renderReportsTable() {
+                const tbody = document.getElementById('reports-table');
+                if (this.state.filteredTickets.length === 0) {
+                    tbody.innerHTML = '<tr class="table-empty"><td colspan="7">No hay registros</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = this.state.filteredTickets.map(t => `
+                    <tr>
+                        <td>${t.id}</td>
+                        <td>${t.code} (${t.type})</td>
+                        <td>${t.dateIn}</td>
+                        <td>${t.dateOut || '-'}</td>
+                        <td>${t.detailsIn || '-'}</td>
+                        <td>${t.detailsOut || '-'}</td>
+                        <td><span class="badge ${t.status}">${t.status}</span></td>
+                    </tr>
+                `).join('');
+            },
+
+            async loadAdmin() {
+                await this.loadConfig();
+                this.populateAdminLists();
+            },
+
+            populateAdminLists() {
+                const brands = document.getElementById('brands-list');
+                brands.innerHTML = (this.state.config.brands || []).map(b => 
+                    `<div style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;">${b}</div>`
+                ).join('');
+
+                const os = document.getElementById('os-list');
+                os.innerHTML = (this.state.config.os || []).map(o => 
+                    `<div style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;">${o}</div>`
+                ).join('');
+
+                const loc = document.getElementById('locations-list');
+                loc.innerHTML = (this.state.locations || []).map(l => 
+                    `<div style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;">${l.building} > ${l.floor} > ${l.area} ${l.room ? '> ' + l.room : ''}</div>`
+                ).join('');
+            },
+
+            // --- UTILIDADES ---
+            updateDateTime() {
+                const now = new Date();
+                document.getElementById('current-date').textContent = now.toLocaleDateString('es-ES');
+            },
+
+            fmtDate(dateStr) {
+                const [y, m, d] = dateStr.split('-');
+                return `${d}/${m}/${y}`;
+            },
+
             // --- FUNCIÓN DE REPORTE COMPLETA ---
             printReport(mode) {
-                const data = mode === 'view' ? this.state.filteredTickets : [...this.state.tickets].sort((a,b) => b.id - a.id);
+                if (mode === 'view') {
+                    const from = document.getElementById('report-date-from').value;
+                    const to = document.getElementById('report-date-to').value;
+                    const status = document.getElementById('report-status-filter').value;
+                    this.applyReportFilters();
+                }
+                
+                const data = mode === 'view' ? this.state.filteredTickets : [...this.state.tickets].sort((a, b) => b.id - a.id);
                 if (!data || data.length === 0) { alert("No hay datos para generar el reporte."); return; }
 
                 // Obtener nombres de los inputs de configuración (si están cargados) o usar defaults
-                const adminName = document.querySelector('[data-js="form-settings-admin"] [name="fullName"]').value || "OSWALDO GUEDEZ";
-                const adminJob = document.querySelector('[data-js="form-settings-admin"] [name="jobTitle"]').value || "JEFE DE ÁREA";
-                const coordName = document.querySelector('[data-js="form-settings-user"] [name="fullName"]').value || "FRANCISCO VELAZQUEZ";
-                const coordJob = document.querySelector('[data-js="form-settings-user"] [name="jobTitle"]').value || "COORDINADOR TIC";
+                const adminName = (document.querySelector('[data-js="form-settings-admin"] [name="fullName"]')?.value || localStorage.getItem('sart_admin_name') || "OSWALDO GUEDEZ");
+                const adminJob = (document.querySelector('[data-js="form-settings-admin"] [name="jobTitle"]')?.value || localStorage.getItem('sart_admin_job') || "JEFE DE ÁREA");
+                const coordName = (document.querySelector('[data-js="form-settings-user"] [name="fullName"]')?.value || localStorage.getItem('sart_coord_name') || "FRANCISCO VELAZQUEZ");
+                const coordJob = (document.querySelector('[data-js="form-settings-user"] [name="jobTitle"]')?.value || localStorage.getItem('sart_coord_job') || "COORDINADOR TIC");
 
-                const URL_LOGO_IZQUIERDO = './public/logo-fuerzas-armadas.avif'; 
+                const URL_LOGO_IZQUIERDO = './public/logo-fuerzas-armadas.avif';
                 const URL_LOGO_DERECHO = './public/logo-unefa.avif';
 
                 let reportContent = '';
@@ -746,7 +2232,7 @@
 
                 for (let i = 0; i < totalPages; i++) {
                     const pageData = data.slice(i * ROWS_PER_PAGE, (i + 1) * ROWS_PER_PAGE);
-                    
+
                     const headerHTML = `
                         <div class="header-container">
                             <div class="logo-box"><img src="${URL_LOGO_IZQUIERDO}" alt="Logo Izq"></div>
@@ -766,14 +2252,16 @@
                     let rowsHTML = '';
                     pageData.forEach((t, idx) => {
                         const num = (i * ROWS_PER_PAGE) + idx + 1;
+                        const location = t.location ? `${t.location.building} - ${t.location.area}` : '-';
+                        const detalle = t.detailsOut || t.detailsIn || '-';
                         rowsHTML += `
                             <tr>
                                 <td class="col-center">${num}</td>
                                 <td class="col-center">${this.fmtDate(t.dateIn)}</td>
-                                <td class="col-center"><b>${t.code}</b><br>${t.type}</td>
-                                <td class="col-center">${t.location}</td>
+                                <td class="col-center"><b>${t.code || '---'}</b><br>${t.type}</td>
+                                <td class="col-center">${location}</td>
                                 <td class="col-center">${t.dateOut ? this.fmtDate(t.dateOut) : '-'}</td>
-                                <td class="col-left" style="font-size:8pt;">${t.solution || t.issue}</td>
+                                <td class="col-left" style="font-size:8pt;">${detalle}</td>
                                 <td class="col-center" style="font-size:8pt;">${t.status}</td>
                             </tr>
                         `;
@@ -866,22 +2354,9 @@
                     iframe.contentWindow.print();
                     document.body.removeChild(iframe);
                 }, 500);
-            },
-
-            renderDash() {
-                document.querySelector('[data-js="stat-pending"]').textContent = this.state.tickets.filter(t=>t.status==='Pendiente').length;
-                document.querySelector('[data-js="stat-total"]').textContent = this.state.tickets.length;
-                document.querySelector('[data-js="stat-repaired"]').textContent = this.state.tickets.filter(t=>t.status==='Reparado').length;
-            },
-            updateTime() {
-                const now = new Date();
-                document.querySelector('[data-js="current-date"]').textContent = now.toLocaleDateString();
-                document.querySelectorAll('input[type="date"]').forEach(i => { if(!i.value) i.value = now.toISOString().split('T')[0]; });
-            },
-            initCharCounters() { document.querySelectorAll('textarea[maxlength]').forEach(txt => { const counter = document.createElement('div'); counter.className = 'char-counter'; counter.textContent = `0/${txt.getAttribute('maxlength')}`; txt.parentNode.appendChild(counter); txt.addEventListener('input', () => { counter.textContent = `${txt.value.length}/${txt.getAttribute('maxlength')}`; }); }); },
-            validateDates() { const start = this.dom.filterDateStart.value; const end = this.dom.filterDateEnd.value; const today = new Date().toISOString().split('T')[0]; if (start > today || end > today) { alert("Fechas futuras inválidas."); if(start > today) this.dom.filterDateStart.value = ''; if(end > today) this.dom.filterDateEnd.value = ''; return; } if (start && end && start > end) { alert("Fecha incorrecta."); this.dom.filterDateEnd.value = ''; } },
-            fmtDate(s) { if(!s) return '-'; const p = s.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; }
+            }
         };
     </script>
 </body>
+
 </html>

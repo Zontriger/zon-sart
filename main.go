@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"embed"
-	"encoding/csv"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -25,20 +24,170 @@ import (
 //go:embed static/*
 var contentWeb embed.FS
 
-// Datos internos por defecto.
-const defaultInventoryData = `Code,Tipo Dispositivo,Edificio,Piso,Área,Habitación (Room),Marca,Modelo,Serial,OS,RAM,Arq.,Alm.,Procesador
----,PC,Edificio 02,Piso 01,Control de Estudios,Jefe de Área,---,---,802MXWE0B993,Win 7,4 GB,64 BIT,512 GB,Intel Pentium G2010
----,PC,Edificio 02,Piso 01,Control de Estudios,Analista de Ingreso,---,---,CN9352W80,Win 10,2 GB,64 BIT,80 GB,Genuine Intel 1.80GHz
----,PC,Edificio 02,Piso 01,Control de Estudios,Analista de Ingreso,---,---,C18D7BA005546,Win 11,2 GB,32 BIT,512 GB,Intel Pentium G2010
-4073,PC,Edificio 01,Piso 01,Área TIC,Soporte Técnico,Dell,---,CN-0N8176...,Linux,1 GB,32 BIT,120 GB,Intel Pentium 3.06Ghz
----,PC,Edificio 01,Piso 01,Coordinación,Asistente,---,---,CNC141QNT2,Win 10,2 GB,32 BIT,512 GB,Intel Pentium G2010
----,PC,Edificio 02,Piso 01,Archivo,---,---,---,---,Win 7,512 MB,32 BIT,37 GB,---
----,PC,Edificio 02,Piso 01,Archivo,Acta y Publicaciones,---,---,---,Win 10,2 GB,64 BIT,512 GB,Intel Pentium G2010 2.80GHz
----,PC,Edificio 02,Piso 01,Archivo,Acta y Publicaciones,---,---,---,Win 7,1.5 GB,32 BIT,37 GB,Intel Celeron 1.80GHz
----,PC,Edificio 02,Piso 01,Archivo,Jefe de Área,---,---,P/NMW9BBK,Win 7,2 GB,32 BIT,512 GB,Intel Pentium 2.80GHz
-708,Modem,Edificio 01,Piso 01,Área TIC,Soporte Técnico,Huawei,AR 157,210235384810,---,---,---,---,---
----,Modem,Edificio 01,Piso 01,Área TIC,Soporte Técnico,CANTV,---,---,---,---,---,---,---
-725,Switch,Edificio 01,Piso 01,Área TIC,Cuarto de Redes,TP-Link,SF1016D,Y21CO30000672,---,---,---,---,---`
+// --- MAPEO DE RECURSOS (API -> SQL) ---
+var resourceMap = map[string]string{
+	"buildings":  "Edificio",
+	"floors":     "Piso",
+	"areas":      "Area",
+	"rooms":      "Habitacion",
+	"brands":     "Marca",
+	"models":     "Modelo",
+	"os":         "Sistema_Operativo",
+	"ram":        "RAM",
+	"storages":   "Almacenamiento",
+	"processors": "Procesador",
+	"users":      "Usuario",
+	// Módulos complejos
+	"devices":    "Dispositivo",
+	"locations":  "Ubicacion",
+	"tickets":    "Taller",
+}
+
+// --- SCHEMA SQL ---
+const schemaSQL = `
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS Usuario (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    full_name TEXT NOT NULL,
+    position TEXT,
+    rol TEXT CHECK(rol IN ('admin', 'viewer')) DEFAULT 'viewer'
+);
+
+CREATE TABLE IF NOT EXISTS Periodo (
+    code TEXT PRIMARY KEY,
+    date_ini TEXT NOT NULL CHECK (date_ini IS date(date_ini)),
+    date_end TEXT NOT NULL CHECK (date_end IS date(date_end)),
+    is_current INTEGER CHECK(is_current IN (0, 1)) DEFAULT 0,
+    CONSTRAINT valid_range CHECK (date_ini < date_end)
+);
+
+CREATE TABLE IF NOT EXISTS Edificio (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	building TEXT UNIQUE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Piso (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	id_building INTEGER NOT NULL,
+	floor TEXT NOT NULL,
+	UNIQUE(id_building, floor),
+	FOREIGN KEY (id_building) REFERENCES Edificio(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Area (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	id_floor INTEGER NOT NULL,
+	area TEXT NOT NULL,
+	UNIQUE(id_floor, area),
+	FOREIGN KEY (id_floor) REFERENCES Piso(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Habitacion (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	id_area INTEGER NOT NULL,
+	room TEXT NOT NULL,
+	UNIQUE(id_area, room),
+	FOREIGN KEY (id_area) REFERENCES Area(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Ubicacion (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	id_area INTEGER NOT NULL,
+	id_room INTEGER,
+	details TEXT,
+	UNIQUE(id_area, id_room, details),
+	FOREIGN KEY (id_area) REFERENCES Area(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+	FOREIGN KEY (id_room) REFERENCES Habitacion(id) ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Sistema_Operativo (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	os TEXT UNIQUE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS RAM (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	ram TEXT UNIQUE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Almacenamiento (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	storage TEXT UNIQUE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Procesador (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	processor TEXT UNIQUE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Marca (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	brand TEXT UNIQUE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Modelo (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	id_brand INTEGER NOT NULL,
+	model TEXT NOT NULL,
+	UNIQUE(id_brand, model),
+	FOREIGN KEY (id_brand) REFERENCES Marca(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Dispositivo (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT UNIQUE,
+	device_type TEXT NOT NULL,
+    id_location INTEGER NOT NULL,
+    id_os INTEGER,
+    id_ram INTEGER,
+    arch TEXT CHECK(arch IN ('32 bits', '64 bits')),
+    id_storage INTEGER,
+    id_processor INTEGER,
+	id_brand INTEGER,
+	id_model INTEGER,
+    serial TEXT,
+	details TEXT,
+	
+	FOREIGN KEY (id_location) REFERENCES Ubicacion(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+	FOREIGN KEY (id_os) REFERENCES Sistema_Operativo(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+	FOREIGN KEY (id_ram) REFERENCES RAM(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+	FOREIGN KEY (id_storage) REFERENCES Almacenamiento(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+	FOREIGN KEY (id_processor) REFERENCES Procesador(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+	FOREIGN KEY (id_brand) REFERENCES Marca(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+	FOREIGN KEY (id_model) REFERENCES Modelo(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+	
+	CONSTRAINT check_brand_model_required CHECK (id_model IS NULL OR (id_model IS NOT NULL AND id_brand IS NOT NULL))
+);
+
+CREATE TABLE IF NOT EXISTS Taller (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_device INTEGER NOT NULL, 
+    status TEXT CHECK(status IN ('repaired', 'pending', 'unrepaired')) DEFAULT 'pending',
+    date_in TEXT NOT NULL CHECK(date_in IS date(date_in)),
+    date_out TEXT CHECK(date_out IS NULL OR date_out IS date(date_out)),
+    details_in TEXT,
+    details_out TEXT,
+	UNIQUE(id_device, status, date_in, details_in),
+    FOREIGN KEY (id_device) REFERENCES Dispositivo(id) ON DELETE NO ACTION ON UPDATE CASCADE
+);
+
+CREATE VIEW IF NOT EXISTS Vista_Ubicacion_Completa AS
+	SELECT 
+		u.id AS id_ubicacion,
+		e.building AS building,
+		p.floor AS floor,
+		a.area AS area,
+		COALESCE(h.room, '') AS room,
+		u.details
+	FROM Ubicacion u
+	JOIN Area a ON u.id_area = a.id
+	JOIN Piso p ON a.id_floor = p.id
+	JOIN Edificio e ON p.id_building = e.id
+	LEFT JOIN Habitacion h ON u.id_room = h.id;
+`
 
 // --- ESTRUCTURAS JSON ---
 
@@ -52,34 +201,44 @@ type UserResponse struct {
 	ID       int    `json:"id"`
 	Username string `json:"username"`
 	FullName string `json:"full_name"`
-	JobTitle string `json:"job_title"`
 	Role     string `json:"role"`
 }
 
 type Ticket struct {
-	ID       int    `json:"id"`
-	Code     string `json:"code"`
-	Type     string `json:"type"`
-	Location string `json:"location"`
-	DateIn   string `json:"dateIn"`
-	DateOut  string `json:"dateOut"`
-	Issue    string `json:"issue"`
-	Solution string `json:"solution"`
-	Status   string `json:"status"`
+	ID         int                    `json:"id"`
+	DeviceID   int64                  `json:"deviceId"`
+	Code       string                 `json:"code"`
+	Type       string                 `json:"type"`
+	Location   map[string]interface{} `json:"location"`
+	DateIn     string                 `json:"dateIn"`
+	DateOut    string                 `json:"dateOut"`
+	DetailsIn  string                 `json:"detailsIn"`
+	DetailsOut string                 `json:"detailsOut"`
+	Status     string                 `json:"status"`
+	Brand      string                 `json:"brand"`
+	Model      string                 `json:"model"`
+	Serial     string                 `json:"serial"`
 }
 
 type DeviceItem struct {
-	ID       int64  `json:"id"`
-	Code     string `json:"code"`
-	Type     string `json:"type"`
-	Brand    string `json:"brand"`
-	Model    string `json:"model"`
-	Serial   string `json:"serial"`
-	OS       string `json:"os"`
-	Location string `json:"location"`
-	Building string `json:"building,omitempty"`
-	Floor    string `json:"floor,omitempty"`
-	Area     string `json:"area,omitempty"`
+	ID           int64  `json:"id"`
+	Code         string `json:"code"`
+	Type         string `json:"type"`
+	Brand        string `json:"brand"`
+	Model        string `json:"model"`
+	Serial       string `json:"serial"`
+	OS           string `json:"os"`
+	Ram          string `json:"ram,omitempty"`
+	Processor    string `json:"processor,omitempty"`
+	Architecture string `json:"architecture,omitempty"`
+	Storage      string `json:"storage,omitempty"`
+	Details      string `json:"details,omitempty"`
+	Location     string `json:"location"` 
+	LocationID   int64  `json:"locationId,omitempty"`
+	Building     string `json:"building,omitempty"`
+	Floor        string `json:"floor,omitempty"`
+	Area         string `json:"area,omitempty"`
+	Room         string `json:"room,omitempty"`
 }
 
 type DevicesResponse struct {
@@ -97,603 +256,496 @@ type Period struct {
 }
 
 type ConfigData struct {
-	Codes     []string `json:"codes"`
-	Types     []string `json:"types"`
-	Brands    []string `json:"brands"`
-	OS        []string `json:"os"`
-	Locations []string `json:"locations"`
-	Buildings []string `json:"buildings"`
-	Floors    []string `json:"floors"`
-	Areas     []string `json:"areas"`
+	Types         []string `json:"types"`
+	Brands        []string `json:"brands"`
+	OS            []string `json:"os"`
+	Rams          []string `json:"rams"`
+	Processors    []string `json:"processors"`
+	Architectures []string `json:"architectures"`
+	Storages      []string `json:"storages"`
+	Buildings     []string `json:"buildings"`
 }
 
-type LocationFull struct {
-	ID       int64  `json:"id"`
-	Building string `json:"building"`
-	Floor    string `json:"floor"`
-	Area     string `json:"area"`
-	Room     string `json:"room"`
-	FullText string `json:"fullText"`
-}
-
-// --- VARIABLES GLOBALES ---
+// --- VARIABLES ---
 var db *sql.DB
 
 func main() {
-	// Configuración de Logs
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	log.Println("=== INICIANDO SISTEMA SART (VERSIÓN FINAL) ===")
+	log.Println("=== INICIANDO SISTEMA SART (PATCH-12: NEW DB) ===")
 
-	// Inicializar Base de Datos
 	initDB()
 
-	// --- DEFINICIÓN DE RUTAS API ---
-	http.HandleFunc("/api/login", handleLogin)
-	http.HandleFunc("/api/users", handleUsers)
-	http.HandleFunc("/api/tickets", handleTickets)
-	http.HandleFunc("/api/tickets/finish", handleFinish)
-	http.HandleFunc("/api/config", handleConfig)
-	http.HandleFunc("/api/devices", handleDevices)
+		// Rutas Públicas
+		http.HandleFunc("/api/login", handleLogin)
+		http.HandleFunc("/api/config", handleConfig)
+		
+		// Rutas Específicas (ORDEN IMPORTA: Específicas primero)
+		http.HandleFunc("/api/tickets/finish", handleFinish)
+		http.HandleFunc("/api/tickets", handleTickets) 
+		http.HandleFunc("/api/tickets/", handleTickets)
+	
+	http.HandleFunc("/api/devices/", handleDevices) 
+	http.HandleFunc("/api/devices", handleDevices) 
+
 	http.HandleFunc("/api/locations", handleLocations)
+	http.HandleFunc("/api/locations/create", handleLocationCreate) 
+
 	http.HandleFunc("/api/periods", handlePeriods)
 	http.HandleFunc("/api/periods/active", handleActivePeriod)
 
-	// Servidor de Archivos Estáticos
+	// Rutas Genéricas (CRUD Tablas Maestras)
+	genericResources := []string{
+		"buildings", "floors", "areas", "rooms", 
+		"brands", "models", "os", "ram", "storages", 
+		"processors", "users",
+	}
+	
+	for _, res := range genericResources {
+		path := "/api/" + res
+		http.HandleFunc(path, handleGenericCRUD)
+		http.HandleFunc(path+"/", handleGenericCRUD)
+	}
+
 	staticFS, _ := fs.Sub(contentWeb, "static")
 	http.Handle("/", http.FileServer(http.FS(staticFS)))
-	http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
 
-	// Iniciar Servidor
 	port := ":8080"
-	log.Printf("Servidor SART iniciado en http://localhost%s", port)
+	log.Printf("Server running at http://localhost%s", port)
 
-	// Abrir navegador automáticamente
 	go func() {
 		time.Sleep(1 * time.Second)
 		exec.Command("rundll32", "url.dll,FileProtocolHandler", "http://localhost"+port).Start()
 	}()
 
-	err := http.ListenAndServe(port, nil)
-	if err != nil {
-		log.Fatal("Error fatal iniciando servidor:", err)
+	if err := http.ListenAndServe(port, nil); err != nil {
+		log.Fatal(err)
 	}
 }
 
-// --- LÓGICA DE BASE DE DATOS ---
+// --- DATABASE ---
 
 func initDB() {
 	ex, _ := os.Executable()
-	dbPath := filepath.Join(filepath.Dir(ex), "sart_system.db")
-	log.Println("Conectando a BD:", dbPath)
-
+	dbPath := filepath.Join(filepath.Dir(ex), "sart_v4.db")
+	
 	var err error
 	db, err = sql.Open("sqlite", dbPath)
-	if err != nil {
-		log.Fatal("Error abriendo conexión BD:", err)
+	if err != nil { log.Fatal(err) }
+
+	if _, err := db.Exec("PRAGMA foreign_keys = ON;"); err != nil { log.Fatal(err) }
+	
+	if _, err := db.Exec(schemaSQL); err != nil {
+		log.Fatal("Error en Schema:", err)
 	}
 
-	if _, err := db.Exec("PRAGMA foreign_keys = ON;"); err != nil {
-		log.Fatal("Error activando Foreign Keys:", err)
+	var count int
+	db.QueryRow("SELECT COUNT(*) FROM Usuario").Scan(&count)
+	if count == 0 {
+		pass := hashPassword("1234")
+		db.Exec("INSERT INTO Usuario (username, password, full_name, position, rol) VALUES (?, ?, ?, ?, ?)", "admin", pass, "ADMINISTRADOR", "SYSADMIN", "admin")
+		db.Exec("INSERT INTO Usuario (username, password, full_name, position, rol) VALUES (?, ?, ?, ?, ?)", "viewer", pass, "VISITANTE", "INVITADO", "viewer")
 	}
-
-	createSchema()
-
-	var userCount int
-	err = db.QueryRow("SELECT COUNT(*) FROM Usuario").Scan(&userCount)
-	if err == nil && userCount == 0 {
-		log.Println("BD Usuarios vacía. Ejecutando seedUsers...")
-		seedUsers()
-	}
-
-	var devCount int
-	err = db.QueryRow("SELECT COUNT(*) FROM Dispositivo").Scan(&devCount)
-	if err == nil && devCount == 0 {
-		log.Println("BD Inventario vacía. Importando datos por defecto...")
-		importDefaultData()
-	}
-
+	
 	ensurePeriods()
-	log.Println("Base de datos lista.")
 }
 
-func createSchema() {
-	schema := `
-	CREATE TABLE IF NOT EXISTS Usuario (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		username TEXT UNIQUE NOT NULL,
-		password TEXT NOT NULL,
-		full_name TEXT NOT NULL,
-		position TEXT,
-		rol TEXT CHECK(rol IN ('admin', 'viewer')) NOT NULL DEFAULT 'viewer'
-	);
+// --- HANDLERS GENÉRICOS ---
 
-	CREATE TABLE IF NOT EXISTS Periodo (
-		code TEXT PRIMARY KEY,
-		date_ini TEXT NOT NULL,
-		date_end TEXT NOT NULL
-	);
-
-	CREATE TABLE IF NOT EXISTS Ubicacion (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		building TEXT NOT NULL,
-		floor TEXT NOT NULL,
-		area TEXT NOT NULL,
-		room TEXT,
-		details TEXT,
-		UNIQUE(building, floor, area, room)
-	);
-
-	CREATE TABLE IF NOT EXISTS Dispositivo (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		code TEXT,
-		device_type TEXT NOT NULL,
-		id_ubication INTEGER NOT NULL,
-		os TEXT,
-		ram TEXT,
-		arch TEXT,
-		storage TEXT,
-		processor TEXT,
-		brand TEXT,
-		model TEXT,
-		serial TEXT,
-		details TEXT,
-		FOREIGN KEY (id_ubication) REFERENCES Ubicacion(id) ON DELETE RESTRICT ON UPDATE CASCADE
-	);
-
-	CREATE TABLE IF NOT EXISTS Taller (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		id_device INTEGER NOT NULL, 
-		status TEXT CHECK(status IN ('repaired', 'pending', 'unrepaired')) DEFAULT 'pending',
-		date_in TEXT NOT NULL,
-		date_out TEXT,
-		details TEXT,
-		solution TEXT,
-		FOREIGN KEY (id_device) REFERENCES Dispositivo(id) ON DELETE NO ACTION ON UPDATE CASCADE
-	);`
-
-	_, err := db.Exec(schema)
-	if err != nil {
-		log.Fatal("Error creando tablas:", err)
-	}
-}
-
-func seedUsers() {
-	pass := hashPassword("1234")
-	stmt := `INSERT INTO Usuario (username, password, full_name, position, rol) VALUES (?, ?, ?, ?, ?)`
+func handleGenericCRUD(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	
-	_, err := db.Exec(stmt, "admin", pass, "OSWALDO GUEDEZ", "JEFE DE ÁREA", "admin")
-	if err != nil { log.Println("Error creando admin:", err) }
+	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+	if len(parts) < 2 { http.Error(w, "Invalid path", 400); return }
 	
-	_, err = db.Exec(stmt, "user", pass, "FRANCISCO VELAZQUEZ", "COORDINADOR TIC", "viewer")
-	if err != nil { log.Println("Error creando user:", err) }
-}
+	resource := parts[1]
+	tableName, ok := resourceMap[resource]
+	if !ok { http.Error(w, "Resource not found", 404); return }
 
-func importDefaultData() {
-	r := csv.NewReader(strings.NewReader(defaultInventoryData))
-	r.LazyQuotes = true
-	records, err := r.ReadAll()
-	if err != nil {
-		log.Println("Error leyendo CSV interno:", err)
-		return
-	}
+	id := ""
+	if len(parts) > 2 { id = parts[2] }
 
-	locCache := make(map[string]int64)
-	tx, err := db.Begin()
-	if err != nil {
-		log.Println("Error iniciando transacción:", err)
-		return
-	}
-
-	defer func() {
-		if err := tx.Commit(); err != nil {
-			log.Println("Error en commit importación:", err)
-		}
-	}()
-
-	nullable := func(s string) interface{} {
-		s = strings.TrimSpace(s)
-		if s == "---" || s == "" {
-			return nil
-		}
-		return s
-	}
-
-	count := 0
-	for i, row := range records {
-		if i == 0 { continue }
-		for j := range row { row[j] = strings.TrimSpace(row[j]) }
-
-		locKey := fmt.Sprintf("%s|%s|%s|%s", row[2], row[3], row[4], row[5])
-		var locID int64
-		if id, ok := locCache[locKey]; ok {
-			locID = id
-		} else {
-			res, _ := tx.Exec("INSERT OR IGNORE INTO Ubicacion (building, floor, area, room) VALUES (?, ?, ?, ?)", row[2], row[3], row[4], nullable(row[5]))
-			rowsAffected, _ := res.RowsAffected()
-			if rowsAffected == 0 {
-				if nullable(row[5]) == nil {
-					tx.QueryRow("SELECT id FROM Ubicacion WHERE building=? AND floor=? AND area=? AND room IS NULL", row[2], row[3], row[4]).Scan(&locID)
-				} else {
-					tx.QueryRow("SELECT id FROM Ubicacion WHERE building=? AND floor=? AND area=? AND room=?", row[2], row[3], row[4], row[5]).Scan(&locID)
-				}
-			} else {
-				locID, _ = res.LastInsertId()
-			}
-			locCache[locKey] = locID
-		}
-
-		_, err = tx.Exec(`INSERT INTO Dispositivo (code, device_type, id_ubication, brand, model, serial, os, ram, arch, storage, processor) 
-				 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
-				 nullable(row[0]), row[1], locID, nullable(row[6]), nullable(row[7]), nullable(row[8]), nullable(row[9]), nullable(row[10]), nullable(row[11]), nullable(row[12]), nullable(row[13]))
+	if r.Method == "GET" {
+		query := fmt.Sprintf("SELECT * FROM %s", tableName)
+		if id != "" { query += " WHERE id = ?" }
 		
-		if err == nil { count++ }
+		var rows *sql.Rows
+		var err error
+		if id != "" { rows, err = db.Query(query, id) } else { rows, err = db.Query(query) }
+		
+		if err != nil { http.Error(w, err.Error(), 500); return }
+		defer rows.Close()
+		
+		cols, _ := rows.Columns()
+		var result []map[string]interface{}
+		
+		for rows.Next() {
+			columns := make([]interface{}, len(cols))
+			columnPointers := make([]interface{}, len(cols))
+			for i := range columns { columnPointers[i] = &columns[i] }
+			rows.Scan(columnPointers...)
+			entry := make(map[string]interface{})
+			for i, colName := range cols {
+				val := columnPointers[i].(*interface{})
+				entry[colName] = *val
+			}
+			result = append(result, entry)
+		}
+		json.NewEncoder(w).Encode(result)
+		return
 	}
-	log.Printf("Importados %d dispositivos.", count)
+
+	if r.Method == "POST" {
+		var data map[string]interface{}
+		json.NewDecoder(r.Body).Decode(&data)
+		
+		cols := []string{}
+		vals := []interface{}{}
+		placeholders := []string{}
+		
+		for k, v := range data {
+			if tableName == "Usuario" && k == "password" {
+				v = hashPassword(v.(string))
+			}
+			cols = append(cols, k)
+			vals = append(vals, v)
+			placeholders = append(placeholders, "?")
+		}
+		
+		query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", tableName, strings.Join(cols, ","), strings.Join(placeholders, ","))
+		_, err := db.Exec(query, vals...)
+		if err != nil {
+			log.Println("SQL Error:", err)
+			http.Error(w, err.Error(), 500); return 
+		}
+		w.Write([]byte(`{"status":"ok"}`))
+		return
+	}
+
+	if r.Method == "DELETE" {
+		if id == "" { http.Error(w, "ID required", 400); return }
+		
+		query := fmt.Sprintf("DELETE FROM %s WHERE id = ?", tableName)
+		_, err := db.Exec(query, id)
+		if err != nil { http.Error(w, err.Error(), 500); return }
+		w.Write([]byte(`{"status":"ok"}`))
+		return
+	}
 }
 
-// --- AUTOMATIZACIÓN DE PERÍODOS ---
-
-func ensurePeriods() {
-	currentYear := time.Now().Year()
-	years := []int{currentYear, currentYear + 1}
-
-	for _, y := range years {
-		startI := getNthWeekday(y, time.March, time.Monday, 2)
-		endI := getNthWeekday(y, time.July, time.Friday, 1)
-		insertPeriodIfMissing(fmt.Sprintf("I-%d", y), startI, endI)
-
-		startII := getNthWeekday(y, time.October, time.Monday, 1)
-		endII := getNthWeekday(y+1, time.February, time.Friday, 2)
-		insertPeriodIfMissing(fmt.Sprintf("II-%d", y), startII, endII)
-	}
-}
-
-func getNthWeekday(year int, month time.Month, weekday time.Weekday, n int) string {
-	t := time.Date(year, month, 1, 0, 0, 0, 0, time.Local)
-	for t.Weekday() != weekday {
-		t = t.AddDate(0, 0, 1)
-	}
-	t = t.AddDate(0, 0, (n-1)*7)
-	return t.Format("2006-01-02")
-}
-
-func insertPeriodIfMissing(code, start, end string) {
-	_, err := db.Exec("INSERT OR IGNORE INTO Periodo (code, date_ini, date_end) VALUES (?, ?, ?)", code, start, end)
-	if err != nil {
-		log.Println("Error asegurando periodo:", err)
-	}
-}
-
-// --- HANDLERS ---
+// --- HANDLERS ESPECÍFICOS ---
 
 func handleLogin(w http.ResponseWriter, r *http.Request) {
 	var creds LoginRequest
-	if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
-		http.Error(w, "Bad Request", 400); return
-	}
-
-	hash := hashPassword(creds.Password)
-	dbRole := creds.Role
-	if dbRole == "user" { dbRole = "viewer" }
+	json.NewDecoder(r.Body).Decode(&creds)
 
 	var user UserResponse
-	err := db.QueryRow("SELECT id, username, full_name, position, rol FROM Usuario WHERE username=? AND password=? AND rol=?", 
-		creds.Username, hash, dbRole).Scan(&user.ID, &user.Username, &user.FullName, &user.JobTitle, &user.Role)
+	err := db.QueryRow("SELECT id, username, full_name, rol FROM Usuario WHERE username=? AND password=? AND rol=?", 
+		creds.Username, hashPassword(creds.Password), creds.Role).Scan(&user.ID, &user.Username, &user.FullName, &user.Role)
 
-	if err == sql.ErrNoRows {
-		http.Error(w, "Credenciales inválidas", 401); return
-	}
-	if user.Role == "viewer" { user.Role = "user" }
-	json.NewEncoder(w).Encode(user)
-}
-
-func handleUsers(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+	if err == sql.ErrNoRows { http.Error(w, "Credenciales inválidas", 401); return }
 	
-	if r.Method == "GET" {
-		rows, err := db.Query("SELECT id, username, full_name, position, rol FROM Usuario")
-		if err != nil { http.Error(w, err.Error(), 500); return }
-		defer rows.Close()
-		var users []UserResponse
-		for rows.Next() {
-			var u UserResponse
-			rows.Scan(&u.ID, &u.Username, &u.FullName, &u.JobTitle, &u.Role)
-			if u.Role == "viewer" { u.Role = "user" }
-			users = append(users, u)
-		}
-		json.NewEncoder(w).Encode(users)
-		return
-	}
-
-	if r.Method == "PUT" {
-		var req struct {
-			TargetRole string `json:"targetRole"`
-			Username   string `json:"username"`
-			Password   string `json:"password"`
-			FullName   string `json:"fullName"`
-			JobTitle   string `json:"jobTitle"`
-		}
-		json.NewDecoder(r.Body).Decode(&req)
-
-		dbRole := req.TargetRole
-		if dbRole == "user" { dbRole = "viewer" }
-
-		query := "UPDATE Usuario SET username=?, full_name=?, position=?"
-		args := []interface{}{req.Username, req.FullName, req.JobTitle}
-
-		if req.Password != "" {
-			query += ", password=?"
-			args = append(args, hashPassword(req.Password))
-		}
-		
-		query += " WHERE rol=?"
-		args = append(args, dbRole)
-
-		_, err := db.Exec(query, args...)
-		if err != nil {
-			log.Println("Error updating user:", err)
-			http.Error(w, "Error BD", 500); return
-		}
-		w.Write([]byte(`{"status":"ok"}`))
-	}
+	http.SetCookie(w, &http.Cookie{Name: "sart_session", Value: "valid", Path: "/", HttpOnly: true})
+	json.NewEncoder(w).Encode(user)
 }
 
 func handleTickets(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	
+	if r.Method == "DELETE" {
+		id := strings.TrimPrefix(r.URL.Path, "/api/tickets/")
+		if id == "" { http.Error(w, "ID required", 400); return }
+		db.Exec("DELETE FROM Taller WHERE id=?", id)
+		w.Write([]byte(`{"status":"ok"}`))
+		return
+	}
+
 	if r.Method == "GET" {
-		rows, err := db.Query(`SELECT T.id, COALESCE(D.code, '---'), D.device_type, U.area || ' - ' || COALESCE(U.room, ''), T.date_in, COALESCE(T.date_out, ''), COALESCE(T.details, ''), COALESCE(T.solution, ''), T.status FROM Taller T JOIN Dispositivo D ON T.id_device = D.id JOIN Ubicacion U ON D.id_ubication = U.id ORDER BY T.id DESC`)
-		if err != nil { http.Error(w, err.Error(), 500); return }
+		query := `
+		SELECT T.id, T.id_device, COALESCE(D.code, '---'), D.device_type,
+			   V.building, V.floor, V.area, V.room,
+			   T.date_in, COALESCE(T.date_out, ''), COALESCE(T.details_in, ''), COALESCE(T.details_out, ''), T.status,
+			   COALESCE(M.brand, ''), COALESCE(Mo.model, ''), COALESCE(D.serial, '')
+		FROM Taller T
+		JOIN Dispositivo D ON T.id_device = D.id
+		JOIN Vista_Ubicacion_Completa V ON D.id_location = V.id_ubicacion
+		LEFT JOIN Marca M ON D.id_brand = M.id
+		LEFT JOIN Modelo Mo ON D.id_model = Mo.id
+		ORDER BY T.id DESC`
+		
+		rows, _ := db.Query(query)
 		defer rows.Close()
+		
 		var tickets []Ticket
 		for rows.Next() {
 			var t Ticket
-			rows.Scan(&t.ID, &t.Code, &t.Type, &t.Location, &t.DateIn, &t.DateOut, &t.Issue, &t.Solution, &t.Status)
-			if t.Status == "pending" { t.Status = "Pendiente" } else if t.Status == "repaired" { t.Status = "Reparado" } else { t.Status = "No Reparado" }
+			var b, f, a, rm string
+			rows.Scan(&t.ID, &t.DeviceID, &t.Code, &t.Type, &b, &f, &a, &rm, &t.DateIn, &t.DateOut, &t.DetailsIn, &t.DetailsOut, &t.Status, &t.Brand, &t.Model, &t.Serial)
+			t.Location = map[string]interface{}{"building": b, "floor": f, "area": a, "room": rm}
 			tickets = append(tickets, t)
 		}
 		if tickets == nil { tickets = []Ticket{} }
 		json.NewEncoder(w).Encode(tickets)
+		return
+	}
 
-	} else if r.Method == "POST" {
-		var req struct { DeviceID int64 `json:"deviceId"`; Code, DateIn, Issue string }
+	if r.Method == "POST" {
+		var req struct { DeviceID int64 `json:"deviceId"`; DateIn, DetailsIn string }
 		json.NewDecoder(r.Body).Decode(&req)
 		
-		var devID int64
-		if req.DeviceID > 0 {
-			devID = req.DeviceID
-		} else {
-			err := db.QueryRow("SELECT id FROM Dispositivo WHERE code = ?", req.Code).Scan(&devID)
-			if err == sql.ErrNoRows { http.Error(w, "Código no encontrado", 400); return }
+		if req.DateIn > time.Now().Format("2006-01-02") { http.Error(w, "Fecha futura", 400); return }
+
+		_, err := db.Exec("INSERT INTO Taller (id_device, date_in, details_in) VALUES (?, ?, ?)", req.DeviceID, req.DateIn, req.DetailsIn)
+		if err != nil {
+			if strings.Contains(err.Error(), "UNIQUE") { http.Error(w, "Duplicado", 409); return }
+			http.Error(w, err.Error(), 500); return
 		}
-		
-		db.Exec("INSERT INTO Taller (id_device, status, date_in, details) VALUES (?, 'pending', ?, ?)", devID, req.DateIn, req.Issue)
 		w.Write([]byte(`{"status":"ok"}`))
 	}
 }
 
 func handleFinish(w http.ResponseWriter, r *http.Request) {
-	var req struct { ID int; Status, DateOut, Solution string }
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Bad JSON", 400); return
-	}
-
-	dbStatus := "pending"
-	if req.Status == "Reparado" { dbStatus = "repaired" } else if req.Status == "No Reparado" { dbStatus = "unrepaired" }
-
-	db.Exec("UPDATE Taller SET status=?, date_out=?, solution=? WHERE id=?", dbStatus, req.DateOut, req.Solution, req.ID)
-	w.Write([]byte(`{"status":"ok"}`))
-}
-
-func handleConfig(w http.ResponseWriter, r *http.Request) {
-	data := ConfigData{}
-	
-	// Función helper que evita pánicos cerrando rows correctamente
-	fill := func(q string, t *[]string) {
-		rows, err := db.Query(q)
-		if err != nil {
-			log.Println("Error en consulta config:", q, err)
-			return
-		}
-		defer rows.Close()
-		for rows.Next() {
-			var s string
-			rows.Scan(&s)
-			*t = append(*t, s)
-		}
-	}
-
-	fill("SELECT DISTINCT code FROM Dispositivo WHERE code IS NOT NULL AND code != ''", &data.Codes)
-	fill("SELECT DISTINCT device_type FROM Dispositivo", &data.Types)
-	fill("SELECT DISTINCT brand FROM Dispositivo WHERE brand IS NOT NULL AND brand != ''", &data.Brands)
-	fill("SELECT DISTINCT os FROM Dispositivo WHERE os IS NOT NULL AND os != ''", &data.OS)
-	fill("SELECT DISTINCT area || ' - ' || COALESCE(room, '') FROM Ubicacion", &data.Locations)
-	fill("SELECT DISTINCT building FROM Ubicacion ORDER BY building", &data.Buildings)
-	fill("SELECT DISTINCT floor FROM Ubicacion ORDER BY floor", &data.Floors)
-	fill("SELECT DISTINCT area FROM Ubicacion ORDER BY area", &data.Areas)
-	json.NewEncoder(w).Encode(data)
-}
-
-func handleLocations(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	var req struct { ID int; Status, DateOut, DetailsOut string }
+	json.NewDecoder(r.Body).Decode(&req)
+	
+	var dateIn string
+	db.QueryRow("SELECT date_in FROM Taller WHERE id=?", req.ID).Scan(&dateIn)
+	if req.DateOut < dateIn { http.Error(w, "Fecha salida < entrada", 400); return }
 
-	if r.Method == "GET" {
-		rows, err := db.Query("SELECT id, building, floor, area, COALESCE(room, '') FROM Ubicacion ORDER BY building, floor, area")
-		if err != nil { http.Error(w, err.Error(), 500); return }
-		defer rows.Close()
-		
-		var locs []LocationFull
-		for rows.Next() {
-			var l LocationFull
-			rows.Scan(&l.ID, &l.Building, &l.Floor, &l.Area, &l.Room)
-			l.FullText = fmt.Sprintf("%s - %s - %s", l.Building, l.Floor, l.Area)
-			if l.Room != "" { l.FullText += " - " + l.Room }
-			locs = append(locs, l)
-		}
-		if locs == nil { locs = []LocationFull{} }
-		json.NewEncoder(w).Encode(locs)
-		return
-	}
-
-	if r.Method == "POST" {
-		var req struct { Building, Floor, Area, Room string }
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil { http.Error(w, "JSON inválido", 400); return }
-		
-		if req.Building == "" || req.Floor == "" || req.Area == "" {
-			http.Error(w, "Edificio, Piso y Área son obligatorios", 400); return
-		}
-
-		query := "INSERT OR IGNORE INTO Ubicacion (building, floor, area, room) VALUES (?, ?, ?, ?)"
-		var roomVal interface{} = req.Room
-		if req.Room == "" { roomVal = nil }
-
-		res, err := db.Exec(query, req.Building, req.Floor, req.Area, roomVal)
-		if err != nil { http.Error(w, err.Error(), 500); return }
-		
-		affected, _ := res.RowsAffected()
-		if affected == 0 {
-			w.Write([]byte(`{"status":"exists", "message":"La ubicación ya existe"}`))
-		} else {
-			w.Write([]byte(`{"status":"ok", "message":"Ubicación creada"}`))
-		}
-	}
+	db.Exec("UPDATE Taller SET status=?, date_out=?, details_out=? WHERE id=?", req.Status, req.DateOut, req.DetailsOut, req.ID)
+	w.Write([]byte(`{"status":"ok"}`))
 }
 
 func handleDevices(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	if r.Method == "POST" {
-		var req struct {
-			Code       string `json:"code"`
-			Type       string `json:"type"`
-			Brand      string `json:"brand"`
-			Model      string `json:"model"`
-			Serial     string `json:"serial"`
-			OS         string `json:"os"`
-			LocationID int64  `json:"locationId"`
-		}
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil { http.Error(w, "JSON inválido", 400); return }
-
-		if req.Type == "" { http.Error(w, "El tipo de dispositivo es obligatorio", 400); return }
-		if req.LocationID == 0 { http.Error(w, "La ubicación es obligatoria", 400); return }
-
-		strOrNull := func(s string) interface{} {
-			if s == "" { return nil }
-			return s
-		}
-
-		_, err := db.Exec(`INSERT INTO Dispositivo (code, device_type, brand, model, serial, os, id_ubication) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-			strOrNull(req.Code), req.Type, strOrNull(req.Brand), strOrNull(req.Model), strOrNull(req.Serial), strOrNull(req.OS), req.LocationID)
+	if r.Method == "GET" {
+		page, _ := strconv.Atoi(r.URL.Query().Get("page")); if page < 1 { page = 1 }
+		limit, _ := strconv.Atoi(r.URL.Query().Get("limit")); if limit < 1 { limit = 10 }
 		
-		if err != nil {
-			log.Println("Error creating device:", err)
-			http.Error(w, "Error al crear dispositivo: "+err.Error(), 500)
-			return
+		baseQ := ` FROM Dispositivo D
+			JOIN Vista_Ubicacion_Completa V ON D.id_location = V.id_ubicacion
+			LEFT JOIN Marca Ma ON D.id_brand = Ma.id
+			LEFT JOIN Modelo Mo ON D.id_model = Mo.id
+			LEFT JOIN Sistema_Operativo OS ON D.id_os = OS.id
+			LEFT JOIN RAM R ON D.id_ram = R.id
+			LEFT JOIN Procesador P ON D.id_processor = P.id
+			LEFT JOIN Almacenamiento S ON D.id_storage = S.id
+			WHERE 1=1`
+		
+		var args []interface{}
+		if q := r.URL.Query().Get("q"); q != "" {
+			baseQ += " AND (D.code LIKE ? OR Ma.brand LIKE ? OR Mo.model LIKE ? OR D.serial LIKE ?)"
+			args = append(args, "%"+q+"%", "%"+q+"%", "%"+q+"%", "%"+q+"%")
 		}
-		w.Write([]byte(`{"status":"ok", "message":"Dispositivo creado"}`))
+		
+		if v := r.URL.Query().Get("type"); v != "" { baseQ += " AND D.device_type=?"; args = append(args, v) }
+
+		var total int
+		db.QueryRow("SELECT COUNT(*)"+baseQ, args...).Scan(&total)
+
+		finalQ := `SELECT D.id, COALESCE(D.code, '---'), D.device_type, 
+			COALESCE(Ma.brand, '---'), COALESCE(Mo.model, '---'),
+			COALESCE(D.serial, '---'), COALESCE(OS.os, '---'), 
+			COALESCE(R.ram, ''), COALESCE(P.processor, ''), 
+			COALESCE(D.arch, ''), COALESCE(S.storage, ''), COALESCE(D.details, ''),
+			V.id_ubicacion, V.building, V.floor, V.area, V.room ` + baseQ + " ORDER BY D.id DESC LIMIT ? OFFSET ?"
+		
+		args = append(args, limit, (page-1)*limit)
+		rows, err := db.Query(finalQ, args...)
+		if err != nil { http.Error(w, err.Error(), 500); return }
+		defer rows.Close()
+
+		var list []DeviceItem
+		for rows.Next() {
+			var d DeviceItem
+			rows.Scan(&d.ID, &d.Code, &d.Type, &d.Brand, &d.Model, &d.Serial, &d.OS, &d.Ram, &d.Processor, &d.Architecture, &d.Storage, &d.Details,
+				&d.LocationID, &d.Building, &d.Floor, &d.Area, &d.Room)
+			d.Location = fmt.Sprintf("%s - %s - %s %s", d.Building, d.Floor, d.Area, d.Room)
+			list = append(list, d)
+		}
+		if list == nil { list = []DeviceItem{} }
+		json.NewEncoder(w).Encode(DevicesResponse{Data: list, Total: total, Page: page, Limit: limit})
 		return
 	}
 
-	q := r.URL.Query().Get("q")
-	fType := r.URL.Query().Get("type")
-	fBrand := r.URL.Query().Get("brand")
-	fOS := r.URL.Query().Get("os")
-	fBuild := r.URL.Query().Get("building")
-	fFloor := r.URL.Query().Get("floor")
-	fArea := r.URL.Query().Get("area")
+	if r.Method == "POST" {
+		var req struct {
+			Code, Type, Serial, Architecture, Details string
+			LocationID, BrandID, ModelID, OSID, RamID, ProcID, StorageID *int64
+		}
+		// Se usa un struct auxiliar para mapear los IDs JSON a punteros (NULLs)
+		var jsonReq struct {
+			Code, Type, Serial, Architecture, Details string
+			LocationID int64 `json:"locationId"`
+			BrandID    int64 `json:"id_brand"`
+			ModelID    int64 `json:"id_model"`
+			OSID       int64 `json:"id_os"`
+			RamID      int64 `json:"id_ram"`
+			ProcID     int64 `json:"id_processor"`
+			StorageID  int64 `json:"id_storage"`
+		}
+		json.NewDecoder(r.Body).Decode(&jsonReq)
 
-	page, _ := strconv.Atoi(r.URL.Query().Get("page")); if page < 1 { page = 1 }
-	limit, _ := strconv.Atoi(r.URL.Query().Get("limit")); if limit < 1 { limit = 10 }
-	offset := (page - 1) * limit
+		// Mapeo simple
+		sN := func(s string) interface{} { if s == "" { return nil }; return s }
+		iN := func(i int64) interface{} { if i == 0 { return nil }; return i }
 
-	baseQuery := " FROM Dispositivo D JOIN Ubicacion U ON D.id_ubication = U.id WHERE 1=1"
-	var args []interface{}
+		_, err := db.Exec(`INSERT INTO Dispositivo (
+			code, device_type, id_location, id_os, id_ram, arch, id_storage, id_processor, id_brand, id_model, serial, details
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
+		sN(jsonReq.Code), jsonReq.Type, jsonReq.LocationID, iN(jsonReq.OSID), iN(jsonReq.RamID), sN(jsonReq.Architecture), iN(jsonReq.StorageID),
+		iN(jsonReq.ProcID), iN(jsonReq.BrandID), iN(jsonReq.ModelID), sN(jsonReq.Serial), sN(jsonReq.Details))
 
-	if q != "" {
-		baseQuery += " AND (D.code LIKE ? OR D.device_type LIKE ? OR D.brand LIKE ? OR D.model LIKE ? OR D.serial LIKE ? OR D.os LIKE ? OR U.area LIKE ?)"
-		likeQ := "%" + q + "%"
-		args = append(args, likeQ, likeQ, likeQ, likeQ, likeQ, likeQ, likeQ)
+		if err != nil { http.Error(w, err.Error(), 500); return }
+		w.Write([]byte(`{"status":"ok"}`))
 	}
-	if fType != "" { baseQuery += " AND D.device_type = ?"; args = append(args, fType) }
-	if fBrand != "" { baseQuery += " AND D.brand = ?"; args = append(args, fBrand) }
-	if fOS != "" { baseQuery += " AND D.os = ?"; args = append(args, fOS) }
-	if fBuild != "" { baseQuery += " AND U.building = ?"; args = append(args, fBuild) }
-	if fFloor != "" { baseQuery += " AND U.floor = ?"; args = append(args, fFloor) }
-	if fArea != "" { baseQuery += " AND U.area = ?"; args = append(args, fArea) }
-
-	var total int
-	err := db.QueryRow("SELECT COUNT(*) "+baseQuery, args...).Scan(&total)
-	if err != nil {
-		log.Println("Error counting devices:", err)
-		http.Error(w, err.Error(), 500); return
+	
+	if r.Method == "DELETE" {
+		id := strings.TrimPrefix(r.URL.Path, "/api/devices/")
+		if id == "" { http.Error(w, "ID missing", 400); return }
+		
+		var count int
+		db.QueryRow("SELECT COUNT(*) FROM Taller WHERE id_device = ?", id).Scan(&count)
+		if count > 0 { http.Error(w, "Tiene tickets asociados", 409); return }
+		
+		db.Exec("DELETE FROM Dispositivo WHERE id=?", id)
+		w.Write([]byte(`{"status":"ok"}`))
 	}
+}
 
-	args = append(args, limit, offset)
-	rows, err := db.Query("SELECT D.id, COALESCE(D.code, '---'), D.device_type, COALESCE(D.brand, '---'), COALESCE(D.model, '---'), COALESCE(D.serial, '---'), COALESCE(D.os, '---'), U.area || ' - ' || COALESCE(U.room, '') "+baseQuery+" ORDER BY D.id DESC LIMIT ? OFFSET ?", args...)
-	if err != nil { http.Error(w, err.Error(), 500); return }
+func handleLocations(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	rows, _ := db.Query("SELECT * FROM Vista_Ubicacion_Completa ORDER BY building, floor, area")
 	defer rows.Close()
-
-	var devices []DeviceItem
+	
+	var res []map[string]interface{}
 	for rows.Next() {
-		var d DeviceItem
-		rows.Scan(&d.ID, &d.Code, &d.Type, &d.Brand, &d.Model, &d.Serial, &d.OS, &d.Location)
-		devices = append(devices, d)
+		var id int64
+		var b, f, a, rm string
+		var d sql.NullString
+		rows.Scan(&id, &b, &f, &a, &rm, &d)
+		res = append(res, map[string]interface{}{
+			"id": id, "building": b, "floor": f, "area": a, "room": rm, "details": d.String,
+		})
 	}
-	if devices == nil { devices = []DeviceItem{} }
+	json.NewEncoder(w).Encode(res)
+}
 
-	json.NewEncoder(w).Encode(DevicesResponse{Data: devices, Total: total, Page: page, Limit: limit})
+func handleLocationCreate(w http.ResponseWriter, r *http.Request) {
+	var req struct { Building, Floor, Area, Room string }
+	json.NewDecoder(r.Body).Decode(&req)
+
+	tx, _ := db.Begin()
+	defer tx.Rollback()
+
+	// Helper para buscar/crear
+	getId := func(table, col string, val interface{}, parentCol string, parentId interface{}) int64 {
+		var id int64
+		qSel := fmt.Sprintf("SELECT id FROM %s WHERE %s = ?", table, col)
+		qIns := fmt.Sprintf("INSERT OR IGNORE INTO %s (%s) VALUES (?)", table, col)
+		args := []interface{}{val}
+		
+		if parentCol != "" {
+			qSel += fmt.Sprintf(" AND %s = ?", parentCol)
+			qIns = fmt.Sprintf("INSERT OR IGNORE INTO %s (%s, %s) VALUES (?, ?)", table, col, parentCol)
+			args = append(args, parentId)
+		}
+		
+		tx.Exec(qIns, args...)
+		tx.QueryRow(qSel, args...).Scan(&id)
+		return id
+	}
+
+	bID := getId("Edificio", "building", req.Building, "", nil)
+	fID := getId("Piso", "floor", req.Floor, "id_building", bID)
+	aID := getId("Area", "area", req.Area, "id_floor", fID)
+	
+	var rID *int64
+	if req.Room != "" {
+		rid := getId("Habitacion", "room", req.Room, "id_area", aID)
+		rID = &rid
+	}
+
+	_, err := tx.Exec("INSERT INTO Ubicacion (id_area, id_room) VALUES (?, ?)", aID, rID)
+	if err != nil { http.Error(w, err.Error(), 409); return }
+	
+	tx.Commit()
+	w.Write([]byte(`{"status":"ok"}`))
+}
+
+func handleConfig(w http.ResponseWriter, r *http.Request) {
+	d := ConfigData{}
+	fill := func(tbl, col string, dst *[]string) {
+		rows, _ := db.Query(fmt.Sprintf("SELECT %s FROM %s", col, tbl))
+		defer rows.Close()
+		for rows.Next() { var s string; rows.Scan(&s); *dst = append(*dst, s) }
+	}
+	fill("Sistema_Operativo", "os", &d.OS)
+	fill("Marca", "brand", &d.Brands)
+	fill("RAM", "ram", &d.Rams)
+	fill("Procesador", "processor", &d.Processors)
+	fill("Almacenamiento", "storage", &d.Storages)
+	fill("Edificio", "building", &d.Buildings)
+	d.Types = []string{"PC", "Laptop", "Impresora", "Monitor"} 
+	d.Architectures = []string{"32 bits", "64 bits"}
+	json.NewEncoder(w).Encode(d)
 }
 
 func handlePeriods(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	if r.Method == "GET" {
-		rows, err := db.Query("SELECT code, date_ini, date_end FROM Periodo ORDER BY date_ini DESC")
-		if err != nil { http.Error(w, err.Error(), 500); return }
-		defer rows.Close()
-		var periods []Period
-		for rows.Next() { var p Period; rows.Scan(&p.Code, &p.DateIni, &p.DateEnd); periods = append(periods, p) }
-		json.NewEncoder(w).Encode(periods)
-	} else if r.Method == "PUT" {
+	if r.Method == "PUT" {
 		var p Period; json.NewDecoder(r.Body).Decode(&p)
-		
-		active := getActivePeriodCode()
-		if p.Code != active { http.Error(w, "Solo se pueden editar las fechas del período activo", 400); return }
-
-		parts := strings.Split(p.Code, "-"); sem, yearStr := parts[0], parts[1]; year, _ := strconv.Atoi(yearStr)
-		tIni, _ := time.Parse("2006-01-02", p.DateIni); tEnd, _ := time.Parse("2006-01-02", p.DateEnd)
-
-		valid := false
-		if sem == "I" { 
-			valid = tIni.Month() == time.March && tIni.Year() == year && tEnd.Month() == time.July && tEnd.Year() == year 
-		} else { 
-			valid = tIni.Month() == time.October && tIni.Year() == year && tEnd.Month() == time.February && tEnd.Year() == year+1 
-		}
-
-		if !valid { http.Error(w, "Fechas fuera de rango permitido", 400); return }
-
 		db.Exec("UPDATE Periodo SET date_ini=?, date_end=? WHERE code=?", p.DateIni, p.DateEnd, p.Code)
 		w.Write([]byte(`{"status":"ok"}`))
 	}
 }
 
-func getActivePeriodCode() string {
-	today := time.Now().Format("2006-01-02")
-	var code string
-	db.QueryRow("SELECT code FROM Periodo WHERE date_ini <= ? ORDER BY date_ini DESC LIMIT 1", today).Scan(&code)
-	return code
-}
-
 func handleActivePeriod(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	today := time.Now().Format("2006-01-02")
 	var p Period
-	// Lógica "Sticky": Busca el último periodo iniciado (start <= today), aunque ya haya terminado (end < today).
-	err := db.QueryRow("SELECT code, date_ini, date_end FROM Periodo WHERE date_ini <= ? ORDER BY date_ini DESC LIMIT 1", today).Scan(&p.Code, &p.DateIni, &p.DateEnd)
-	if err != nil { json.NewEncoder(w).Encode(nil); return }
+	db.QueryRow("SELECT code, date_ini, date_end FROM Periodo WHERE is_current=1").Scan(&p.Code, &p.DateIni, &p.DateEnd)
 	p.IsCurrent = true
 	json.NewEncoder(w).Encode(p)
+}
+
+func ensurePeriods() {
+	y := time.Now().Year()
+	db.Exec("INSERT OR IGNORE INTO Periodo (code, date_ini, date_end, is_current) VALUES (?, ?, ?, 1)", fmt.Sprintf("I-%d", y), fmt.Sprintf("%d-03-10", y), fmt.Sprintf("%d-07-05", y))
+	db.Exec("INSERT OR IGNORE INTO Periodo (code, date_ini, date_end) VALUES (?, ?, ?)", fmt.Sprintf("II-%d", y), fmt.Sprintf("%d-10-10", y), fmt.Sprintf("%d-02-10", y+1))
+	
+	// Datos de prueba - Edificios
+	db.Exec("INSERT OR IGNORE INTO Edificio (building) VALUES (?)", "Edificio 01")
+	db.Exec("INSERT OR IGNORE INTO Edificio (building) VALUES (?)", "Edificio 02")
+	
+	// Pisos
+	db.Exec("INSERT OR IGNORE INTO Piso (id_building, floor) VALUES ((SELECT id FROM Edificio WHERE building='Edificio 01'), ?)", "Piso 01")
+	db.Exec("INSERT OR IGNORE INTO Piso (id_building, floor) VALUES ((SELECT id FROM Edificio WHERE building='Edificio 02'), ?)", "Piso 01")
+	
+	// Áreas
+	db.Exec("INSERT OR IGNORE INTO Area (id_floor, area) VALUES ((SELECT id FROM Piso WHERE floor='Piso 01' AND id_building=(SELECT id FROM Edificio WHERE building='Edificio 01')), ?)", "Área TIC")
+	db.Exec("INSERT OR IGNORE INTO Area (id_floor, area) VALUES ((SELECT id FROM Piso WHERE floor='Piso 01' AND id_building=(SELECT id FROM Edificio WHERE building='Edificio 01')), ?)", "Coordinación")
+	db.Exec("INSERT OR IGNORE INTO Area (id_floor, area) VALUES ((SELECT id FROM Piso WHERE floor='Piso 01' AND id_building=(SELECT id FROM Edificio WHERE building='Edificio 02')), ?)", "Control Estudios")
+	db.Exec("INSERT OR IGNORE INTO Area (id_floor, area) VALUES ((SELECT id FROM Piso WHERE floor='Piso 01' AND id_building=(SELECT id FROM Edificio WHERE building='Edificio 02')), ?)", "Archivo")
+	
+	// Ubicaciones
+	db.Exec("INSERT OR IGNORE INTO Ubicacion (id_area) VALUES ((SELECT id FROM Area WHERE area='Área TIC'))")
+	db.Exec("INSERT OR IGNORE INTO Ubicacion (id_area) VALUES ((SELECT id FROM Area WHERE area='Coordinación'))")
+	db.Exec("INSERT OR IGNORE INTO Ubicacion (id_area) VALUES ((SELECT id FROM Area WHERE area='Control Estudios'))")
+	db.Exec("INSERT OR IGNORE INTO Ubicacion (id_area) VALUES ((SELECT id FROM Area WHERE area='Archivo'))")
+	
+	// Marcas de prueba
+	db.Exec("INSERT OR IGNORE INTO Marca (brand) VALUES (?)", "Dell")
+	db.Exec("INSERT OR IGNORE INTO Marca (brand) VALUES (?)", "HP")
+	db.Exec("INSERT OR IGNORE INTO Marca (brand) VALUES (?)", "Huawei")
+	db.Exec("INSERT OR IGNORE INTO Marca (brand) VALUES (?)", "TP-Link")
+	
+	// SO de prueba
+	db.Exec("INSERT OR IGNORE INTO Sistema_Operativo (os) VALUES (?)", "Windows 7")
+	db.Exec("INSERT OR IGNORE INTO Sistema_Operativo (os) VALUES (?)", "Windows 10")
+	db.Exec("INSERT OR IGNORE INTO Sistema_Operativo (os) VALUES (?)", "Linux")
 }
 
 func hashPassword(p string) string {
 	h := sha256.Sum256([]byte(p))
 	return hex.EncodeToString(h[:])
+}
 }
