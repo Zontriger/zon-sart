@@ -57,15 +57,20 @@ type UserResponse struct {
 }
 
 type Ticket struct {
-	ID        int    `json:"id"`
-	Code      string `json:"code"`
-	Type      string `json:"type"`
-	Location  string `json:"location"`
-	DateIn    string `json:"dateIn"`
-	DateOut   string `json:"dateOut"`
-	DetailsIn string `json:"details_in"`
-	DetailsOut string `json:"details_out"`
-	Status    string `json:"status"`
+	ID         int    `json:"id"`
+	DeviceID   int64  `json:"deviceId"` // Solicitud Frontend: ID Relacional
+	Code       string `json:"code"`
+	Type       string `json:"type"`
+	Location   string `json:"location"`
+	DateIn     string `json:"dateIn"`
+	DateOut    string `json:"dateOut"`
+	DetailsIn  string `json:"detailsIn"`  // Solicitud Frontend: camelCase
+	DetailsOut string `json:"detailsOut"` // Solicitud Frontend: camelCase
+	Status     string `json:"status"`
+	// Campos extendidos para UI
+	Brand  string `json:"brand"`
+	Model  string `json:"model"`
+	Serial string `json:"serial"`
 	// Campos para compatibilidad con frontend anterior
 	Issue    string `json:"issue"`
 	Solution string `json:"solution"`
@@ -80,9 +85,18 @@ type DeviceItem struct {
 	Serial   string `json:"serial"`
 	OS       string `json:"os"`
 	Location string `json:"location"`
+	// Campos técnicos
+	Ram          string `json:"ram,omitempty"`
+	Processor    string `json:"processor,omitempty"`
+	Architecture string `json:"architecture,omitempty"`
+	Storage      string `json:"storage,omitempty"`
+	Details      string `json:"details,omitempty"`
+	// Ubicación desagregada
 	Building string `json:"building,omitempty"`
 	Floor    string `json:"floor,omitempty"`
 	Area     string `json:"area,omitempty"`
+	Room     string `json:"room,omitempty"`
+	LocID    int64  `json:"locationId,omitempty"`
 }
 
 type DevicesResponse struct {
@@ -129,7 +143,7 @@ var db *sql.DB
 func main() {
 	// Configuración de Logs
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	log.Println("=== INICIANDO SISTEMA SART (VERSIÓN FINAL) ===")
+	log.Println("=== INICIANDO SISTEMA SART (VERSIÓN PATCH-6) ===")
 
 	// Inicializar Base de Datos
 	initDB()
@@ -137,10 +151,16 @@ func main() {
 	// --- DEFINICIÓN DE RUTAS API ---
 	http.HandleFunc("/api/login", handleLogin)
 	http.HandleFunc("/api/users", handleUsers)
-	http.HandleFunc("/api/tickets", handleTickets)
+	
+	http.HandleFunc("/api/tickets/", handleTickets)
+	http.HandleFunc("/api/tickets", handleTickets) 
+
 	http.HandleFunc("/api/tickets/finish", handleFinish)
 	http.HandleFunc("/api/config", handleConfig)
-	http.HandleFunc("/api/devices", handleDevices)
+	
+	http.HandleFunc("/api/devices/", handleDevices) 
+	http.HandleFunc("/api/devices", handleDevices) 
+
 	http.HandleFunc("/api/devices/floors", handleDeviceFloors)
 	http.HandleFunc("/api/devices/areas", handleDeviceAreas)
 	http.HandleFunc("/api/locations", handleLocations)
@@ -149,8 +169,9 @@ func main() {
 
 	// Servidor de Archivos Estáticos
 	staticFS, _ := fs.Sub(contentWeb, "static")
+	// FIX: Se elimina el handler específico para "/public/" que buscaba en disco.
+	// Ahora el handler raíz servirá los archivos embebidos en static/public correctamente.
 	http.Handle("/", http.FileServer(http.FS(staticFS)))
-	http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
 
 	// Iniciar Servidor
 	port := ":8080"
@@ -186,6 +207,11 @@ func initDB() {
 	}
 
 	createSchema()
+	
+	_, err = db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_ticket_unique ON Taller(id_device, status, date_in, details_in)")
+	if err != nil {
+		log.Println("Advertencia creando índice único (puede que ya existan duplicados):", err)
+	}
 
 	var userCount int
 	err = db.QueryRow("SELECT COUNT(*) FROM Usuario").Scan(&userCount)
@@ -257,6 +283,7 @@ func createSchema() {
 		date_out TEXT,
 		details_in TEXT,
 		details_out TEXT,
+		UNIQUE(id_device, status, date_in, details_in),
 		FOREIGN KEY (id_device) REFERENCES Dispositivo(id) ON DELETE NO ACTION ON UPDATE CASCADE
 	);`
 
@@ -344,7 +371,7 @@ func importDefaultData() {
 
 func ensurePeriods() {
 	currentYear := time.Now().Year()
-	years := []int{currentYear, currentYear + 1}
+	years := []int{currentYear - 1, currentYear, currentYear + 1}
 
 	for _, y := range years {
 		startI := getNthWeekday(y, time.March, time.Monday, 2)
@@ -399,7 +426,6 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 	
 	if user.Role == "viewer" { user.Role = "user" }
 	
-	// Session cookie - válida 30 días
 	sessionToken := hashPassword(fmt.Sprintf("%d-%s-%d", user.ID, creds.Username, time.Now().Unix()))
 	cookie := &http.Cookie{
 		Name:     "sart_session",
@@ -470,15 +496,64 @@ func handleUsers(w http.ResponseWriter, r *http.Request) {
 
 func handleTickets(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	
+	// --- LÓGICA DE ELIMINACIÓN (DELETE) ---
+	if r.Method == "DELETE" {
+		parts := strings.Split(r.URL.Path, "/")
+		if len(parts) < 4 {
+			http.Error(w, "ID requerido en la ruta", 400); return
+		}
+		ticketID := parts[3]
+		if ticketID == "" { http.Error(w, "ID vacío", 400); return }
+		
+		log.Printf("[DIAG] Eliminando ticket ID: %s", ticketID)
+		
+		result, err := db.Exec("DELETE FROM Taller WHERE id = ?", ticketID)
+		if err != nil {
+			log.Printf("[ERROR] Error eliminando ticket: %v", err)
+			http.Error(w, "Error eliminando ticket", 500)
+			return
+		}
+		
+		affected, _ := result.RowsAffected()
+		if affected == 0 {
+			http.Error(w, "Ticket no encontrado", 404)
+			return
+		}
+		
+		log.Printf("[DIAG] Ticket eliminado exitosamente")
+		w.Write([]byte(`{"status":"ok"}`))
+		return
+	}
+
 	if r.Method == "GET" {
-		rows, err := db.Query(`SELECT T.id, COALESCE(D.code, '---'), D.device_type, U.area || ' - ' || COALESCE(U.room, ''), T.date_in, COALESCE(T.date_out, ''), COALESCE(T.details_in, ''), COALESCE(T.details_out, ''), T.status FROM Taller T JOIN Dispositivo D ON T.id_device = D.id JOIN Ubicacion U ON D.id_ubication = U.id ORDER BY T.id DESC`)
+		query := `
+		SELECT T.id, 
+		       T.id_device, -- FIX: Se agrega deviceId requerido por frontend
+		       COALESCE(D.code, '---'), 
+			   D.device_type, 
+			   U.area || ' - ' || COALESCE(U.room, ''), 
+			   T.date_in, 
+			   COALESCE(T.date_out, ''), 
+			   COALESCE(T.details_in, ''), 
+			   COALESCE(T.details_out, ''), 
+			   T.status,
+			   COALESCE(D.brand, ''), 
+			   COALESCE(D.model, ''), 
+			   COALESCE(D.serial, '')
+		FROM Taller T 
+		JOIN Dispositivo D ON T.id_device = D.id 
+		JOIN Ubicacion U ON D.id_ubication = U.id 
+		ORDER BY T.id DESC`
+		
+		rows, err := db.Query(query)
 		if err != nil { http.Error(w, err.Error(), 500); return }
 		defer rows.Close()
 		var tickets []Ticket
 			for rows.Next() {
 				var t Ticket
-				rows.Scan(&t.ID, &t.Code, &t.Type, &t.Location, &t.DateIn, &t.DateOut, &t.DetailsIn, &t.DetailsOut, &t.Status)
-				// Compatibilidad con frontend anterior
+				rows.Scan(&t.ID, &t.DeviceID, &t.Code, &t.Type, &t.Location, &t.DateIn, &t.DateOut, &t.DetailsIn, &t.DetailsOut, &t.Status, &t.Brand, &t.Model, &t.Serial)
+				// Compatibilidad: llenar issue/solution
 				t.Issue = t.DetailsIn
 				t.Solution = t.DetailsOut
 				if t.Status == "pending" { t.Status = "Pendiente" } else if t.Status == "repaired" { t.Status = "Reparado" } else { t.Status = "No Reparado" }
@@ -487,16 +562,56 @@ func handleTickets(w http.ResponseWriter, r *http.Request) {
 		if tickets == nil { tickets = []Ticket{} }
 		json.NewEncoder(w).Encode(tickets)
 
+	} else if r.Method == "PUT" {
+		// FIX: Nuevo endpoint para editar ticket
+		parts := strings.Split(r.URL.Path, "/")
+		var ticketID int
+		if len(parts) >= 4 { ticketID, _ = strconv.Atoi(parts[3]) }
+		
+		var req struct {
+			ID        int    `json:"id"`
+			DeviceID  int64  `json:"deviceId"`
+			DateIn    string `json:"dateIn"`
+			DetailsIn string `json:"detailsIn"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "JSON inválido", 400); return
+		}
+		
+		// ID de URL tiene prioridad
+		if ticketID > 0 { req.ID = ticketID }
+		
+		if req.ID == 0 { http.Error(w, "ID de ticket requerido", 400); return }
+		
+		log.Printf("[DIAG] Editando ticket ID=%d", req.ID)
+		
+		query := "UPDATE Taller SET date_in=?, details_in=?"
+		args := []interface{}{req.DateIn, req.DetailsIn}
+		
+		if req.DeviceID > 0 {
+			query += ", id_device=?"
+			args = append(args, req.DeviceID)
+		}
+		query += " WHERE id=?"
+		args = append(args, req.ID)
+		
+		_, err := db.Exec(query, args...)
+		if err != nil {
+			log.Printf("[ERROR] Error editando ticket: %v", err)
+			http.Error(w, "Error al editar ticket", 500)
+			return
+		}
+		w.Write([]byte(`{"status":"ok"}`))
+
 	} else if r.Method == "POST" {
 		var req struct { DeviceID int64 `json:"deviceId"`; Code, DateIn, DetailsIn, Issue string }
 		json.NewDecoder(r.Body).Decode(&req)
 		
-		// Compatibilidad: si viene "issue", usarlo como "details_in"
+		// Compatibilidad: si viene "issue", usarlo como "detailsIn"
 		if req.Issue != "" && req.DetailsIn == "" {
 			req.DetailsIn = req.Issue
 		}
 		
-		// Validar que fecha ingreso no sea futura
 		today := time.Now().Format("2006-01-02")
 		if req.DateIn > today {
 			log.Printf("[DIAG] Intento de ingreso con fecha futura. Entrada: %s, Hoy: %s", req.DateIn, today)
@@ -513,32 +628,19 @@ func handleTickets(w http.ResponseWriter, r *http.Request) {
 		}
 		
 		log.Printf("[DIAG] Creando ticket para dispositivo %d en fecha %s", devID, req.DateIn)
-		db.Exec("INSERT INTO Taller (id_device, status, date_in, details_in) VALUES (?, 'pending', ?, ?)", devID, req.DateIn, req.DetailsIn)
-		w.Write([]byte(`{"status":"ok"}`))
-	} else if r.Method == "DELETE" {
-		// Extraer ID del path /api/tickets/{id}
-		parts := strings.Split(r.URL.Path, "/")
-		if len(parts) < 4 {
-			http.Error(w, "ID requerido", 400)
-			return
-		}
-		ticketID := parts[3]
 		
-		log.Printf("[DIAG] Eliminando ticket ID: %s", ticketID)
-		result, err := db.Exec("DELETE FROM Taller WHERE id = ?", ticketID)
+		_, err := db.Exec("INSERT INTO Taller (id_device, status, date_in, details_in) VALUES (?, 'pending', ?, ?)", devID, req.DateIn, req.DetailsIn)
 		if err != nil {
-			log.Printf("[ERROR] Error eliminando ticket: %v", err)
-			http.Error(w, "Error eliminando ticket", 500)
+			if strings.Contains(err.Error(), "constraint failed") || strings.Contains(err.Error(), "UNIQUE constraint") {
+				log.Printf("[WARN] Intento de crear ticket duplicado para disp %d", devID)
+				http.Error(w, "Ticket duplicado: Ya existe un ticket con los mismos datos", 409) 
+				return
+			}
+			log.Printf("[ERROR] Error creando ticket: %v", err)
+			http.Error(w, "Error creando ticket", 500)
 			return
 		}
 		
-		affected, _ := result.RowsAffected()
-		if affected == 0 {
-			http.Error(w, "Ticket no encontrado", 404)
-			return
-		}
-		
-		log.Printf("[DIAG] Ticket eliminado exitosamente")
 		w.Write([]byte(`{"status":"ok"}`))
 	}
 }
@@ -550,7 +652,6 @@ func handleFinish(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad JSON", 400); return
 	}
 
-	// Compatibilidad: si viene "solution", usarlo como "details_out"
 	if req.Solution != "" && req.DetailsOut == "" {
 		req.DetailsOut = req.Solution
 	}
@@ -578,7 +679,6 @@ func handleConfig(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[DIAG] Cargando configuración...")
 	data := ConfigData{}
 	
-	// Función helper que evita pánicos cerrando rows correctamente
 	fill := func(q string, t *[]string) {
 		rows, err := db.Query(q)
 		if err != nil {
@@ -603,7 +703,7 @@ func handleConfig(w http.ResponseWriter, r *http.Request) {
 	fill("SELECT DISTINCT area FROM Ubicacion ORDER BY area", &data.Areas)
 	fill("SELECT DISTINCT ram FROM Dispositivo WHERE ram IS NOT NULL AND ram != ''", &data.Rams)
 	fill("SELECT DISTINCT processor FROM Dispositivo WHERE processor IS NOT NULL AND processor != ''", &data.Processors)
-	fill("SELECT DISTINCT architecture FROM Dispositivo WHERE architecture IS NOT NULL AND architecture != ''", &data.Architectures)
+	fill("SELECT DISTINCT arch FROM Dispositivo WHERE arch IS NOT NULL AND arch != ''", &data.Architectures)
 	fill("SELECT DISTINCT storage FROM Dispositivo WHERE storage IS NOT NULL AND storage != ''", &data.Storages)
 	
 	log.Printf("[DIAG] Configuración cargada: %d tipos, %d marcas, %d edificios, %d RAMs, %d procesadores", len(data.Types), len(data.Brands), len(data.Buildings), len(data.Rams), len(data.Processors))
@@ -660,6 +760,92 @@ func handleLocations(w http.ResponseWriter, r *http.Request) {
 func handleDevices(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
+	if r.Method == "DELETE" {
+		parts := strings.Split(r.URL.Path, "/")
+		if len(parts) < 4 {
+			http.Error(w, "ID requerido en la ruta", 400); return
+		}
+		deviceID := parts[3]
+		if deviceID == "" { http.Error(w, "ID vacío", 400); return }
+
+		log.Printf("[DIAG] Solicitud de eliminación para dispositivo ID: %s", deviceID)
+		
+		var ticketCount int
+		err := db.QueryRow("SELECT COUNT(*) FROM Taller WHERE id_device = ?", deviceID).Scan(&ticketCount)
+		if err == nil && ticketCount > 0 {
+			http.Error(w, "No se puede eliminar: El dispositivo tiene tickets asociados", 409)
+			return
+		}
+
+		res, err := db.Exec("DELETE FROM Dispositivo WHERE id = ?", deviceID)
+		if err != nil {
+			http.Error(w, "Error al eliminar: "+err.Error(), 500); return
+		}
+		
+		aff, _ := res.RowsAffected()
+		if aff == 0 {
+			http.Error(w, "Dispositivo no encontrado", 404); return
+		}
+		w.Write([]byte(`{"status":"ok", "message":"Dispositivo eliminado"}`))
+		return
+	}
+
+	if r.Method == "PUT" {
+		var idFromPath string
+		parts := strings.Split(r.URL.Path, "/")
+		if len(parts) >= 4 { idFromPath = parts[3] }
+
+		var req struct {
+			ID           int64  `json:"id"`
+			Code         string `json:"code"`
+			Type         string `json:"type"`
+			Brand        string `json:"brand"`
+			Model        string `json:"model"`
+			Serial       string `json:"serial"`
+			OS           string `json:"os"`
+			Ram          string `json:"ram"`
+			Processor    string `json:"processor"`
+			Architecture string `json:"architecture"`
+			Storage      string `json:"storage"`
+			Details      string `json:"details"`
+			LocationID   int64  `json:"locationId"`
+		}
+
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil { 
+			http.Error(w, "JSON inválido", 400); return 
+		}
+
+		if idFromPath != "" {
+			parsedID, _ := strconv.ParseInt(idFromPath, 10, 64)
+			req.ID = parsedID
+		}
+
+		if req.ID == 0 {
+			http.Error(w, "ID de dispositivo requerido para actualización", 400); return
+		}
+		
+		log.Printf("[DIAG] Actualizando dispositivo ID: %d", req.ID)
+
+		strOrNull := func(s string) interface{} { if s == "" { return nil }; return s }
+		
+		_, err := db.Exec(`UPDATE Dispositivo SET 
+			code=?, device_type=?, brand=?, model=?, serial=?, os=?, 
+			ram=?, processor=?, arch=?, storage=?, details=?, id_ubication=?
+			WHERE id=?`,
+			strOrNull(req.Code), req.Type, strOrNull(req.Brand), strOrNull(req.Model), 
+			strOrNull(req.Serial), strOrNull(req.OS), strOrNull(req.Ram), 
+			strOrNull(req.Processor), strOrNull(req.Architecture), strOrNull(req.Storage), 
+			strOrNull(req.Details), req.LocationID, req.ID)
+
+		if err != nil {
+			log.Println("Error updating device:", err)
+			http.Error(w, "Error al actualizar: "+err.Error(), 500); return
+		}
+		
+		w.Write([]byte(`{"status":"ok", "message":"Dispositivo actualizado"}`))
+		return
+	}
+
 	if r.Method == "POST" {
 		var req struct {
 			Code       string `json:"code"`
@@ -668,6 +854,11 @@ func handleDevices(w http.ResponseWriter, r *http.Request) {
 			Model      string `json:"model"`
 			Serial     string `json:"serial"`
 			OS         string `json:"os"`
+			Ram        string `json:"ram"`
+			Processor  string `json:"processor"`
+			Architecture string `json:"architecture"`
+			Storage    string `json:"storage"`
+			Details    string `json:"details"`
 			LocationID int64  `json:"locationId"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil { http.Error(w, "JSON inválido", 400); return }
@@ -680,8 +871,12 @@ func handleDevices(w http.ResponseWriter, r *http.Request) {
 			return s
 		}
 
-		_, err := db.Exec(`INSERT INTO Dispositivo (code, device_type, brand, model, serial, os, id_ubication) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-			strOrNull(req.Code), req.Type, strOrNull(req.Brand), strOrNull(req.Model), strOrNull(req.Serial), strOrNull(req.OS), req.LocationID)
+		_, err := db.Exec(`INSERT INTO Dispositivo (
+			code, device_type, brand, model, serial, os, ram, processor, arch, storage, details, id_ubication
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			strOrNull(req.Code), req.Type, strOrNull(req.Brand), strOrNull(req.Model), 
+			strOrNull(req.Serial), strOrNull(req.OS), strOrNull(req.Ram), strOrNull(req.Processor),
+			strOrNull(req.Architecture), strOrNull(req.Storage), strOrNull(req.Details), req.LocationID)
 		
 		if err != nil {
 			log.Println("Error creating device:", err)
@@ -708,9 +903,10 @@ func handleDevices(w http.ResponseWriter, r *http.Request) {
 	var args []interface{}
 
 	if q != "" {
-		baseQuery += " AND (D.code LIKE ? OR D.device_type LIKE ? OR D.brand LIKE ? OR D.model LIKE ? OR D.serial LIKE ? OR D.os LIKE ? OR U.area LIKE ?)"
+		// Búsqueda global incluyendo Detalles (notas)
+		baseQuery += " AND (D.code LIKE ? OR D.device_type LIKE ? OR D.brand LIKE ? OR D.model LIKE ? OR D.serial LIKE ? OR D.os LIKE ? OR U.area LIKE ? OR D.details LIKE ?)"
 		likeQ := "%" + q + "%"
-		args = append(args, likeQ, likeQ, likeQ, likeQ, likeQ, likeQ, likeQ)
+		args = append(args, likeQ, likeQ, likeQ, likeQ, likeQ, likeQ, likeQ, likeQ)
 	}
 	if fType != "" { baseQuery += " AND D.device_type = ?"; args = append(args, fType) }
 	if fBrand != "" { baseQuery += " AND D.brand = ?"; args = append(args, fBrand) }
@@ -727,14 +923,22 @@ func handleDevices(w http.ResponseWriter, r *http.Request) {
 	}
 
 	args = append(args, limit, offset)
-	rows, err := db.Query("SELECT D.id, COALESCE(D.code, '---'), D.device_type, COALESCE(D.brand, '---'), COALESCE(D.model, '---'), COALESCE(D.serial, '---'), COALESCE(D.os, '---'), U.area || ' - ' || COALESCE(U.room, '') "+baseQuery+" ORDER BY D.id DESC LIMIT ? OFFSET ?", args...)
+	rows, err := db.Query(`SELECT D.id, 
+		COALESCE(D.code, '---'), D.device_type, COALESCE(D.brand, '---'), COALESCE(D.model, '---'), 
+		COALESCE(D.serial, '---'), COALESCE(D.os, '---'), U.area || ' - ' || COALESCE(U.room, ''),
+		COALESCE(D.ram, ''), COALESCE(D.processor, ''), COALESCE(D.arch, ''), COALESCE(D.storage, ''), COALESCE(D.details, ''),
+		U.building, U.floor, U.area, COALESCE(U.room, ''), U.id 
+		`+baseQuery+" ORDER BY D.id DESC LIMIT ? OFFSET ?", args...)
+	
 	if err != nil { http.Error(w, err.Error(), 500); return }
 	defer rows.Close()
 
 	var devices []DeviceItem
 	for rows.Next() {
 		var d DeviceItem
-		rows.Scan(&d.ID, &d.Code, &d.Type, &d.Brand, &d.Model, &d.Serial, &d.OS, &d.Location)
+		rows.Scan(&d.ID, &d.Code, &d.Type, &d.Brand, &d.Model, &d.Serial, &d.OS, &d.Location,
+			&d.Ram, &d.Processor, &d.Architecture, &d.Storage, &d.Details,
+			&d.Building, &d.Floor, &d.Area, &d.Room, &d.LocID)
 		devices = append(devices, d)
 	}
 	if devices == nil { devices = []DeviceItem{} }
@@ -752,13 +956,25 @@ func handlePeriods(w http.ResponseWriter, r *http.Request) {
 		for rows.Next() { var p Period; rows.Scan(&p.Code, &p.DateIni, &p.DateEnd); periods = append(periods, p) }
 		json.NewEncoder(w).Encode(periods)
 	} else if r.Method == "PUT" {
-		var p Period; json.NewDecoder(r.Body).Decode(&p)
+		var p Period 
+		if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
+			http.Error(w, "JSON inválido o malformado", 400)
+			return
+		}
 		
 		active := getActivePeriodCode()
 		if p.Code != active { http.Error(w, "Solo se pueden editar las fechas del período activo", 400); return }
 
-		parts := strings.Split(p.Code, "-"); sem, yearStr := parts[0], parts[1]; year, _ := strconv.Atoi(yearStr)
-		tIni, _ := time.Parse("2006-01-02", p.DateIni); tEnd, _ := time.Parse("2006-01-02", p.DateEnd)
+		parts := strings.Split(p.Code, "-")
+		if len(parts) < 2 {
+			http.Error(w, "Formato de código inválido (se espera SEM-AÑO)", 400)
+			return
+		}
+		sem, yearStr := parts[0], parts[1]
+		year, _ := strconv.Atoi(yearStr)
+		
+		tIni, _ := time.Parse("2006-01-02", p.DateIni)
+		tEnd, _ := time.Parse("2006-01-02", p.DateEnd)
 
 		valid := false
 		if sem == "I" { 

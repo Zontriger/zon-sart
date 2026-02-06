@@ -90,38 +90,18 @@ VALIDACIONES Y RESTRICCIONES
 ════════════════════════════════════════════════════════════════════════════════
 
 ✓ Un dispositivo pertenece a UNA SOLA ubicación
-✓ No puede cambiar de ubicación (inmutable)
 ✓ Los dispositivos NO APARECEN en otros edificios
 ✓ Las áreas NO APARECEN en otros pisos
 ✓ Los pisos NO APARECEN en otros edificios
 
-Ejemplo INCORRECTO (que ahora está FIX):
-   - Edificio 01 → Ve pisos de Edificio 02 ❌ IMPOSIBLE AHORA
-   - Edificio 01 → Piso 01 → Ve áreas de Piso 02 ❌ IMPOSIBLE AHORA
+Ejemplo INCORRECTO:
+   - Edificio 01 → Ve pisos de Edificio 02 ❌ IMPOSIBLE
+   - Edificio 01 → Piso 01 → Ve áreas de Piso 02 ❌ IMPOSIBLE
 
 Ejemplo CORRECTO:
    - Edificio 01 → Ve solo sus pisos (01, 02, etc.) ✅
    - Edificio 01 → Piso 01 → Ve solo sus áreas ✅
    - Dispositivos filtrados correctamente ✅
-
-
-ENDPOINTS API PARA JERARQUÍA
-════════════════════════════════════════════════════════════════════════════════
-
-GET /api/devices/floors?building=Edificio%2001
-    Retorna: ["Piso 01", "Piso 02"]
-    Logs: [DIAG] Buscando pisos para edificio: Edificio 01
-
-GET /api/devices/areas?building=Edificio%2001&floor=Piso%2001
-    Retorna: ["Área TIC", "Coordinación", "Control Estudios", "Archivo"]
-    Logs: [DIAG] Buscando áreas para Edificio 01 - Piso 01
-
-GET /api/devices?building=Edificio%2001&floor=Piso%2001&area=Área%20TIC
-    Retorna: [
-        {id: 1, type: "PC", brand: "Dell", model: "Optiplex", serial: "CN-0N8176...", location: "Soporte Técnico"},
-        {id: 2, type: "Modem", brand: "Huawei", ...},
-        ...
-    ]
 
 
 ESTRUCTURA DE BASE DE DATOS
@@ -150,37 +130,6 @@ RELACIÓN:
 - Dispositivo.id_ubication → Ubicacion.id
 - Un Ubicacion puede tener MUCHOS Dispositivos
 - Un Dispositivo solo puede estar en UNA Ubicacion
-
-
-FLUJO DE DATOS EN FRONTEND
-════════════════════════════════════════════════════════════════════════════════
-
-                        fetchModalDevices()
-                                │
-                ┌───────────────┼───────────────┐
-                │               │               │
-              Step1           Step2            Step3
-                │               │               │
-         [Edificio vacío?]  [Piso vacío?]   [Área vacío?]
-              │               │                 │
-             YES             YES               YES
-              │               │                 │
-         Fetch pisos    Fetch áreas        Fetch devices
-         for building   for building+      for building+
-                        floor              floor+area
-                │               │                 │
-                │               │                 │
-         Carga →   Carga →   Carga →
-         Select    Select     Select
-         "Piso"    "Área"     "Dispositivo"
-                │               │                 │
-                └───────────────┼───────────────┘
-                                │
-                    User completes form
-                                │
-                            Submit
-                                │
-                        Create Ticket
 
 
 DATOS DE PRUEBA

@@ -33,6 +33,7 @@
         .text-primary { color: var(--color-primary); }
         .text-secondary { color: var(--color-text-light); }
         .text-danger { color: var(--color-danger); }
+        .text-success { color: var(--color-success); }
         .text-sm { font-size: 0.85rem; }
         .font-bold { font-weight: bold; }
         .uppercase { text-transform: uppercase; }
@@ -83,7 +84,7 @@
         .btn-clean:hover { background-color: #f3f4f6; color: var(--color-danger); border-color: var(--color-danger); }
 
         .btn-sm { padding: 0.3rem 0.6rem; }
-        .btn-icon { background: transparent; color: inherit; padding: 0.5rem; display: flex; align-items: center; justify-content: center; }
+        .btn-icon { background: transparent; color: inherit; padding: 0.5rem; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
         .btn-icon:hover { background-color: rgba(0,0,0,0.05); border-radius: 50%; }
         .btn-delete { color: var(--color-danger); background: none; font-size: 1.2rem; line-height: 1; padding: 0 0.5rem; }
         .action-group { display: flex; gap: 0.25rem; justify-content: center; }
@@ -93,6 +94,7 @@
         textarea { resize: vertical; min-height: 80px; max-height: 200px; }
         .char-counter { font-size: 0.7rem; color: var(--color-text-light); text-align: right; margin-top: 2px; }
         .filter-label { font-size: 0.7rem; font-weight: bold; color: var(--color-text-light); margin-bottom: 0.3rem; display: block; text-transform: uppercase; }
+        .truncate-text { max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .card { background: var(--color-white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.5rem; margin-bottom: 1.5rem; height: 100%; display: flex; flex-direction: column; }
         .card-header { border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
@@ -166,6 +168,12 @@
         .special-select-input { max-height: 100px; }
         .special-select-input.hidden { display: none; }
         .special-select-select.hidden { display: none; }
+        
+        /* Estilos específicos para la vista de detalles */
+        .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .detail-item { margin-bottom: 0.5rem; }
+        .detail-label { font-weight: bold; color: var(--color-primary); font-size: 0.8rem; display: block; }
+        .detail-value { font-size: 0.95rem; }
     
         .card.period { grid-column: span 1; padding: 1rem; background-image: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark)); color: var(--color-white); border-top: none !important; }
         @media (min-width: 1024px) { .card.period { grid-column: span 2; } }
@@ -177,7 +185,13 @@
         .card.period .dates { display: flex; justify-content: space-between; font-size: 0.8rem; opacity: 0.9; }
         .card.period .progress-bar-wrapper { position: relative; border-radius: 9999px; overflow: hidden; width: 100%; height: 1.2rem; background: rgba(255,255,255,0.2); }
         .card.period .progress-bar { height: 100%; border-radius: 9999px; background: var(--color-secondary); width: 0%; transition: width 1s ease-in-out; }
-        .card.period .progress-bar-wrapper p { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; color: var(--color-white); text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+        .card.period .progress-bar-wrapper p { 
+            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; 
+            font-weight: 700; font-size: 0.75rem; 
+            color: white; 
+            mix-blend-mode: difference; /* FIX: Color del porcentaje visible siempre */
+            z-index: 10;
+        }
         
         .sidebar-toggle-btn { display: none; } 
         .sidebar-close-btn { display: none; }
@@ -383,8 +397,8 @@
                             <div><label class="filter-label">Tipo de Equipo</label><select id="dev-filter-type"><option value="">Todos</option></select></div>
                             <div><label class="filter-label">Edificio</label><select id="dev-filter-building"><option value="">Todos</option></select></div>
                             <div><label class="filter-label">Piso</label><select id="dev-filter-floor"><option value="">Todos</option></select></div>
-                            <div><label class="filter-label">Área</label><select id="dev-filter-area"><option value="">Todas</option></select></div>
-                            <div><label class="filter-label">Marca</label><select id="dev-filter-brand"><option value="">Todas</option></select></div>
+                            <div><label class="filter-label">Área</label><select id="dev-filter-area"><option value="">Todos</option></select></div>
+                            <div><label class="filter-label">Marca</label><select id="dev-filter-brand"><option value="">Todos</option></select></div>
                             <div><label class="filter-label">S.O.</label><select id="dev-filter-os"><option value="">Todos</option></select></div>
                         </div>
                         <div class="table-responsive mb-2">
@@ -449,6 +463,7 @@
             </div>
             <div class="modal-body">
                 <form data-js="form-ticket">
+                    <input type="hidden" name="id" id="ticket-id">
                     <div class="p-2 border rounded mb-2" style="background:#f9fafb;">
                         <span class="filter-label text-primary mb-1">Buscar en Inventario</span>
                         <div class="grid-2 mb-1">
@@ -470,7 +485,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn-secondary" data-action="close-modal-ticket">Cancelar</button>
-                        <button type="submit" class="btn-primary">Guardar Datos</button>
+                        <button type="submit" class="btn-primary" data-js="btn-save-ticket">Guardar Datos</button>
                     </div>
                 </form>
             </div>
@@ -530,41 +545,35 @@
                 </div>
             </div>
 
-            <!-- MODAL NUEVO DISPOSITIVO -->
+            <!-- MODAL NUEVO/EDITAR DISPOSITIVO -->
             <div id="modal-device" class="modal-overlay hidden">
                 <div class="modal-container">
                     <div class="modal-header">
-                        <strong>Nuevo Dispositivo</strong>
+                        <strong data-js="modal-device-title">Nuevo Dispositivo</strong>
                         <button data-action="close-modal-device" class="btn-icon text-white"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
                     </div>
                     <div class="modal-body">
                         <form data-js="form-device">
+                            <input type="hidden" name="id" id="device-id">
                             <!-- Ubicación Jerárquica -->
                             <div class="mb-3 p-2 border rounded" style="background:#f9fafb;">
                                 <span class="filter-label text-primary mb-1">Seleccionar Ubicación</span>
                                 <div class="grid-2 gap-2 mb-2">
                                     <div>
-                                        <label class="filter-label">Modelo</label>
-                                        <input type="text" name="model" class="w-full">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Campos Avanzados -->
-                            <div class="mb-3 p-2 border rounded" style="background:#f9fafb;">
-                                <span class="filter-label text-primary mb-1">Especificaciones Técnicas</span>
-                                <div class="grid-2 gap-2 mb-2">
-                                    <div>
-                                        <label class="filter-label">Serial</label>
-                                        <input type="text" name="serial" class="w-full">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <label class="filter-label">Edificio (Obligatorio)</label>
+                                            <a href="#" class="special-select-toggle" data-target="new-dev-building" onclick="return app.toggleSpecialSelect(event, 'new-dev-building')" style="color:#f59e0b; text-decoration:none; font-size:0.8rem; font-weight:bold;">+ Agregar</a>
+                                        </div>
+                                        <select id="new-dev-building" class="w-full special-select-select"><option value="">-- Seleccione --</option></select>
+                                        <input type="text" id="input-new-dev-building" class="w-full special-select-input hidden" placeholder="Nuevo edificio">
                                     </div>
                                     <div>
                                         <div class="flex justify-between items-center mb-1">
-                                            <label class="filter-label">S.O.</label>
-                                            <a href="#" class="special-select-toggle" data-target="new-dev-os" onclick="return app.toggleSpecialSelect(event, 'new-dev-os')" style="color:#f59e0b; text-decoration:none; font-size:0.8rem; font-weight:bold;">+ Agregar</a>
+                                            <label class="filter-label">Piso</label>
+                                            <a href="#" class="special-select-toggle" data-target="new-dev-floor" onclick="return app.toggleSpecialSelect(event, 'new-dev-floor')" style="color:#f59e0b; text-decoration:none; font-size:0.8rem; font-weight:bold;">+ Agregar</a>
                                         </div>
-                                        <select name="os" id="new-dev-os" class="w-full special-select-select"><option value="">-- Seleccione --</option></select>
-                                        <input type="text" id="input-new-dev-os" class="w-full special-select-input hidden" placeholder="Nuevo S.O.">
+                                        <select id="new-dev-floor" class="w-full special-select-select"><option value="">-- Seleccione --</option></select>
+                                        <input type="text" id="input-new-dev-floor" class="w-full special-select-input hidden" placeholder="Nuevo piso">
                                     </div>
                                 </div>
                                 <div class="grid-2 gap-2 mb-2">
@@ -572,9 +581,14 @@
                                         <label class="filter-label">Área</label>
                                         <select id="new-dev-area" class="w-full"><option value="">-- Seleccione --</option></select>
                                     </div>
+                                    <!-- FIX: Habitación como Select Especial -->
                                     <div>
-                                        <label class="filter-label">Habitación</label>
-                                        <input type="text" name="room" id="new-dev-room" class="w-full">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <label class="filter-label">Habitación (Opcional)</label>
+                                            <a href="#" class="special-select-toggle" data-target="new-dev-room" onclick="return app.toggleSpecialSelect(event, 'new-dev-room')" style="color:#f59e0b; text-decoration:none; font-size:0.8rem; font-weight:bold;">+ Agregar</a>
+                                        </div>
+                                        <select id="new-dev-room" class="w-full special-select-select"><option value="">-- Seleccione --</option></select>
+                                        <input type="text" id="input-new-dev-room" class="w-full special-select-input hidden" placeholder="Nueva habitación">
                                     </div>
                                 </div>
                             </div>
@@ -606,10 +620,19 @@
                                         <input type="text" id="input-new-dev-brand" class="w-full special-select-input hidden" placeholder="Nueva marca">
                                     </div>
                                     <div>
-                                        <label class="filter-label">Modelo</label>
-                                        <input type="text" name="model" class="w-full">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <label class="filter-label">Modelo</label>
+                                            <a href="#" class="special-select-toggle" data-target="new-dev-model" onclick="return app.toggleSpecialSelect(event, 'new-dev-model')" style="color:#f59e0b; text-decoration:none; font-size:0.8rem; font-weight:bold;">+ Agregar</a>
+                                        </div>
+                                        <select name="model" id="new-dev-model" class="w-full special-select-select"><option value="">-- Seleccione --</option></select>
+                                        <input type="text" id="input-new-dev-model" class="w-full special-select-input hidden" placeholder="Nuevo modelo">
                                     </div>
                                 </div>
+                            </div>
+
+                            <!-- Campos Avanzados -->
+                            <div class="mb-3 p-2 border rounded" style="background:#f9fafb;">
+                                <span class="filter-label text-primary mb-1">Especificaciones Técnicas</span>
                                 <div class="grid-2 gap-2 mb-2">
                                     <div>
                                         <label class="filter-label">Serial</label>
@@ -624,11 +647,6 @@
                                         <input type="text" id="input-new-dev-os" class="w-full special-select-input hidden" placeholder="Nuevo S.O.">
                                     </div>
                                 </div>
-                            </div>
-
-                            <!-- Campos Avanzados -->
-                            <div class="mb-3 p-2 border rounded" style="background:#f9fafb;">
-                                <span class="filter-label text-primary mb-1">Especificaciones Técnicas</span>
                                 <div class="grid-2 gap-2 mb-2">
                                     <div>
                                         <div class="flex justify-between items-center mb-1">
@@ -673,9 +691,44 @@
 
                             <div class="modal-footer">
                                 <button type="button" class="btn-secondary" data-action="close-modal-device">Cancelar</button>
-                                <button type="submit" class="btn-primary">Crear Dispositivo</button>
+                                <button type="submit" class="btn-primary" data-js="btn-save-device">Crear Dispositivo</button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- MODAL CONFIRMAR ELIMINAR -->
+            <div id="modal-delete" class="modal-overlay hidden">
+                <div class="modal-container" style="max-width: 400px;">
+                    <div class="modal-header" style="background-color: var(--color-danger);">
+                        <strong>Confirmar Eliminación</strong>
+                        <button data-action="close-modal-delete" class="btn-icon text-white"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <p class="mb-3">¿Está seguro de que desea eliminar este elemento? Esta acción no se puede deshacer.</p>
+                        <input type="hidden" id="delete-target-id">
+                        <input type="hidden" id="delete-target-type">
+                        <div class="flex justify-center gap-2">
+                            <button class="btn-secondary" data-action="close-modal-delete">Cancelar</button>
+                            <button class="btn-danger" id="btn-confirm-delete">Sí, Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- MODAL VER DETALLES -->
+            <div id="modal-view" class="modal-overlay hidden">
+                <div class="modal-container">
+                    <div class="modal-header">
+                        <strong data-js="view-title">Detalles</strong>
+                        <button data-action="close-modal-view" class="btn-icon text-white"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                    </div>
+                    <div class="modal-body" id="view-body-content">
+                        <!-- Content Injected via JS -->
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-secondary" data-action="close-modal-view">Cerrar</button>
                     </div>
                 </div>
             </div>
@@ -704,31 +757,7 @@
                 }
             },
             cacheDOM() {
-                const els = ['view-login', 'view-app', 'login-form', 'login-error', 'sidebar', 'user-role', 'modal-ticket', 'form-ticket', 'modal-finish', 'form-finish', 'modal-location', 'form-location', 'modal-device', 'form-device', 'tbody-workshop', 'tbody-history', 'tbody-devices', 'tbody-periods', 'dev-filter-q', 'dev-pagination-info', 'ticket-device-select', 'new-dev-location', 'form-settings-admin', 'form-settings-user'];
-                els.forEach(id => { const el = document.getElementById(id) || document.querySelector(`[data-js="${id}"]`); if(el) this.dom[id] = el; });
-                this.dom.navLinks = document.querySelectorAll('.nav-link');
-                this.dom.ticketFilterBuild = document.getElementById('ticket-filter-build');
-                this.dom.ticketFilterFloor = document.getElementById('ticket-filter-floor');
-                this.dom.ticketFilterArea = document.getElementById('ticket-filter-area');
-                this.dom.devFilterType = document.getElementById('dev-filter-type');
-                this.dom.devFilterBrand = document.getElementById('dev-filter-brand');
-                this.dom.devFilterOS = document.getElementById('dev-filter-os');
-                this.dom.devPrevBtn = document.getElementById('dev-prev-btn');
-                this.dom.devNextBtn = document.getElementById('dev-next-btn');
-                this.dom.filterText = document.getElementById('filter-text');
-                this.dom.filterCode = document.getElementById('filter-code');
-                this.dom.filterLoc = document.getElementById('filter-loc');
-                this.dom.filterType = document.getElementById('filter-type');
-                this.dom.filterBrand = document.getElementById('filter-brand');
-                this.dom.filterBuilding = document.getElementById('filter-building');
-                this.dom.filterFloorH = document.getElementById('filter-floor-h');
-                this.dom.filterAreaH = document.getElementById('filter-area-h');
-                this.dom.filterStatus = document.getElementById('filter-status');
-                this.dom.filterDateStart = document.getElementById('filter-date-start');
-                this.dom.filterDateEnd = document.getElementById('filter-date-end');
-            },
-            cacheDOM() {
-                const els = ['view-login', 'view-app', 'login-form', 'login-error', 'sidebar', 'user-role', 'modal-ticket', 'form-ticket', 'modal-finish', 'form-finish', 'modal-location', 'form-location', 'modal-device', 'form-device', 'tbody-workshop', 'tbody-history', 'tbody-devices', 'tbody-periods', 'dev-filter-q', 'dev-pagination-info', 'ticket-device-select', 'new-dev-location', 'form-settings-admin', 'form-settings-user'];
+                const els = ['view-login', 'view-app', 'login-form', 'login-error', 'sidebar', 'user-role', 'modal-ticket', 'form-ticket', 'modal-finish', 'form-finish', 'modal-location', 'form-location', 'modal-device', 'form-device', 'modal-delete', 'modal-view', 'tbody-workshop', 'tbody-history', 'tbody-devices', 'tbody-periods', 'dev-filter-q', 'dev-pagination-info', 'ticket-device-select', 'new-dev-location', 'form-settings-admin', 'form-settings-user'];
                 els.forEach(id => { const el = document.getElementById(id) || document.querySelector(`[data-js="${id}"]`); if(el) this.dom[id] = el; });
                 this.dom.navLinks = document.querySelectorAll('.nav-link');
                 this.dom.ticketFilterBuild = document.getElementById('ticket-filter-build');
@@ -748,9 +777,15 @@
                 this.dom.filterText = document.getElementById('filter-text');
                 this.dom.filterCode = document.getElementById('filter-code');
                 this.dom.filterLoc = document.getElementById('filter-loc');
+                this.dom.filterType = document.getElementById('filter-type');
+                this.dom.filterBrand = document.getElementById('filter-brand');
+                this.dom.filterBuilding = document.getElementById('filter-building');
+                this.dom.filterFloorH = document.getElementById('filter-floor-h');
+                this.dom.filterAreaH = document.getElementById('filter-area-h');
                 this.dom.filterStatus = document.getElementById('filter-status');
                 this.dom.filterDateStart = document.getElementById('filter-date-start');
                 this.dom.filterDateEnd = document.getElementById('filter-date-end');
+                this.dom.btnConfirmDelete = document.getElementById('btn-confirm-delete');
             },
             bindEvents() {
                 this.dom['login-form'].addEventListener('submit', e => { e.preventDefault(); this.login(new FormData(e.target)); });
@@ -766,39 +801,18 @@
                     document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'));
                 }));
                 
-                // Botones específicos para cerrar modales
-                document.querySelectorAll('[data-action="close-modal-ticket"]').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        console.log("[v0] Cerrando modal ticket");
-                        if(this.dom['modal-ticket']) this.dom['modal-ticket'].classList.add('hidden');
-                    });
-                });
-                document.querySelectorAll('[data-action="close-modal-finish"]').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        console.log("[v0] Cerrando modal finish");
-                        if(this.dom['modal-finish']) this.dom['modal-finish'].classList.add('hidden');
-                    });
-                });
-                document.querySelectorAll('[data-action="close-modal-device"]').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        console.log("[v0] Cerrando modal device");
-                        if(this.dom['modal-device']) this.dom['modal-device'].classList.add('hidden');
-                    });
-                });
-                document.querySelectorAll('[data-action="close-modal-location"]').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        console.log("[v0] Cerrando modal location");
-                        if(this.dom['modal-location']) this.dom['modal-location'].classList.add('hidden');
-                    });
-                });
+                // Helper para cerrar modales específicos
+                const closeSpecificModal = (id) => {
+                    const el = document.getElementById(id);
+                    if(el) el.classList.add('hidden');
+                };
+
+                document.querySelectorAll('[data-action="close-modal-ticket"]').forEach(btn => btn.addEventListener('click', (e) => { e.preventDefault(); closeSpecificModal('modal-ticket'); }));
+                document.querySelectorAll('[data-action="close-modal-finish"]').forEach(btn => btn.addEventListener('click', (e) => { e.preventDefault(); closeSpecificModal('modal-finish'); }));
+                document.querySelectorAll('[data-action="close-modal-device"]').forEach(btn => btn.addEventListener('click', (e) => { e.preventDefault(); closeSpecificModal('modal-device'); }));
+                document.querySelectorAll('[data-action="close-modal-location"]').forEach(btn => btn.addEventListener('click', (e) => { e.preventDefault(); closeSpecificModal('modal-location'); }));
+                document.querySelectorAll('[data-action="close-modal-delete"]').forEach(btn => btn.addEventListener('click', (e) => { e.preventDefault(); closeSpecificModal('modal-delete'); }));
+                document.querySelectorAll('[data-action="close-modal-view"]').forEach(btn => btn.addEventListener('click', (e) => { e.preventDefault(); closeSpecificModal('modal-view'); }));
                 
                 // Cerrar modales haciendo click en el backdrop
                 document.querySelectorAll('.modal-overlay').forEach(overlay => {
@@ -812,44 +826,42 @@
 
                 document.querySelector('[data-action="open-create-modal"]').addEventListener('click', () => { 
                     console.log("[v0] Abriendo modal ticket");
+                    const f = this.dom['form-ticket'];
+                    f.reset();
+                    // Limpiar ID oculto para indicar creación
+                    const idInput = document.getElementById('ticket-id');
+                    if(idInput) idInput.value = '';
+                    
+                    // Restaurar título y texto del botón
+                    document.querySelector('[data-js="modal-ticket-title"]').textContent = 'Añadir al Taller';
+                    document.querySelector('[data-js="btn-save-ticket"]').textContent = 'Guardar Datos';
+                    
+                    // Set default date to today using local date function
+                    const dateInput = f.querySelector('input[name="fecha"]');
+                    if (dateInput) {
+                        dateInput.value = this.getVeDate();
+                        dateInput.max = this.getVeDate();
+                    }
+                    
                     if(this.dom['modal-ticket']) this.dom['modal-ticket'].classList.remove('hidden'); 
                     this.fetchModalDevices(); 
                 });
                 document.querySelector('[data-action="open-loc-modal"]').addEventListener('click', () => {
+                    // Populate selects on open
+                    this.loadLocationsForSelect(); 
                     if(this.dom['modal-location']) this.dom['modal-location'].classList.remove('hidden');
                 });
                 document.querySelector('[data-action="open-dev-modal"]').addEventListener('click', () => { 
-                    if(this.dom['modal-device']) this.dom['modal-device'].classList.remove('hidden'); 
-                    this.loadLocationsForSelect();
-                    this.initSpecialSelects();
-                    this.initDeviceHierarchy();
+                    this.openDeviceModal();
                 });
                 
-                // Event listeners para jerarquía de dispositivo
-                const buildingSelect = document.getElementById('new-dev-building');
-                if(buildingSelect) {
-                    buildingSelect.addEventListener('change', () => {
-                        const building = buildingSelect.value;
-                        const floorSelect = document.getElementById('new-dev-floor');
-                        const areaSelect = document.getElementById('new-dev-area');
-                        if(!building) {
-                            floorSelect.innerHTML = '<option value="">-- Seleccione --</option>';
-                            areaSelect.innerHTML = '<option value="">-- Seleccione --</option>';
-                            return;
-                        }
-                        
-                        // Cargar pisos para este edificio
-                        const floors = this.state.config.floors || [];
-                        floorSelect.innerHTML = '<option value="">-- Seleccione --</option>' + floors.map(f => `<option value="${f}">${f}</option>`).join('');
-                    });
-                }
-
                 this.dom['form-ticket'].addEventListener('submit', e => { e.preventDefault(); this.saveTicket(new FormData(e.target)); });
                 this.dom['form-finish'].addEventListener('submit', e => { e.preventDefault(); this.finishTicket(new FormData(e.target)); });
                 this.dom['form-location'].addEventListener('submit', e => { e.preventDefault(); this.saveLocation(new FormData(e.target)); });
                 this.dom['form-device'].addEventListener('submit', e => { e.preventDefault(); this.saveDevice(new FormData(e.target)); });
                 this.dom['form-settings-admin'].addEventListener('submit', e => { e.preventDefault(); this.updateUser(new FormData(e.target), 'admin'); });
                 this.dom['form-settings-user'].addEventListener('submit', e => { e.preventDefault(); this.updateUser(new FormData(e.target), 'user'); });
+                this.dom.btnConfirmDelete.addEventListener('click', () => this.executeDelete());
 
                 // Filters
                 const triggerDevices = () => { this.state.deviceFilters.page = 1; this.fetchDevices(); };
@@ -862,13 +874,11 @@
                 this.dom.devFilterArea.addEventListener('change', triggerDevices);
                 this.dom.devPrevBtn.addEventListener('click', () => { 
                     if(this.state.deviceFilters.page > 1) { 
-                        console.log("[v0] Página anterior. Página actual:", this.state.deviceFilters.page);
                         this.state.deviceFilters.page--; 
                         this.fetchDevices(); 
                     }
                 });
                 this.dom.devNextBtn.addEventListener('click', () => { 
-                    console.log("[v0] Página siguiente. Página actual:", this.state.deviceFilters.page);
                     this.state.deviceFilters.page++; 
                     this.fetchDevices(); 
                 });
@@ -917,37 +927,22 @@
                 try {
                     console.log("[v0] Iniciando login...");
                     const res = await fetch('/api/login', { method:'POST', body: JSON.stringify(Object.fromEntries(fd)) });
-                    if(!res.ok) {
-                        console.log("[v0] Login fallido - respuesta no OK");
-                        throw new Error();
-                    }
+                    if(!res.ok) throw new Error();
                     this.state.user = await res.json();
-                    console.log("[v0] Login exitoso para usuario:", this.state.user.full_name);
-                    
-                    // Guardar sesión en localStorage
                     sessionStorage.setItem('sart_user', JSON.stringify(this.state.user));
-                    
                     this.dom['view-login'].classList.add('hidden');
                     this.dom['view-app'].classList.remove('hidden');
-                    
-                    // Mostrar nombre completo en MAYÚSCULAS
                     this.dom['user-role'].textContent = this.state.user.full_name.toUpperCase();
-                    console.log("[v0] Header actualizado con:", this.state.user.full_name.toUpperCase());
-                    
                     if(this.state.user.role === 'user') document.querySelectorAll('.admin-only').forEach(e => e.classList.add('hidden'));
                     else document.querySelectorAll('.admin-only').forEach(e => e.classList.remove('hidden'));
                     this.fetchData(); this.nav('home');
-                } catch(e) { 
-                    console.log("[v0] Error en login:", e);
-                    this.dom['login-error'].classList.remove('hidden'); 
-                }
+                } catch(e) { this.dom['login-error'].classList.remove('hidden'); }
             },
             checkSession() {
                 console.log("[v0] Verificando sesión...");
                 const stored = sessionStorage.getItem('sart_user');
                 if(stored) {
                     this.state.user = JSON.parse(stored);
-                    console.log("[v0] Sesión restaurada para:", this.state.user.full_name);
                     this.dom['view-login'].classList.add('hidden');
                     this.dom['view-app'].classList.remove('hidden');
                     this.dom['user-role'].textContent = this.state.user.full_name.toUpperCase();
@@ -977,18 +972,21 @@
                 const res = await fetch('/api/config');
                 this.state.config = await res.json();
                 const createOpts = (arr) => `<option value="">Todos</option>` + (arr||[]).map(x => `<option value="${x}">${x}</option>`).join('');
+                
+                // Filtros de Inventario
                 this.dom.devFilterType.innerHTML = createOpts(this.state.config.types);
                 this.dom.devFilterBrand.innerHTML = createOpts(this.state.config.brands);
                 this.dom.devFilterOS.innerHTML = createOpts(this.state.config.os);
                 this.dom.devFilterBuild.innerHTML = createOpts(this.state.config.buildings);
                 this.dom.devFilterFloor.innerHTML = createOpts(this.state.config.floors);
                 this.dom.devFilterArea.innerHTML = createOpts(this.state.config.areas);
+                
+                // Filtros Modal Ticket
                 this.dom.ticketFilterBuild.innerHTML = createOpts(this.state.config.buildings);
                 this.dom.ticketFilterFloor.innerHTML = createOpts(this.state.config.floors);
                 document.getElementById('ticket-filter-area').innerHTML = createOpts(this.state.config.areas);
-                if(this.dom.filterCode) this.dom.filterCode.innerHTML = createOpts(this.state.config.codes);
-                if(this.dom.filterLoc) this.dom.filterLoc.innerHTML = createOpts(this.state.config.locations);
-                // Filtros del Historial
+                
+                // Filtros Historial
                 if(this.dom.filterType) this.dom.filterType.innerHTML = createOpts(this.state.config.types);
                 if(this.dom.filterBrand) this.dom.filterBrand.innerHTML = createOpts(this.state.config.brands);
                 if(this.dom.filterBuilding) this.dom.filterBuilding.innerHTML = createOpts(this.state.config.buildings);
@@ -1014,28 +1012,6 @@
                 this.state.tickets = tickets;
                 console.log("[v0] Tickets cargados:", tickets.length);
                 
-                // Actualizar opciones de filtro en Historial basado en datos reales
-                if(this.dom.filterType) {
-                    const types = this.extractUniqueValues(tickets, 'type');
-                    this.dom.filterType.innerHTML = '<option value="">Todos</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
-                }
-                if(this.dom.filterBrand) {
-                    const brands = this.extractUniqueValues(tickets, 'brand');
-                    this.dom.filterBrand.innerHTML = '<option value="">Todos</option>' + brands.map(b => `<option value="${b}">${b}</option>`).join('');
-                }
-                if(this.dom.filterBuilding) {
-                    const buildings = this.extractUniqueValues(tickets, 'location').map(loc => loc.split(' - ')[0]);
-                    this.dom.filterBuilding.innerHTML = '<option value="">Todos</option>' + buildings.map(b => `<option value="${b}">${b}</option>`).join('');
-                }
-                if(this.dom.filterFloorH) {
-                    const floors = this.extractUniqueValues(tickets, 'location').map(loc => loc.split(' - ')[1]).filter(f => f);
-                    this.dom.filterFloorH.innerHTML = '<option value="">Todos</option>' + floors.map(f => `<option value="${f}">${f}</option>`).join('');
-                }
-                if(this.dom.filterAreaH) {
-                    const areas = this.extractUniqueValues(tickets, 'location').map(loc => loc.split(' - ')[2]).filter(a => a);
-                    this.dom.filterAreaH.innerHTML = '<option value="">Todos</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
-                }
-                
                 this.renderWorkshop();
                 this.renderHistory();
                 this.renderDash();
@@ -1050,43 +1026,55 @@
                 console.log("[v0] Cargando dispositivos - Página:", f.page, "Q:", q);
                 
                 const query = `page=${f.page}&limit=${f.limit}&q=${encodeURIComponent(q)}&type=${this.dom.devFilterType.value}&brand=${this.dom.devFilterBrand.value}&os=${this.dom.devFilterOS.value}&building=${encodeURIComponent(building)}&floor=${encodeURIComponent(floor)}&area=${encodeURIComponent(area)}`;
-                const res = await fetch(`/api/devices?${query}`);
-                const data = await res.json();
                 
-                console.log("[v0] Respuesta dispositivos:", data.total, "registros,", "página", data.page);
-                
-                this.dom['tbody-devices'].innerHTML = (data.data||[]).map(d => {
-                    const typeLower = d.type.toLowerCase();
-                    let badgeClass = 'dev-other';
-                    if (typeLower.includes('pc')||typeLower.includes('desktop')) badgeClass = 'dev-pc';
-                    else if (typeLower.includes('laptop')) badgeClass = 'dev-laptop';
-                    else if (typeLower.includes('switch')||typeLower.includes('modem')) badgeClass = 'dev-network';
-                    else if (typeLower.includes('impresora')) badgeClass = 'dev-printer';
-                    return `<tr>
-                        <td class="font-bold text-primary">${d.code}</td>
-                        <td><span class="dev-badge ${badgeClass}">${d.type}</span></td>
-                        <td>${d.brand} ${d.model}</td>
-                        <td>${d.serial}</td>
-                        <td>${d.location}</td>
-                        <td>${d.os}</td>
-                        <td>
-                            <div class="action-group">
-                                <button class="btn-icon" title="Editar" onclick="app.editDevice(${d.id})">✏️</button>
-                                <button class="btn-icon" title="Ver detalles" onclick="app.viewDevice(${d.id})">👁️</button>
-                                <button class="btn-icon" title="Eliminar" onclick="app.deleteDevice(${d.id})">🗑️</button>
-                            </div>
-                        </td>
-                    </tr>`;
-                }).join('');
-                
-                const totalPages = Math.ceil(data.total / data.limit);
-                document.getElementById('dev-pagination-info').textContent = `Pág ${data.page} de ${totalPages} (${data.total})`;
-                
-                // Actualizar estado de botones
-                this.dom.devPrevBtn.disabled = data.page <= 1;
-                this.dom.devNextBtn.disabled = data.page >= totalPages;
-                
-                console.log("[v0] Botones: Anterior disabled=", this.dom.devPrevBtn.disabled, ", Siguiente disabled=", this.dom.devNextBtn.disabled);
+                try {
+                    const res = await fetch(`/api/devices?${query}`);
+                    if (!res.ok) {
+                        // FIX 2: Manejo de error 500 del backend para no romper la app
+                        const txt = await res.text();
+                        console.error("Backend Error:", res.status, txt);
+                        document.getElementById('dev-pagination-info').textContent = "Error de conexión con el servidor";
+                        // Mostrar mensaje en la tabla vacía
+                        this.dom['tbody-devices'].innerHTML = `<tr><td colspan="7" class="text-center text-danger">Error al cargar dispositivos: ${res.status}</td></tr>`;
+                        return; 
+                    }
+                    const data = await res.json();
+                    
+                    this.state.currentDevices = data.data; 
+                    
+                    this.dom['tbody-devices'].innerHTML = (data.data||[]).map(d => {
+                        const typeLower = d.type.toLowerCase();
+                        let badgeClass = 'dev-other';
+                        if (typeLower.includes('pc')||typeLower.includes('desktop')) badgeClass = 'dev-pc';
+                        else if (typeLower.includes('laptop')) badgeClass = 'dev-laptop';
+                        else if (typeLower.includes('switch')||typeLower.includes('modem')) badgeClass = 'dev-network';
+                        else if (typeLower.includes('impresora')) badgeClass = 'dev-printer';
+                        return `<tr>
+                            <td class="font-bold text-primary">${d.code}</td>
+                            <td><span class="dev-badge ${badgeClass}">${d.type}</span></td>
+                            <td>${d.brand} ${d.model}</td>
+                            <td>${d.serial}</td>
+                            <td>${d.location}</td>
+                            <td>${d.os}</td>
+                            <td>
+                                <div class="action-group">
+                                    <button class="btn-icon" title="Editar" onclick="app.openEditDevice(${d.id})">✏️</button>
+                                    <button class="btn-icon" title="Ver detalles" onclick="app.openViewDevice(${d.id}, 'device')">👁️</button>
+                                    <button class="btn-icon" title="Eliminar" onclick="app.openDeleteModal(${d.id}, 'device')">🗑️</button>
+                                </div>
+                            </td>
+                        </tr>`;
+                    }).join('');
+                    
+                    const totalPages = Math.ceil(data.total / data.limit);
+                    document.getElementById('dev-pagination-info').textContent = `Pág ${data.page} de ${totalPages} (${data.total})`;
+                    
+                    this.dom.devPrevBtn.disabled = data.page <= 1;
+                    this.dom.devNextBtn.disabled = data.page >= totalPages;
+                } catch(e) {
+                    console.error("Network error:", e);
+                    this.dom['tbody-devices'].innerHTML = `<tr><td colspan="7" class="text-center text-danger">Error de red al conectar con el servidor.</td></tr>`;
+                }
             },
             async fetchModalDevices() {
                 const b = this.dom.ticketFilterBuild.value;
@@ -1094,90 +1082,97 @@
                 const a = document.getElementById('ticket-filter-area').value;
                 const sel = document.getElementById('ticket-device-select');
                 
-                console.log("[v0] Cargando dispositivos - Edificio:", b, "Piso:", f, "Área:", a);
-                
-                // Si no hay edificio seleccionado, limpiar todo
-                if(!b) {
-                    sel.innerHTML = '<option value="">-- Seleccione Edificio Primero --</option>';
-                    return;
-                }
-                
-                // Si hay edificio pero no piso, cargar pisos
+                if(!b) { sel.innerHTML = '<option value="">-- Seleccione Edificio Primero --</option>'; return; }
                 if(b && !f) {
-                    console.log("[v0] Cargando pisos para edificio:", b);
                     const floorsRes = await fetch(`/api/devices/floors?building=${encodeURIComponent(b)}`);
                     const floors = await floorsRes.json();
-                    console.log("[v0] Pisos cargados:", floors);
-                    const floorSelect = this.dom.ticketFilterFloor;
-                    floorSelect.innerHTML = '<option value="">-- Seleccione Piso --</option>' + (floors||[]).map(fl => `<option value="${fl}">${fl}</option>`).join('');
-                    sel.innerHTML = '<option value="">-- Seleccione Piso Primero --</option>';
-                    return;
+                    this.dom.ticketFilterFloor.innerHTML = '<option value="">-- Seleccione Piso --</option>' + (floors||[]).map(fl => `<option value="${fl}">${fl}</option>`).join('');
+                    sel.innerHTML = '<option value="">-- Seleccione Piso Primero --</option>'; return;
                 }
-                
-                // Si hay piso pero no área, cargar áreas
                 if(f && !a) {
-                    console.log("[v0] Cargando áreas para piso:", f);
                     const areasRes = await fetch(`/api/devices/areas?building=${encodeURIComponent(b)}&floor=${encodeURIComponent(f)}`);
                     const areas = await areasRes.json();
-                    console.log("[v0] Áreas cargadas:", areas);
-                    const areaSelect = document.getElementById('ticket-filter-area');
-                    areaSelect.innerHTML = '<option value="">-- Seleccione Área --</option>' + (areas||[]).map(ar => `<option value="${ar}">${ar}</option>`).join('');
-                    sel.innerHTML = '<option value="">-- Seleccione Área Primero --</option>';
-                    return;
+                    document.getElementById('ticket-filter-area').innerHTML = '<option value="">-- Seleccione Área --</option>' + (areas||[]).map(ar => `<option value="${ar}">${ar}</option>`).join('');
+                    sel.innerHTML = '<option value="">-- Seleccione Área Primero --</option>'; return;
                 }
-                
-                // Cargar dispositivos finales
                 const res = await fetch(`/api/devices?limit=100&building=${encodeURIComponent(b)}&floor=${encodeURIComponent(f)}&area=${encodeURIComponent(a)}`);
                 const data = await res.json();
-                console.log("[v0] Dispositivos cargados:", data.data ? data.data.length : 0);
-                
-                if(!data.data || data.data.length === 0) { 
-                    sel.innerHTML = '<option value="">No hay equipos en esta ubicación</option>'; 
-                    return; 
-                }
+                if(!data.data || data.data.length === 0) { sel.innerHTML = '<option value="">No hay equipos en esta ubicación</option>'; return; }
                 sel.innerHTML = '<option value="">-- Seleccione --</option>' + data.data.map(d => `<option value="${d.id}" data-code="${d.code}">${d.type} - ${d.location} - ${d.brand} - ${d.model} - ${d.serial}</option>`).join('');
             },
-            async loadLocationsForSelect() {
+            loadLocationsForSelect() {
                 console.log("[v0] Cargando ubicaciones para selects especiales");
-                
-                // Cargar edificios
                 if(this.state.config.buildings && this.state.config.buildings.length > 0) {
                     const buildingSelect = document.getElementById('new-dev-building');
                     const locBuildingSelect = document.getElementById('loc-building');
                     if(buildingSelect) buildingSelect.innerHTML = '<option value="">-- Seleccione --</option>' + this.state.config.buildings.map(b => `<option value="${b}">${b}</option>`).join('');
                     if(locBuildingSelect) locBuildingSelect.innerHTML = '<option value="">-- Seleccione --</option>' + this.state.config.buildings.map(b => `<option value="${b}">${b}</option>`).join('');
                 }
-                
-                // Cargar tipos, marcas, sistemas operativos
-                if(this.state.config.types && this.state.config.types.length > 0) {
-                    const typeSelect = document.getElementById('new-dev-type');
-                    if(typeSelect) typeSelect.innerHTML = '<option value="">-- Seleccione --</option>' + this.state.config.types.map(t => `<option value="${t}">${t}</option>`).join('');
-                }
-                if(this.state.config.brands && this.state.config.brands.length > 0) {
-                    const brandSelect = document.getElementById('new-dev-brand');
-                    if(brandSelect) brandSelect.innerHTML = '<option value="">-- Seleccione --</option>' + this.state.config.brands.map(b => `<option value="${b}">${b}</option>`).join('');
-                }
-                if(this.state.config.os && this.state.config.os.length > 0) {
-                    const osSelect = document.getElementById('new-dev-os');
-                    if(osSelect) osSelect.innerHTML = '<option value="">-- Seleccione --</option>' + this.state.config.os.map(o => `<option value="${o}">${o}</option>`).join('');
-                }
+                // ... (Tipos, Marcas, OS igual que antes) ...
+                if(this.state.config.types) document.getElementById('new-dev-type').innerHTML = '<option value="">-- Seleccione --</option>' + this.state.config.types.map(x => `<option value="${x}">${x}</option>`).join('');
+                if(this.state.config.brands) document.getElementById('new-dev-brand').innerHTML = '<option value="">-- Seleccione --</option>' + this.state.config.brands.map(x => `<option value="${x}">${x}</option>`).join('');
+                if(this.state.config.os) document.getElementById('new-dev-os').innerHTML = '<option value="">-- Seleccione --</option>' + this.state.config.os.map(x => `<option value="${x}">${x}</option>`).join('');
             },
+            
+            // --- NUEVA LÓGICA DE JERARQUÍA COMPLETA (FIX 4) ---
+            async loadFloors(building) {
+                if(!building) return [];
+                const res = await fetch(`/api/devices/floors?building=${encodeURIComponent(building)}`);
+                return res.ok ? await res.json() : [];
+            },
+            async loadAreas(building, floor) {
+                if(!building || !floor) return [];
+                const res = await fetch(`/api/devices/areas?building=${encodeURIComponent(building)}&floor=${encodeURIComponent(floor)}`);
+                return res.ok ? await res.json() : [];
+            },
+            loadRooms(area) {
+                if(!area || !this.state.config.locations) return [];
+                // Truco frontend: Parsear "Area - Room" de la configuración global para encontrar rooms de esta área
+                const rooms = this.state.config.locations
+                    .filter(loc => loc.startsWith(area + ' - '))
+                    .map(loc => loc.substring(area.length + 3)); // +3 por " - "
+                return [...new Set(rooms)].filter(r => r.trim() !== '');
+            },
+
             initDeviceHierarchy() {
                 console.log("[v0] Inicializando jerarquía de dispositivo");
+                const buildingSelect = document.getElementById('new-dev-building');
                 const floorSelect = document.getElementById('new-dev-floor');
                 const areaSelect = document.getElementById('new-dev-area');
-                
-                if(floorSelect) {
-                    floorSelect.addEventListener('change', () => {
-                        const floor = floorSelect.value;
-                        if(!floor) {
-                            areaSelect.innerHTML = '<option value="">-- Seleccione --</option>';
-                            return;
-                        }
+                const roomSelect = document.getElementById('new-dev-room');
+
+                // Listener Edificio -> Carga Pisos
+                if(buildingSelect) {
+                    buildingSelect.addEventListener('change', async () => {
+                        const building = buildingSelect.value;
+                        floorSelect.innerHTML = '<option value="">Cargando...</option>';
+                        areaSelect.innerHTML = '<option value="">-- Seleccione Piso --</option>';
+                        roomSelect.innerHTML = '<option value="">-- Seleccione Área --</option>';
                         
-                        // Cargar áreas para este piso
-                        const areas = this.state.config.areas || [];
+                        const floors = await this.loadFloors(building);
+                        floorSelect.innerHTML = '<option value="">-- Seleccione --</option>' + floors.map(f => `<option value="${f}">${f}</option>`).join('');
+                    });
+                }
+
+                // Listener Piso -> Carga Áreas
+                if(floorSelect) {
+                    floorSelect.addEventListener('change', async () => {
+                        const building = buildingSelect.value;
+                        const floor = floorSelect.value;
+                        areaSelect.innerHTML = '<option value="">Cargando...</option>';
+                        roomSelect.innerHTML = '<option value="">-- Seleccione Área --</option>';
+                        
+                        const areas = await this.loadAreas(building, floor);
                         areaSelect.innerHTML = '<option value="">-- Seleccione --</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
+                    });
+                }
+
+                // Listener Área -> Carga Habitaciones (Local)
+                if(areaSelect) {
+                    areaSelect.addEventListener('change', () => {
+                        const area = areaSelect.value;
+                        const rooms = this.loadRooms(area);
+                        roomSelect.innerHTML = '<option value="">-- Seleccione --</option>' + rooms.map(r => `<option value="${r}">${r}</option>`).join('');
                     });
                 }
             },
@@ -1192,337 +1187,399 @@
                 const selectIsHidden = selectEl.classList.contains('hidden');
                 
                 if(selectIsHidden) {
-                    // Cambiar a select (ocultar input)
                     inputEl.classList.add('hidden');
+                    inputEl.removeAttribute('required'); // FIX: remove required when hidden
+                    
                     selectEl.classList.remove('hidden');
+                    selectEl.setAttribute('required', 'required'); // FIX: add required when shown
                     selectEl.focus();
                     toggleBtn.textContent = '+ Agregar';
                 } else {
-                    // Cambiar a input (ocultar select)
                     selectEl.classList.add('hidden');
+                    selectEl.removeAttribute('required'); // FIX: remove required when hidden
+                    
                     inputEl.classList.remove('hidden');
+                    inputEl.setAttribute('required', 'required'); // FIX: add required when shown
                     inputEl.value = '';
                     inputEl.focus();
                     toggleBtn.textContent = 'Cancelar';
                 }
-                
                 return false;
             },
             initSpecialSelects() {
-                console.log("[v0] Inicializando selects especiales");
-                // Los inputs están ocultos por defecto, los selects visibles
+                // Inputs ocultos por defecto, los selects visibles
+                document.querySelectorAll('.special-select-input').forEach(el => el.classList.add('hidden'));
+                document.querySelectorAll('.special-select-select').forEach(el => el.classList.remove('hidden'));
+                document.querySelectorAll('.special-select-toggle').forEach(el => el.textContent = '+ Agregar');
             },
-            editDevice(deviceId) {
-                console.log("[v0] Editando dispositivo ID:", deviceId);
-                const device = this.state.tickets.find(d => d.id === deviceId) || {};
-                // TODO: Abrir modal con datos pre-rellenos
-                alert("Editar dispositivo: " + deviceId);
+
+            // --- ACCIONES MODALES ---
+            openDeviceModal() {
+                const f = this.dom['form-device'];
+                f.reset();
+                document.getElementById('device-id').value = '';
+                document.querySelector('[data-js="modal-device-title"]').textContent = 'Nuevo Dispositivo';
+                document.querySelector('[data-js="btn-save-device"]').textContent = 'Crear Dispositivo';
+                this.loadLocationsForSelect();
+                this.initSpecialSelects();
+                this.initDeviceHierarchy();
+                this.dom['modal-device'].classList.remove('hidden');
             },
-            viewDevice(deviceId) {
-                console.log("[v0] Viendo detalles dispositivo ID:", deviceId);
-                // TODO: Abrir modal con todos los detalles
-                alert("Ver detalles: " + deviceId);
-            },
-            deleteDevice(deviceId) {
-                console.log("[v0] Eliminando dispositivo ID:", deviceId);
-                if(confirm("¿Está seguro de eliminar este dispositivo?")) {
-                    fetch(`/api/devices/${deviceId}`, { method: 'DELETE' }).then(res => {
-                        if(res.ok) {
-                            alert("Dispositivo eliminado");
-                            this.fetchDevices();
+            async openEditDevice(deviceId) {
+                console.log("[v0] Abriendo modal edición para ID:", deviceId);
+                const device = this.state.currentDevices.find(d => d.id === deviceId);
+                if (!device) return;
+
+                const f = this.dom['form-device'];
+                f.reset();
+                document.getElementById('device-id').value = deviceId;
+                document.querySelector('[data-js="modal-device-title"]').textContent = 'Editar Dispositivo';
+                document.querySelector('[data-js="btn-save-device"]').textContent = 'Guardar Cambios';
+
+                this.loadLocationsForSelect();
+                this.initSpecialSelects(); 
+                this.initDeviceHierarchy();
+
+                // Llenar campos simples
+                f.querySelector('[name=code]').value = device.code || '';
+                f.querySelector('[name=serial]').value = device.serial || '';
+                f.querySelector('[name=model]').value = device.model || '';
+                
+                const setSelect = (id, val) => { const sel = document.getElementById(id); if(sel) sel.value = val || ''; };
+                setSelect('new-dev-type', device.type);
+                setSelect('new-dev-brand', device.brand);
+                setSelect('new-dev-os', device.os);
+                
+                // AUTORRELLENO SPECS - AGREGADO (Recovered)
+                setSelect('new-dev-ram', device.ram);
+                setSelect('new-dev-processor', device.processor);
+                setSelect('new-dev-architecture', device.architecture || device.arch); 
+                setSelect('new-dev-storage', device.storage);
+                
+                f.querySelector('textarea[name="details"]').value = device.details || '';
+
+                // LLENADO EN CASCADA (Async) - Adapted for standard selects
+                if(device.building) {
+                    setSelect('new-dev-building', device.building);
+                    
+                    // Cargar pisos
+                    const floors = await this.loadFloors(device.building);
+                    document.getElementById('new-dev-floor').innerHTML = '<option value="">-- Seleccione --</option>' + floors.map(f => `<option value="${f}">${f}</option>`).join('');
+                    
+                    if(device.floor) {
+                        setSelect('new-dev-floor', device.floor);
+                        
+                        // Cargar áreas
+                        const areas = await this.loadAreas(device.building, device.floor);
+                        document.getElementById('new-dev-area').innerHTML = '<option value="">-- Seleccione --</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
+                        
+                        if(device.area) {
+                            setSelect('new-dev-area', device.area);
+                            
+                            // Cargar habitaciones
+                            const rooms = this.loadRooms(device.area);
+                            document.getElementById('new-dev-room').innerHTML = '<option value="">-- Seleccione --</option>' + rooms.map(r => `<option value="${r}">${r}</option>`).join('');
+                            
+                            if(device.location) {
+                                const parts = device.location.split(' - ');
+                                if(parts.length > 3) setSelect('new-dev-room', parts[3]);
+                            }
                         }
-                    });
+                    }
                 }
+
+                this.dom['modal-device'].classList.remove('hidden');
             },
-            viewTicketDetails(ticketId) {
-                console.log("[v0] Viendo detalles del ticket ID:", ticketId);
-                const ticket = this.state.tickets.find(t => t.id === ticketId);
-                if(!ticket) return;
+            openViewDevice(id, type) {
+                console.log("[v0] Viendo detalles", type, id);
+                let data = null;
+                let title = "Detalles";
+                if (type === 'device') { data = this.state.currentDevices.find(d => d.id === id); title = "Detalles del Dispositivo"; } 
+                else if (type === 'ticket') { data = this.state.tickets.find(t => t.id === id); title = "Detalles del Ticket"; }
+                if (!data) return;
+                const container = document.getElementById('view-body-content');
+                document.querySelector('[data-js="view-title"]').textContent = title;
                 
-                const details = `
-                    <strong>Código:</strong> ${ticket.code}<br>
-                    <strong>Tipo:</strong> ${ticket.type}<br>
-                    <strong>Ubicación:</strong> ${ticket.location}<br>
-                    <strong>Fecha Entrada:</strong> ${this.fmtDate(ticket.dateIn)}<br>
-                    <strong>Fecha Salida:</strong> ${ticket.dateOut ? this.fmtDate(ticket.dateOut) : 'Aún en taller'}<br>
-                    <strong>Falla Reportada:</strong> ${ticket.details_in || ticket.issue || '-'}<br>
-                    <strong>Solución:</strong> ${ticket.details_out || ticket.solution || '-'}<br>
-                    <strong>Estado:</strong> ${ticket.status}
-                `;
+                // INYECCIÓN HTML MANUAL (SIMPLIFICADA)
+                let html = '<div class="details-grid">';
                 
-                // Crear modal temporal para mostrar detalles
-                const modal = document.createElement('div');
-                modal.className = 'modal-overlay';
-                modal.innerHTML = `
-                    <div class="modal-container" style="max-width: 500px;">
-                        <div class="modal-header">
-                            <h3>Detalles del Ticket #${ticketId}</h3>
-                            <button onclick="this.closest('.modal-overlay').remove()">&times;</button>
-                        </div>
-                        <div class="modal-body">
-                            ${details}
-                        </div>
-                        <div class="modal-footer">
-                            <button class="btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cerrar</button>
-                        </div>
-                    </div>
-                `;
-                document.body.appendChild(modal);
-            },
-            editTicket(ticketId) {
-                console.log("[v0] Editando ticket ID:", ticketId);
-                const ticket = this.state.tickets.find(t => t.id === ticketId);
-                if(!ticket) return;
-                
-                // TODO: Abrir modal de edición con datos pre-rellenos
-                alert("Función de edición en desarrollo. Ticket ID: " + ticketId);
-            },
-            deleteTicket(ticketId) {
-                console.log("[v0] Eliminando ticket ID:", ticketId);
-                if(confirm("¿Está seguro de eliminar este ticket?")) {
-                    fetch(`/api/tickets/${ticketId}`, { method: 'DELETE' }).then(res => {
-                        if(res.ok) {
-                            alert("Ticket eliminado");
-                            this.fetchTickets();
-                        } else {
-                            alert("Error al eliminar ticket");
-                        }
-                    });
-                }
-            },
-            async saveLocation(fd) {
-                const data = Object.fromEntries(fd);
-                console.log("[v0] Guardando ubicación:", data);
-                
-                // Capturar valores de selects especiales (pueden venir del select O del input)
-                const buildingSelect = document.getElementById('loc-building');
-                const floorSelect = document.getElementById('loc-floor');
-                const areaSelect = document.getElementById('loc-area');
-                const roomSelect = document.getElementById('loc-room');
-                
-                const buildingInput = document.getElementById('input-loc-building');
-                const floorInput = document.getElementById('input-loc-floor');
-                const areaInput = document.getElementById('input-loc-area');
-                const roomInput = document.getElementById('input-loc-room');
-                
-                // Si el input NO está oculto, capturar su valor; sino, capturar del select
-                if(buildingInput && !buildingInput.classList.contains('hidden') && buildingInput.value) {
-                    data.building = buildingInput.value;
-                } else if(buildingSelect?.value) {
-                    data.building = buildingSelect.value;
-                }
-                
-                if(floorInput && !floorInput.classList.contains('hidden') && floorInput.value) {
-                    data.floor = floorInput.value;
-                } else if(floorSelect?.value) {
-                    data.floor = floorSelect.value;
-                }
-                
-                if(areaInput && !areaInput.classList.contains('hidden') && areaInput.value) {
-                    data.area = areaInput.value;
-                } else if(areaSelect?.value) {
-                    data.area = areaSelect.value;
-                }
-                
-                if(roomInput && !roomInput.classList.contains('hidden') && roomInput.value) {
-                    data.room = roomInput.value;
-                } else if(roomSelect?.value) {
-                    data.room = roomSelect.value;
-                }
-                
-                const res = await fetch('/api/locations', { method:'POST', body: JSON.stringify(data) });
-                if(res.ok) {
-                    alert("Ubicación creada");
-                    document.getElementById('modal-location').classList.add('hidden');
-                    this.fetchConfig();
-                    this.loadLocationsForSelect();
+                if (type === 'ticket') {
+                    html += `
+                        <div class="detail-item"><span class="detail-label">Código</span><span class="detail-value">${data.code || '-'}</span></div>
+                        <div class="detail-item"><span class="detail-label">Tipo</span><span class="detail-value">${data.type || data.device_type || '-'}</span></div>
+                        <div class="detail-item"><span class="detail-label">Ubicación</span><span class="detail-value">${data.location || '-'}</span></div>
+                        <div class="detail-item"><span class="detail-label">Estado</span><span class="detail-value">${data.status || '-'}</span></div>
+                        <div class="detail-item"><span class="detail-label">Fecha Ingreso</span><span class="detail-value">${data.dateIn || data.date_in || '-'}</span></div>
+                        <div class="detail-item"><span class="detail-label">Fecha Salida</span><span class="detail-value">${data.dateOut || data.date_out || '-'}</span></div>
+                        <div class="detail-item"><span class="detail-label">Falla Reportada</span><span class="detail-value">${data.detailsIn || data.details_in || data.issue || '-'}</span></div>
+                        <div class="detail-item"><span class="detail-label">Solución / Obs.</span><span class="detail-value">${data.detailsOut || data.details_out || data.solution || '-'}</span></div>
+                        <div class="detail-item"><span class="detail-label">Marca</span><span class="detail-value">${data.brand || '-'}</span></div>
+                        <div class="detail-item"><span class="detail-label">Modelo</span><span class="detail-value">${data.model || '-'}</span></div>
+                        <div class="detail-item"><span class="detail-label">Serial</span><span class="detail-value">${data.serial || '-'}</span></div>
+                    `;
                 } else {
-                    alert("Error al crear ubicación");
+                    // Dispositivo
+                    html += `
+                        <div class="detail-item"><span class="detail-label">Código</span><span class="detail-value">${data.code || '-'}</span></div>
+                        <div class="detail-item"><span class="detail-label">Tipo</span><span class="detail-value">${data.type || '-'}</span></div>
+                        <div class="detail-item"><span class="detail-label">Marca</span><span class="detail-value">${data.brand || '-'}</span></div>
+                        <div class="detail-item"><span class="detail-label">Modelo</span><span class="detail-value">${data.model || '-'}</span></div>
+                        <div class="detail-item"><span class="detail-label">Serial</span><span class="detail-value">${data.serial || '-'}</span></div>
+                        <div class="detail-item"><span class="detail-label">S.O.</span><span class="detail-value">${data.os || '-'}</span></div>
+                        <div class="detail-item"><span class="detail-label">Ubicación Completa</span><span class="detail-value">${data.location || '-'}</span></div>
+                        <div class="detail-item"><span class="detail-label">Edificio</span><span class="detail-value">${data.building || '-'}</span></div>
+                        <div class="detail-item"><span class="detail-label">Piso</span><span class="detail-value">${data.floor || '-'}</span></div>
+                        <div class="detail-item"><span class="detail-label">Área</span><span class="detail-value">${data.area || '-'}</span></div>
+                        <div class="detail-item"><span class="detail-label">Habitación</span><span class="detail-value">${data.room || '-'}</span></div>
+                        <div class="detail-item"><span class="detail-label">RAM</span><span class="detail-value">${data.ram || '-'}</span></div>
+                        <div class="detail-item"><span class="detail-label">Procesador</span><span class="detail-value">${data.processor || '-'}</span></div>
+                        <div class="detail-item"><span class="detail-label">Arquitectura</span><span class="detail-value">${data.architecture || '-'}</span></div>
+                        <div class="detail-item"><span class="detail-label">Almacenamiento</span><span class="detail-value">${data.storage || '-'}</span></div>
+                        <div class="detail-item"><span class="detail-label">Detalles Adicionales</span><span class="detail-value">${data.details || '-'}</span></div>
+                    `;
                 }
+                
+                html += '</div>';
+                container.innerHTML = html;
+                this.dom['modal-view'].classList.remove('hidden');
+            },
+            openDeleteModal(id, type) {
+                document.getElementById('delete-target-id').value = id;
+                document.getElementById('delete-target-type').value = type;
+                this.dom['modal-delete'].classList.remove('hidden');
+            },
+            async executeDelete() {
+                const id = document.getElementById('delete-target-id').value;
+                const type = document.getElementById('delete-target-type').value;
+                let url = type === 'device' ? `/api/devices/${id}` : `/api/tickets/${id}`;
+                try {
+                    const res = await fetch(url, { method: 'DELETE' });
+                    if(res.status === 409) { alert("No se puede eliminar: Tiene registros asociados."); this.dom['modal-delete'].classList.add('hidden'); return; }
+                    if(res.ok) {
+                        alert("Eliminado exitosamente");
+                        this.dom['modal-delete'].classList.add('hidden');
+                        if(type === 'device') this.fetchDevices(); else this.fetchTickets();
+                    } else { const txt = await res.text(); alert("Error al eliminar: " + txt); }
+                } catch (e) { console.error(e); alert("Error de conexión"); }
             },
             async saveDevice(fd) {
                 const data = Object.fromEntries(fd);
-                console.log("[v0] Guardando dispositivo...");
+                const isEdit = !!data.id;
                 
-                // Construir ubicación desde selects jerárquicos
+                // Construcción de Location manual (Fallback)
                 const building = document.getElementById('new-dev-building').value;
                 const floor = document.getElementById('new-dev-floor').value || '';
                 const area = document.getElementById('new-dev-area').value || '';
-                const room = document.getElementById('new-dev-room').value || '';
                 
-                if(!building) {
-                    alert("El edificio es obligatorio");
-                    return;
-                }
+                // Lógica Select Especial para Room
+                const roomSelect = document.getElementById('new-dev-room');
+                const roomInput = document.getElementById('input-new-dev-room');
+                let room = '';
+                if(roomInput && !roomInput.classList.contains('hidden') && roomInput.value) room = roomInput.value;
+                else if(roomSelect?.value) room = roomSelect.value;
                 
+                if(!building) { alert("El edificio es obligatorio"); return; }
                 data.location = `${building} - ${floor} - ${area} ${room}`.trim();
                 
-                // Capturar valores de selects especiales (pueden venir del select O del input)
-                const typeSelect = document.getElementById('new-dev-type');
-                const brandSelect = document.getElementById('new-dev-brand');
-                const osSelect = document.getElementById('new-dev-os');
-                const ramSelect = document.getElementById('new-dev-ram');
-                const processorSelect = document.getElementById('new-dev-processor');
-                const architectureSelect = document.getElementById('new-dev-architecture');
-                const storageSelect = document.getElementById('new-dev-storage');
+                // Selects especiales restantes
+                const captureSpecial = (key, selId, inpId) => {
+                    const s = document.getElementById(selId), i = document.getElementById(inpId);
+                    if(i && !i.classList.contains('hidden') && i.value) data[key] = i.value;
+                    else if(s?.value) data[key] = s.value;
+                };
+                captureSpecial('type', 'new-dev-type', 'input-new-dev-type');
+                captureSpecial('brand', 'new-dev-brand', 'input-new-dev-brand');
+                captureSpecial('os', 'new-dev-os', 'input-new-dev-os');
+                captureSpecial('ram', 'new-dev-ram', 'input-new-dev-ram');
+                captureSpecial('processor', 'new-dev-processor', 'input-new-dev-processor');
+                captureSpecial('architecture', 'new-dev-architecture', 'input-new-dev-architecture');
+                captureSpecial('storage', 'new-dev-storage', 'input-new-dev-storage');
                 
-                const typeInput = document.getElementById('input-new-dev-type');
-                const brandInput = document.getElementById('input-new-dev-brand');
-                const osInput = document.getElementById('input-new-dev-os');
-                const ramInput = document.getElementById('input-new-dev-ram');
-                const processorInput = document.getElementById('input-new-dev-processor');
-                const architectureInput = document.getElementById('input-new-dev-architecture');
-                const storageInput = document.getElementById('input-new-dev-storage');
-                
-                // Si el input NO está oculto, capturar su valor; sino, capturar del select
-                if(typeInput && !typeInput.classList.contains('hidden') && typeInput.value) {
-                    data.type = typeInput.value;
-                } else if(typeSelect?.value) {
-                    data.type = typeSelect.value;
-                }
-                
-                if(brandInput && !brandInput.classList.contains('hidden') && brandInput.value) {
-                    data.brand = brandInput.value;
-                } else if(brandSelect?.value) {
-                    data.brand = brandSelect.value;
-                }
-                
-                if(osInput && !osInput.classList.contains('hidden') && osInput.value) {
-                    data.os = osInput.value;
-                } else if(osSelect?.value) {
-                    data.os = osSelect.value;
-                }
-                
-                // Especificaciones técnicas opcionales
-                if(ramInput && !ramInput.classList.contains('hidden') && ramInput.value) {
-                    data.ram = ramInput.value;
-                } else if(ramSelect?.value) {
-                    data.ram = ramSelect.value;
-                }
-                
-                if(processorInput && !processorInput.classList.contains('hidden') && processorInput.value) {
-                    data.processor = processorInput.value;
-                } else if(processorSelect?.value) {
-                    data.processor = processorSelect.value;
-                }
-                
-                if(architectureInput && !architectureInput.classList.contains('hidden') && architectureInput.value) {
-                    data.architecture = architectureInput.value;
-                } else if(architectureSelect?.value) {
-                    data.architecture = architectureSelect.value;
-                }
-                
-                if(storageInput && !storageInput.classList.contains('hidden') && storageInput.value) {
-                    data.storage = storageInput.value;
-                } else if(storageSelect?.value) {
-                    data.storage = storageSelect.value;
-                }
-                
-                console.log("[v0] Dispositivo a guardar:", data);
-                
-                const res = await fetch('/api/devices', { method:'POST', body: JSON.stringify(data) });
+                const url = isEdit ? `/api/devices/${data.id}` : '/api/devices'; 
+                const method = isEdit ? 'PUT' : 'POST';
+                const res = await fetch(url, { method: method, body: JSON.stringify(data) }); 
                 if(res.ok) {
-                    alert("Dispositivo creado");
+                    alert(isEdit ? "Dispositivo actualizado" : "Dispositivo creado");
                     document.getElementById('modal-device').classList.add('hidden');
-                    this.fetchDevices();
-                    this.fetchConfig();
-                } else {
-                    const err = await res.text();
-                    console.log("[v0] Error:", err);
-                    alert("Error al crear dispositivo: " + err);
+                    this.fetchDevices(); this.fetchConfig();
+                } else { const err = await res.text(); alert("Error: " + err); }
+            },
+            // Helper function for local date string YYYY-MM-DD
+            getVeDate() {
+                // Obtiene la fecha en formato DD/MM/YYYY local
+                const local = new Date().toLocaleDateString('es-VE'); 
+                // Convierte a YYYY-MM-DD para el input date
+                const parts = local.split('/');
+                if(parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+                return new Date().toISOString().split('T')[0]; // Fallback
+            },
+            // Función para editar ticket
+            async editTicket(id) {
+                console.log("[v0] Editando ticket ID:", id);
+                const t = this.state.tickets.find(x => x.id === id);
+                if (!t) { console.error("Ticket no encontrado"); return; }
+                
+                const f = this.dom['form-ticket'];
+                f.reset();
+                
+                // --- 1. Llenar Datos Básicos (Mapeo Seguro PATCH-5) ---
+                document.getElementById('ticket-id').value = id;
+                
+                // ID Dispositivo: Ahora el backend PATCH-5 lo incluye como `deviceId`
+                const devId = t.deviceId;
+                document.getElementById('ticket-selected-id').value = devId;
+                document.getElementById('ticket-selected-code').value = t.code;
+                
+                // Fecha: Manejar formato YYYY-MM-DD
+                let dateVal = t.dateIn;
+                if(dateVal && dateVal.includes('T')) dateVal = dateVal.split('T')[0];
+                f.querySelector('input[name="fecha"]').value = dateVal || this.getVeDate();
+                
+                // Falla: Usar nuevo nombre camelCase detailsIn
+                f.querySelector('textarea[name="falla"]').value = t.detailsIn || '';
+                
+                // UI
+                document.querySelector('[data-js="modal-ticket-title"]').textContent = 'Editar Ticket';
+                document.querySelector('[data-js="btn-save-ticket"]').textContent = 'Guardar Cambios';
+                
+                // --- 2. Lógica de Ubicación (Autorrelleno Inteligente) ---
+                try {
+                    // Obtener datos frescos del dispositivo para llenar los selects en cascada
+                    const devRes = await fetch(`/api/devices/${devId}`);
+                    if(devRes.ok) {
+                        const dev = await devRes.json();
+                        
+                        // Determinar ubicación: Usar campos explícitos O parsear string 'location'
+                        let build = dev.building;
+                        let floor = dev.floor;
+                        let area = dev.area;
+                        
+                        if (!build && dev.location) {
+                            const parts = dev.location.split(' - ');
+                            if (parts.length >= 1) build = parts[0].trim();
+                            if (parts.length >= 2) floor = parts[1].trim();
+                            if (parts.length >= 3) area = parts[2].trim();
+                        }
+
+                        // A. Setear Edificio
+                        const buildSel = document.getElementById('ticket-filter-build');
+                        buildSel.value = build || '';
+                        
+                        // B. Cargar Pisos y Setear
+                        if(build) {
+                            const floors = await this.loadFloors(build);
+                            const floorSel = document.getElementById('ticket-filter-floor');
+                            floorSel.innerHTML = '<option value="">-- Seleccione --</option>' + floors.map(x => `<option value="${x}">${x}</option>`).join('');
+                            floorSel.value = floor || '';
+                            
+                            // C. Cargar Áreas y Setear
+                            if(floor) {
+                                const areas = await this.loadAreas(build, floor);
+                                const areaSel = document.getElementById('ticket-filter-area');
+                                areaSel.innerHTML = '<option value="">-- Seleccione --</option>' + areas.map(x => `<option value="${x}">${x}</option>`).join('');
+                                areaSel.value = area || '';
+                                
+                                // D. Cargar Lista de Equipos Filtrada
+                                await this.fetchModalDevices(); // Usa los valores actuales del DOM
+                                
+                                // E. Seleccionar el equipo
+                                const devSel = document.getElementById('ticket-device-select');
+                                devSel.value = devId;
+                            }
+                        }
+                    } else {
+                        // Fallback visual si falla API devices
+                        const sel = document.getElementById('ticket-device-select');
+                        sel.innerHTML = `<option value="${devId}" selected>${t.code} - (Equipo Actual)</option>`;
+                    }
+                } catch(e) {
+                    console.error("Error autorrellenando ubicación:", e);
+                    // Fallback visual
+                    const sel = document.getElementById('ticket-device-select');
+                    sel.innerHTML = `<option value="${devId}" selected>${t.code} - (Equipo Actual)</option>`;
                 }
+                
+                this.dom['modal-ticket'].classList.remove('hidden');
             },
             async saveTicket(fd) {
-                const d = Object.fromEntries(fd); 
-                d.deviceId = parseInt(d.deviceId);
-                // Renombrar 'issue' a 'details_in' para que coincida con la BD
-                if(d.issue) {
-                    d.details_in = d.issue;
-                    delete d.issue;
-                }
+                const d = Object.fromEntries(fd);
+                const isEdit = d.id && d.id.trim() !== '';
                 
-                console.log("[v0] Guardando ticket - Fecha ingreso:", d.fecha);
+                // Payload exacto según PATCH-5 (camelCase)
+                const payload = {
+                    deviceId: parseInt(d.deviceId),
+                    detailsIn: d.falla,
+                    dateIn: d.fecha
+                };
                 
-                // Validar fecha
-                const today = new Date().toISOString().split('T')[0];
-                if(d.fecha > today) {
-                    console.log("[v0] Fecha futura rechazada:", d.fecha);
-                    alert("La fecha de ingreso no puede ser mayor a hoy");
-                    return;
-                }
+                if(!payload.dateIn) payload.dateIn = this.getVeDate();
+                if(isEdit) payload.id = parseInt(d.id);
+
+                const url = isEdit ? `/api/tickets/${d.id}` : '/api/tickets';
+                const method = isEdit ? 'PUT' : 'POST';
                 
-                const res = await fetch('/api/tickets', { method:'POST', body: JSON.stringify(d) });
-                if(!res.ok) {
-                    const err = await res.text();
-                    console.log("[v0] Error creando ticket:", err);
-                    alert("Error: " + err);
-                    return;
+                try {
+                    const res = await fetch(url, { 
+                        method: method, 
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(payload) 
+                    });
+                    
+                    if(res.ok) {
+                        alert(isEdit ? "Guardado correctamente" : "Creado correctamente");
+                        document.getElementById('modal-ticket').classList.add('hidden'); // Cerrar modal explícitamente
+                        await this.fetchTickets(); // Recargar tabla
+                    } else {
+                        const txt = await res.text();
+                        alert("Error del servidor: " + txt);
+                    }
+                } catch(e) {
+                    alert("Error de red: " + e.message);
                 }
-                alert("Ticket creado"); 
-                document.querySelector('[data-action="close-modals"]').click();
-                // Actualizar dinámicamente sin recargar
-                await this.fetchTickets();
             },
             async finishTicket(fd) {
                 const d = Object.fromEntries(fd); 
-                d.id = parseInt(d.id);
-                // Renombrar 'solution' a 'details_out' para que coincida con la BD
-                if(d.solution) {
-                    d.details_out = d.solution;
-                    delete d.solution;
-                }
-                console.log("[v0] Finalizando ticket ID:", d.id, "- Estado:", d.status, "- Fecha salida:", d.date_out);
                 
-                const res = await fetch('/api/tickets/finish', { method:'POST', body: JSON.stringify(d) });
-                if(!res.ok) {
-                    console.log("[v0] Error finalizando ticket");
-                    alert("Error al finalizar el ticket");
-                    return;
-                }
+                // Payload exacto para finalizar (PATCH-5 camelCase)
+                const payload = {
+                    id: parseInt(d.id),
+                    status: d.status,
+                    dateOut: d.date_out,
+                    detailsOut: d.solution 
+                };
                 
-                console.log("[v0] Ticket finalizado exitosamente");
-                document.querySelector('.modal-overlay:not(.hidden)').classList.add('hidden');
-                // Actualizar dinámicamente sin recargar
+                const res = await fetch('/api/tickets/finish', { method:'POST', body: JSON.stringify(payload) });
+                if(!res.ok) { alert("Error al finalizar el ticket"); return; }
+                
+                document.querySelector('.modal-overlay:not(.hidden)').classList.add('hidden'); 
                 await this.fetchTickets();
             },
             openFinish(id) {
                 const t = this.state.tickets.find(x => x.id === id);
-                if(t) { 
-                    const f = this.dom['form-finish']; f.reset();
-                    f.querySelector('[name=id]').value = id; 
-                    f.querySelector('[name=date_out]').value = new Date().toISOString().split('T')[0];
-                    this.dom['modal-finish'].classList.remove('hidden'); 
-                }
+                if(t) { const f = this.dom['form-finish']; f.reset(); f.querySelector('[name=id]').value = id; f.querySelector('[name=date_out]').value = this.getVeDate(); this.dom['modal-finish'].classList.remove('hidden'); }
             },
             extractUniqueValues(tickets, field) {
-                // Extrae valores únicos de un campo de la lista de tickets
-                const values = tickets.filter(t => t[field]).map(t => t[field]);
-                return [...new Set(values)].sort();
+                const values = tickets.filter(t => t[field]).map(t => t[field]); return [...new Set(values)].sort();
             },
             async fetchPeriod() {
-                console.log("[v0] Buscando período académico activo...");
+                console.log("[v0] Buscando período...");
                 const allP = await (await fetch('/api/periods')).json();
-                const today = new Date().toISOString().split('T')[0];
+                const today = this.getVeDate();
                 
-                console.log("[v0] Fecha actual:", today);
-                console.log("[v0] Períodos disponibles:", allP.map(p => `${p.code} (${p.date_ini} - ${p.date_end})`));
+                // Ordenar por fecha de inicio descendente (Más reciente primero)
+                // Ejemplo: [II-2026 (Oct 26), I-2026 (Mar 26), II-2025 (Oct 25)]
+                const sorted = allP.sort((a,b) => (a.date_ini < b.date_ini ? 1 : -1));
                 
-                // LÓGICA CORRECTA: El período activo es el último que ya inició (date_ini <= hoy)
-                // No importa si ya terminó, seguirá siendo el activo hasta que inicie el siguiente
-                let activePeriod = null;
-                for(let i = allP.length - 1; i >= 0; i--) {
-                    if(today >= allP[i].date_ini) {
-                        activePeriod = allP[i];
-                        console.log("[v0] Período activo encontrado:", activePeriod.code, "porque hoy >=", activePeriod.date_ini);
-                        break;
-                    }
-                }
+                // Buscar el primer periodo que YA haya iniciado (fecha_inicio <= hoy)
+                // Si hoy es Feb 2026:
+                // II-2026 (Oct 26) > Feb 26? NO. (Pasa)
+                // I-2026 (Mar 26) > Feb 26? NO. (Pasa)
+                // II-2025 (Oct 25) <= Feb 26? SI. (Lo toma)
+                let activePeriod = sorted.find(p => p.date_ini <= today);
                 
-                // Si no hay ningún período iniciado, usar el primero
-                if(!activePeriod && allP.length > 0) {
-                    activePeriod = allP[0];
-                    console.log("[v0] No hay período iniciado, usando el primero:", activePeriod.code);
-                }
+                // Fallback de seguridad: Si no encuentra ninguno iniciado (ej. base de datos vacía o fechas raras),
+                // toma el último de la lista ordenada (el más antiguo), nunca el futuro (index 0).
+                if (!activePeriod && sorted.length > 0) activePeriod = sorted[sorted.length - 1];
                 
                 if(activePeriod) {
                     this.state.currentPeriodCode = activePeriod.code;
@@ -1530,67 +1587,35 @@
                     document.querySelector('[data-render="period-ini"]').textContent = this.fmtDate(activePeriod.date_ini);
                     document.querySelector('[data-render="period-end"]').textContent = this.fmtDate(activePeriod.date_end);
                     
-                    // Calcular porcentaje: (hoy - inicio) / (fin - inicio) * 100
-                    const todayDate = new Date().toISOString().split('T')[0];
-                    const startDate = activePeriod.date_ini;
-                    const endDate = activePeriod.date_end;
+                    // Cálculo de fechas para la barra
+                    const start = new Date(activePeriod.date_ini + 'T00:00:00');
+                    const end = new Date(activePeriod.date_end + 'T23:59:59');
+                    const now = new Date(); 
+
+                    let pct = 0;
+                    if (now > start) {
+                        const totalDuration = end.getTime() - start.getTime();
+                        const elapsed = now.getTime() - start.getTime();
+                        pct = (elapsed / totalDuration) * 100;
+                    }
                     
-                    const now = new Date(todayDate + 'T00:00:00').getTime();
-                    const start = new Date(startDate + 'T00:00:00').getTime();
-                    const end = new Date(endDate + 'T00:00:00').getTime();
-                    
-                    let pct = ((now - start) / (end - start)) * 100;
-                    if(pct < 0) pct = 0;
+                    if(pct < 0) pct = 0; 
                     if(pct > 100) pct = 100;
                     
-                    document.querySelector('.progress-bar').style.width = `${pct}%`;
-                    console.log("[v0] Período activo:", activePeriod.code, "- Progreso:", Math.round(pct) + "%");
-                    // SOLO mostrar el período académico activo
-                    this.dom['tbody-periods'].innerHTML = `<tr>
-                        <td>${activePeriod.code} <span style="color:var(--color-success); font-weight:bold;">(ACTUAL)</span></td>
-                        <td><input type="date" id="ini-${activePeriod.code}" value="${activePeriod.date_ini}" data-month="${activePeriod.date_ini.slice(0, 7)}"></td>
-                        <td><input type="date" id="end-${activePeriod.code}" value="${activePeriod.date_end}" data-month="${activePeriod.date_end.slice(0, 7)}"></td>
-                        <td><button class="btn-sm btn-success" onclick="app.updPeriod('${activePeriod.code}')">Guardar</button></td>
-                    </tr>`;
-                } else {
-                    console.log("[v0] Error: No hay ningún período definido en la base de datos");
-                    document.querySelector('[data-render="current-period"]').textContent = "Sin Período";
-                    this.dom['tbody-periods'].innerHTML = '<tr><td colspan="4">No hay períodos definidos.</td></tr>';
+                    const bar = document.querySelector('.progress-bar'); 
+                    bar.style.width = `${pct}%`;
+                    bar.style.minWidth = "0"; 
+                    
+                    document.querySelector('[data-render="progress-percent"]').textContent = `${Math.round(pct)}%`;
+
+                    this.dom['tbody-periods'].innerHTML = `<tr><td>${activePeriod.code} <span style="color:var(--color-success); font-weight:bold;">(ACTUAL)</span></td><td><input type="date" id="ini-${activePeriod.code}" value="${activePeriod.date_ini}" data-month="${activePeriod.date_ini.slice(0, 7)}"></td><td><input type="date" id="end-${activePeriod.code}" value="${activePeriod.date_end}" data-month="${activePeriod.date_end.slice(0, 7)}"></td><td><button class="btn-sm btn-success" onclick="app.updPeriod('${activePeriod.code}')">Guardar</button></td></tr>`;
                 }
             },
             async updPeriod(code) {
-                const iniInput = document.getElementById(`ini-${code}`);
-                const endInput = document.getElementById(`end-${code}`);
-                const ini = iniInput.value;
-                const end = endInput.value;
-                const origMonth = iniInput.dataset.month; // YYYY-MM original
-                
-                console.log("[v0] Actualizando período", code, "- Inicio:", ini, "- Fin:", end);
-                
-                // Validar que las fechas sean válidas
-                if(!ini || !end) {
-                    alert("Las fechas de inicio y fin son obligatorias");
-                    return;
-                }
-                
-                // Validar que NO cambien mes ni año, solo el día
-                const newMonth = ini.slice(0, 7);
-                if(newMonth !== origMonth) {
-                    alert("Solo puede cambiar el día, no puede cambiar mes ni año");
-                    iniInput.value = iniInput.dataset.originalValue;
-                    return;
-                }
-                
+                const ini = document.getElementById(`ini-${code}`).value; const end = document.getElementById(`end-${code}`).value;
+                if(!ini || !end) { alert("Fechas obligatorias"); return; }
                 const res = await fetch('/api/periods', { method:'PUT', body:JSON.stringify({code, date_ini:ini, date_end:end})});
-                if(res.ok) { 
-                    console.log("[v0] Período actualizado exitosamente");
-                    alert('Período actualizado'); 
-                    this.fetchPeriod(); 
-                } else { 
-                    const t = await res.text(); 
-                    console.log("[v0] Error actualizando período:", t);
-                    alert('Error: ' + t); 
-                }
+                if(res.ok) { alert('Período actualizado'); this.fetchPeriod(); } else { const t = await res.text(); alert('Error: ' + t); }
             },
             async fetchUsers() {
                 const res = await fetch('/api/users'); const users = await res.json();
@@ -1604,149 +1629,31 @@
                 const res = await fetch('/api/users', { method:'PUT', body:JSON.stringify(d)});
                 if(res.ok) alert('Usuario actualizado'); else alert('Error');
             },
-            
-            // --- FUNCIÓN DE REPORTE COMPLETA ---
             printReport(mode) {
                 const data = mode === 'view' ? this.state.filteredTickets : [...this.state.tickets].sort((a,b) => b.id - a.id);
                 if (!data || data.length === 0) { alert("No hay datos para generar el reporte."); return; }
-
-                // Obtener nombres de los inputs de configuración (si están cargados) o usar defaults
                 const adminName = document.querySelector('[data-js="form-settings-admin"] [name="fullName"]').value || "OSWALDO GUEDEZ";
                 const adminJob = document.querySelector('[data-js="form-settings-admin"] [name="jobTitle"]').value || "JEFE DE ÁREA";
                 const coordName = document.querySelector('[data-js="form-settings-user"] [name="fullName"]').value || "FRANCISCO VELAZQUEZ";
                 const coordJob = document.querySelector('[data-js="form-settings-user"] [name="jobTitle"]').value || "COORDINADOR TIC";
-
-                const URL_LOGO_IZQUIERDO = './public/logo-fuerzas-armadas.avif'; 
-                const URL_LOGO_DERECHO = './public/logo-unefa.avif';
-
+                const URL_LOGO_IZQUIERDO = '/static/public/logo-fuerzas-armadas.avif'; 
+                const URL_LOGO_DERECHO = '/static/public/logo-unefa.avif';
                 let reportContent = '';
                 const ROWS_PER_PAGE = 12;
                 const totalPages = Math.ceil(data.length / ROWS_PER_PAGE);
-
                 for (let i = 0; i < totalPages; i++) {
                     const pageData = data.slice(i * ROWS_PER_PAGE, (i + 1) * ROWS_PER_PAGE);
-                    
-                    const headerHTML = `
-                        <div class="header-container">
-                            <div class="logo-box"><img src="${URL_LOGO_IZQUIERDO}" alt="Logo Izq"></div>
-                            <div class="header-text">
-                                MINISTERIO DEL PODER POPULAR PARA LA DEFENSA<br>
-                                UNIVERSIDAD NACIONAL EXPERIMENTAL POLITÉCNICA DE LA FUERZA ARMADA<br>
-                                NÚCLEO MIRANDA - SEDE LOS TEQUES<br>
-                                COORDINACIÓN DE TECNOLOGÍA Y SOPORTE<br>
-                                TECNOLOGÍA, INFORMACIÓN Y COMUNICACIÓN<br>
-                                SOPORTE TÉCNICO
-                            </div>
-                            <div class="logo-box"><img src="${URL_LOGO_DERECHO}" alt="Logo Der"></div>
-                        </div>
-                        <div class="section-title">REPORTE DE GESTIÓN DE SOPORTE TÉCNICO</div>
-                    `;
-
+                    const headerHTML = `<div class="header-container"><div class="logo-box"><img src="${URL_LOGO_IZQUIERDO}" alt="Logo Izq"></div><div class="header-text">MINISTERIO DEL PODER POPULAR PARA LA DEFENSA<br>UNIVERSIDAD NACIONAL EXPERIMENTAL POLITÉCNICA DE LA FUERZA ARMADA<br>NÚCLEO MIRANDA - SEDE LOS TEQUES<br>COORDINACIÓN DE TECNOLOGÍA Y SOPORTE<br>TECNOLOGÍA, INFORMACIÓN Y COMUNICACIÓN<br>SOPORTE TÉCNICO</div><div class="logo-box"><img src="${URL_LOGO_DERECHO}" alt="Logo Der"></div></div><div class="section-title">REPORTE DE GESTIÓN DE SOPORTE TÉCNICO</div>`;
                     let rowsHTML = '';
-                    pageData.forEach((t, idx) => {
-                        const num = (i * ROWS_PER_PAGE) + idx + 1;
-                        rowsHTML += `
-                            <tr>
-                                <td class="col-center">${num}</td>
-                                <td class="col-center">${this.fmtDate(t.dateIn)}</td>
-                                <td class="col-center"><b>${t.code}</b><br>${t.type}</td>
-                                <td class="col-center">${t.location}</td>
-                                <td class="col-center">${t.dateOut ? this.fmtDate(t.dateOut) : '-'}</td>
-                                <td class="col-left" style="font-size:8pt;">${t.solution || t.issue}</td>
-                                <td class="col-center" style="font-size:8pt;">${t.status}</td>
-                            </tr>
-                        `;
-                    });
-
+                    pageData.forEach((t, idx) => { const num = (i * ROWS_PER_PAGE) + idx + 1; rowsHTML += `<tr><td class="col-center">${num}</td><td class="col-center">${this.fmtDate(t.dateIn || t.date_in)}</td><td class="col-center"><b>${t.code}</b><br>${t.device_type || t.type}</td><td class="col-center">${t.location}</td><td class="col-center">${t.dateOut || t.date_out ? this.fmtDate(t.dateOut || t.date_out) : '-'}</td><td class="col-left" style="font-size:8pt;">${t.detailsOut || t.detailsIn || t.details_in || t.issue || '-'}</td><td class="col-center" style="font-size:8pt;">${t.status}</td></tr>`; });
                     let signaturesHTML = '';
-                    if (i === totalPages - 1) {
-                        signaturesHTML = `
-                            <div class="signatures">
-                                <div class="sign-box">
-                                    <div style="margin-top:5px; margin-bottom:2px; font-weight:normal;">${adminName}</div>
-                                    ${adminJob}
-                                    <br><span style="font-weight:normal;font-size:8pt;">FIRMA Y SELLO</span>
-                                </div>
-                                <div class="sign-box">
-                                    <div style="margin-top:5px; margin-bottom:2px; font-weight:normal;">${coordName}</div>
-                                    ${coordJob}
-                                    <br><span style="font-weight:normal;font-size:8pt;">FIRMA Y SELLO</span>
-                                </div>
-                            </div>
-                        `;
-                    }
-
-                    reportContent += `
-                        <div class="page">
-                            ${headerHTML}
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th style="width:5%">N°</th>
-                                        <th style="width:10%">FECHA</th>
-                                        <th style="width:15%">EQUIPO</th>
-                                        <th style="width:15%">UBICACIÓN</th>
-                                        <th style="width:10%">SALIDA</th>
-                                        <th style="width:35%">DETALLE / SOLUCIÓN</th>
-                                        <th style="width:10%">ESTADO</th>
-                                    </tr>
-                                </thead>
-                                <tbody>${rowsHTML}</tbody>
-                            </table>
-                            ${signaturesHTML}
-                            <div class="footer-info">
-                                <span>Sistema S.A.R.T.</span>
-                                <span>Página ${i + 1} de ${totalPages}</span>
-                            </div>
-                        </div>
-                    `;
+                    if (i === totalPages - 1) { signaturesHTML = `<div class="signatures"><div class="sign-box"><div style="margin-top:5px; margin-bottom:2px; font-weight:normal;">${adminName}</div>${adminJob}<br><span style="font-weight:normal;font-size:8pt;">FIRMA Y SELLO</span></div><div class="sign-box"><div style="margin-top:5px; margin-bottom:2px; font-weight:normal;">${coordName}</div>${coordJob}<br><span style="font-weight:normal;font-size:8pt;">FIRMA Y SELLO</span></div></div>`; }
+                    reportContent += `<div class="page">${headerHTML}<table><thead><tr><th style="width:5%">N°</th><th style="width:10%">FECHA</th><th style="width:15%">EQUIPO</th><th style="width:15%">UBICACIÓN</th><th style="width:10%">SALIDA</th><th style="width:35%">DETALLE / SOLUCIÓN</th><th style="width:10%">ESTADO</th></tr></thead><tbody>${rowsHTML}</tbody></table>${signaturesHTML}<div class="footer-info"><span>Sistema S.A.R.T.</span><span>Página ${i + 1} de ${totalPages}</span></div></div>`;
                 }
-
-                const iframe = document.createElement('iframe');
-                iframe.style.position = 'absolute';
-                iframe.style.width = '0px';
-                iframe.style.height = '0px';
-                iframe.style.border = 'none';
-                document.body.appendChild(iframe);
-
-                const doc = iframe.contentWindow.document;
-                doc.open();
-                doc.write(`
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <title>Reporte SART</title>
-                        <style>
-                            @page { size: letter; margin: 0; }
-                            body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #ccc; }
-                            .page { width: 215.9mm; height: 279.4mm; background: white; margin: 0 auto; padding: 15mm; position: relative; page-break-after: always; overflow: hidden; }
-                            .header-container { display: flex; justify-content: space-between; align-items: center; height: 110px; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; overflow: hidden; }
-                            .logo-box { width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-                            .logo-box img { width: 100%; height: 100%; object-fit: contain; }
-                            .header-text { flex: 1; text-align: center; font-weight: bold; font-size: 8pt; line-height: 1.2; padding: 0 10px; }
-                            .section-title { font-weight: bold; margin-bottom: 10px; font-size: 11pt; text-align: center; text-decoration: underline; }
-                            table { width: 100%; border-collapse: collapse; font-size: 9pt; }
-                            th, td { border: 1px solid black; padding: 4px; vertical-align: middle; }
-                            th { background: #f0f0f0; text-align: center; font-weight: bold; }
-                            .col-center { text-align: center; }
-                            .col-left { text-align: left; }
-                            .signatures { margin-top: 50px; display: flex; justify-content: space-around; }
-                            .sign-box { width: 40%; text-align: center; border-top: 1px solid black; padding-top: 5px; font-weight: bold; font-size: 9pt; }
-                            .footer-info { position: absolute; bottom: 15mm; left: 15mm; right: 15mm; display: flex; justify-content: space-between; font-size: 8pt; border-top: 1px solid #ccc; padding-top: 5px; }
-                        </style>
-                    </head>
-                    <body>${reportContent}</body>
-                    </html>
-                `);
-                doc.close();
-
-                iframe.contentWindow.focus();
-                setTimeout(() => {
-                    iframe.contentWindow.print();
-                    document.body.removeChild(iframe);
-                }, 500);
+                const iframe = document.createElement('iframe'); iframe.style.position = 'absolute'; iframe.style.width = '0px'; iframe.style.height = '0px'; iframe.style.border = 'none'; document.body.appendChild(iframe);
+                const doc = iframe.contentWindow.document; doc.open(); doc.write(`<!DOCTYPE html><html><head><title>Reporte SART</title><style>@page { size: letter; margin: 0; } body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #ccc; } .page { width: 215.9mm; height: 279.4mm; background: white; margin: 0 auto; padding: 15mm; position: relative; page-break-after: always; overflow: hidden; } .header-container { display: flex; justify-content: space-between; align-items: center; height: 110px; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; overflow: hidden; } .logo-box { width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; } .logo-box img { width: 100%; height: 100%; object-fit: contain; } .header-text { flex: 1; text-align: center; font-weight: bold; font-size: 8pt; line-height: 1.2; padding: 0 10px; } .section-title { font-weight: bold; margin-bottom: 10px; font-size: 11pt; text-align: center; text-decoration: underline; } table { width: 100%; border-collapse: collapse; font-size: 9pt; } th, td { border: 1px solid black; padding: 4px; vertical-align: middle; } th { background: #f0f0f0; text-align: center; font-weight: bold; } .col-center { text-align: center; } .col-left { text-align: left; } .signatures { margin-top: 50px; display: flex; justify-content: space-around; } .sign-box { width: 40%; text-align: center; border-top: 1px solid black; padding-top: 5px; font-weight: bold; font-size: 9pt; } .footer-info { position: absolute; bottom: 15mm; left: 15mm; right: 15mm; display: flex; justify-content: space-between; font-size: 8pt; border-top: 1px solid #ccc; padding-top: 5px; } </style></head><body>${reportContent}</body></html>`); doc.close();
+                iframe.contentWindow.focus(); setTimeout(() => { iframe.contentWindow.print(); document.body.removeChild(iframe); }, 500);
             },
-
             renderDash() {
                 document.querySelector('[data-js="stat-pending"]').textContent = this.state.tickets.filter(t=>t.status==='Pendiente').length;
                 document.querySelector('[data-js="stat-total"]').textContent = this.state.tickets.length;
@@ -1755,12 +1662,11 @@
             updateTime() {
                 const now = new Date();
                 document.querySelector('[data-js="current-date"]').textContent = now.toLocaleDateString();
-                document.querySelectorAll('input[type="date"]').forEach(i => { if(!i.value) i.value = now.toISOString().split('T')[0]; });
+                document.querySelectorAll('input[type="date"]').forEach(i => { if(!i.value) i.value = this.getVeDate(); });
             },
             initCharCounters() { document.querySelectorAll('textarea[maxlength]').forEach(txt => { const counter = document.createElement('div'); counter.className = 'char-counter'; counter.textContent = `0/${txt.getAttribute('maxlength')}`; txt.parentNode.appendChild(counter); txt.addEventListener('input', () => { counter.textContent = `${txt.value.length}/${txt.getAttribute('maxlength')}`; }); }); },
-            validateDates() { const start = this.dom.filterDateStart.value; const end = this.dom.filterDateEnd.value; const today = new Date().toISOString().split('T')[0]; if (start > today || end > today) { alert("Fechas futuras inválidas."); if(start > today) this.dom.filterDateStart.value = ''; if(end > today) this.dom.filterDateEnd.value = ''; return; } if (start && end && start > end) { alert("Fecha incorrecta."); this.dom.filterDateEnd.value = ''; } },
+            validateDates() { const start = this.dom.filterDateStart.value; const end = this.dom.filterDateEnd.value; const today = this.getVeDate(); if (start > today || end > today) { alert("Fechas futuras inválidas."); if(start > today) this.dom.filterDateStart.value = ''; if(end > today) this.dom.filterDateEnd.value = ''; return; } if (start && end && start > end) { alert("Fecha incorrecta."); this.dom.filterDateEnd.value = ''; } },
             renderHistory() {
-                console.log("[v0] Renderizando historial con filtros...");
                 const textF = (this.dom.filterText.value || '').toLowerCase();
                 const typeF = this.dom.filterType?.value || '';
                 const brandF = this.dom.filterBrand?.value || '';
@@ -1783,32 +1689,24 @@
                     if(dateEndF && t.dateIn > dateEndF) return false;
                     return true;
                 });
-                
-                console.log("[v0] Historial filtrado:", this.state.filteredTickets.length, "de", this.state.tickets.length);
-                this.dom['tbody-history'].innerHTML = this.state.filteredTickets.map(t => `<tr>
-                    <td><span class="badge ${t.status==='Pendiente'?'pending':t.status==='Reparado'?'repaired':'norepaired'}">${t.status}</span></td>
+                this.dom['tbody-history'].innerHTML = this.state.filteredTickets.map(t => `<tr><td><span class="badge ${t.status==='Pendiente'?'pending':t.status==='Reparado'?'repaired':'norepaired'}">${t.status}</span></td><td>${t.code}</td><td>${t.type}</td><td>${t.location}</td><td>${this.fmtDate(t.dateIn)}</td><td>${t.dateOut?this.fmtDate(t.dateOut):'-'}</td><td>${t.detailsOut || t.detailsIn || '-'}</td><td><div class="action-group"><button class="btn-icon" title="Ver detalles" onclick="app.openViewDevice(${t.id}, 'ticket')">👁️</button>${t.status === 'Pendiente' ? `<button class="btn-icon" title="Editar" onclick="app.editTicket(${t.id})">✏️</button>` : ''}<button class="btn-icon" title="Eliminar" onclick="app.openDeleteModal(${t.id}, 'ticket')">🗑️</button></div></td></tr>`).join('');
+            },
+            renderWorkshop(searchTerm = '') {
+                const pending = this.state.tickets.filter(t => t.status === 'Pendiente');
+                const filtered = searchTerm ? pending.filter(t => JSON.stringify(t).toLowerCase().includes(searchTerm.toLowerCase())) : pending;
+                this.dom['tbody-workshop'].innerHTML = filtered.map(t => `<tr>
                     <td>${t.code}</td>
                     <td>${t.type}</td>
-                    <td>${t.location}</td>
+                    <td>${t.detailsIn || '-'}</td>
                     <td>${this.fmtDate(t.dateIn)}</td>
-                    <td>${t.dateOut?this.fmtDate(t.dateOut):'-'}</td>
-                    <td>${t.details_out || t.solution || '-'}</td>
                     <td>
                         <div class="action-group">
-                            <button class="btn-icon" title="Ver detalles" onclick="app.viewTicketDetails(${t.id})">👁️</button>
-                            ${t.status === 'Pendiente' ? `<button class="btn-icon" title="Editar" onclick="app.editTicket(${t.id})">✏️</button>` : ''}
-                            <button class="btn-icon" title="Eliminar" onclick="app.deleteTicket(${t.id})">🗑️</button>
+                            <button class="btn-icon" title="Editar" onclick="app.editTicket(${t.id})">✏️</button>
+                            <button class="btn-icon text-success" title="Finalizar" onclick="app.openFinish(${t.id})">✅</button>
+                            <button class="btn-icon text-danger" title="Eliminar" onclick="app.openDeleteModal(${t.id}, 'ticket')">❌</button>
                         </div>
                     </td>
                 </tr>`).join('');
-            },
-            renderWorkshop(searchTerm = '') {
-                console.log("[v0] Renderizando taller con búsqueda:", searchTerm);
-                const pending = this.state.tickets.filter(t => t.status === 'pending');
-                const filtered = searchTerm ? pending.filter(t => JSON.stringify(t).toLowerCase().includes(searchTerm.toLowerCase())) : pending;
-                
-                console.log("[v0] Taller - Mostrando", filtered.length, "de", pending.length, "equipos pendientes");
-                this.dom['tbody-workshop'].innerHTML = filtered.map(t => `<tr><td>${t.code}</td><td>${t.type}</td><td>${t.details_in || t.issue || '-'}</td><td>${this.fmtDate(t.dateIn)}</td><td><button class="btn-success btn-sm" onclick="app.openFinish(${t.id})">Finalizar</button></td></tr>`).join('');
             },
             fmtDate(s) { if(!s) return '-'; const p = s.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; }
         };
