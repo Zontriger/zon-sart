@@ -748,4 +748,3 @@ func hashPassword(p string) string {
 	h := sha256.Sum256([]byte(p))
 	return hex.EncodeToString(h[:])
 }
-}
