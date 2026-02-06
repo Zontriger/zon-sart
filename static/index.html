@@ -1509,48 +1509,26 @@
                 document.getElementById('login-panel').classList.add('hidden');
                 document.querySelector('.app-layout').classList.remove('hidden');
                 document.getElementById('user-role').textContent = this.state.user.role === 'admin' ? '👤 Administrador' : '👁️ Visualizador';
+                
+                // Role-based menu filtering
+                if (this.state.user.role !== 'admin') {
+                    // Hide restricted modules for viewers - only Dashboard and Reports
+                    document.querySelector('[data-module="inventory"]').style.display = 'none';
+                    document.querySelector('[data-module="workshop"]').style.display = 'none';
+                    document.querySelector('[data-module="admin"]').style.display = 'none';
+                }
             },
 
-            setupLoginListener() {
-                document.getElementById('login-form').addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const username = document.getElementById('login-username').value;
-                    const password = document.getElementById('login-password').value;
-                    const role = document.getElementById('login-role').value;
-
-                    try {
-                        const res = await fetch('/api/login', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ username, password, role })
-                        });
-                        if (res.ok) {
-                            const user = await res.json();
-                            this.state.user = user;
-                            sessionStorage.setItem('user', JSON.stringify(user));
-                            this.showApp();
-                            await this.loadConfig();
-                            await this.loadData();
-                            this.setupEventListeners();
-                            this.updateDateTime();
-                            setInterval(() => this.updateDateTime(), 60000);
-                        } else {
-                            document.getElementById('login-error').textContent = 'Credenciales inválidas';
-                        }
-                    } catch (err) {
-                        console.error(err);
-                        document.getElementById('login-error').textContent = 'Error al conectar';
-                    }
-                });
-            },
-
-            // --- SETUP DE EVENTOS ---
             setupEventListeners() {
+                // Show initial dashboard
+                this.switchModule('dashboard');
+                
                 // Navigation
                 document.querySelectorAll('[data-module]').forEach(link => {
                     link.addEventListener('click', (e) => {
-                        if (e.target.tagName === 'A') {
-                            this.switchModule(e.target.dataset.module);
+                        if (e.target.tagName === 'A' || e.target.closest('[data-module]')) {
+                            const module = e.target.dataset.module || e.target.closest('[data-module]').dataset.module;
+                            this.switchModule(module);
                         }
                     });
                 });
@@ -1622,10 +1600,22 @@
             // --- MÓDULOS DE NAVEGACIÓN ---
             switchModule(module) {
                 this.state.activeModule = module;
+                
+                // Hide all modules
                 document.querySelectorAll('.module').forEach(m => m.classList.add('hidden'));
-                document.querySelector(`[data-module="${module}"]`).classList.remove('hidden');
+                
+                // Show selected module
+                const selectedModule = document.querySelector(`.module[data-module="${module}"]`);
+                if (selectedModule) {
+                    selectedModule.classList.remove('hidden');
+                }
+                
+                // Update nav links
                 document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-                document.querySelector(`[data-module="${module}"]`).classList.add('active');
+                const navLink = document.querySelector(`.nav-link[data-module="${module}"]`);
+                if (navLink) {
+                    navLink.classList.add('active');
+                }
 
                 const titles = {
                     'dashboard': '📊 Dashboard',
@@ -2083,6 +2073,7 @@
 
             // --- DASHBOARD ---
             async loadDashboard() {
+                console.log("[v0] Loading dashboard with tickets:", this.state.tickets);
                 this.updateDashboardStats();
                 await this.loadPeriodInfo();
             },
@@ -2092,10 +2083,11 @@
                 const month = new Date().getMonth() + 1;
                 const year = new Date().getFullYear();
                 const repaired = this.state.tickets.filter(t => 
-                    t.status === 'repaired' && t.dateOut.startsWith(`${year}-${String(month).padStart(2, '0')}`)
+                    t.status === 'repaired' && (t.dateOut && t.dateOut.startsWith(`${year}-${String(month).padStart(2, '0')}`))
                 ).length;
                 const total = this.state.tickets.length;
 
+                console.log("[v0] Dashboard stats - pending:", pending, "repaired:", repaired, "total:", total);
                 document.getElementById('stat-pending').textContent = pending;
                 document.getElementById('stat-repaired').textContent = repaired;
                 document.getElementById('stat-total').textContent = total;
@@ -2104,8 +2096,13 @@
             async loadPeriodInfo() {
                 try {
                     const res = await fetch('/api/periods/active');
+                    if (!res.ok) {
+                        console.log("[v0] Period endpoint returned:", res.status);
+                        return;
+                    }
                     const period = await res.json();
-                    if (period.code) {
+                    console.log("[v0] Period data:", period);
+                    if (period && period.code) {
                         document.querySelector('[data-render="current-period"]').textContent = period.code;
                         const [y, m, d] = period.date_ini.split('-');
                         const [y2, m2, d2] = period.date_end.split('-');
@@ -2123,7 +2120,7 @@
                         document.getElementById('progress-percent').textContent = percent + '%';
                     }
                 } catch (err) {
-                    console.error('Error loading period:', err);
+                    console.error('[v0] Error loading period:', err);
                 }
             },
 
