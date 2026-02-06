@@ -570,10 +570,6 @@ func handleDevices(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "POST" {
-		var req struct {
-			Code, Type, Serial, Architecture, Details string
-			LocationID, BrandID, ModelID, OSID, RamID, ProcID, StorageID *int64
-		}
 		// Se usa un struct auxiliar para mapear los IDs JSON a punteros (NULLs)
 		var jsonReq struct {
 			Code, Type, Serial, Architecture, Details string
