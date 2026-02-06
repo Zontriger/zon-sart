@@ -1496,13 +1496,48 @@
                     setInterval(() => this.updateDateTime(), 60000);
                 } else {
                     this.showLogin();
-                    this.setupLoginListener();
                 }
             },
 
             showLogin() {
                 document.getElementById('login-panel').classList.remove('hidden');
                 document.querySelector('.app-layout').classList.add('hidden');
+                this.setupLoginListener();
+            },
+
+            setupLoginListener() {
+                const form = document.getElementById('login-form');
+                if (!form) return;
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const username = document.getElementById('login-username').value;
+                    const password = document.getElementById('login-password').value;
+                    const role = document.getElementById('login-role').value;
+
+                    try {
+                        const res = await fetch('/api/login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ username, password, role })
+                        });
+                        if (res.ok) {
+                            const user = await res.json();
+                            this.state.user = user;
+                            sessionStorage.setItem('user', JSON.stringify(user));
+                            this.showApp();
+                            await this.loadConfig();
+                            await this.loadData();
+                            this.setupEventListeners();
+                            this.updateDateTime();
+                            setInterval(() => this.updateDateTime(), 60000);
+                        } else {
+                            document.getElementById('login-error').textContent = 'Credenciales inválidas';
+                        }
+                    } catch (err) {
+                        console.error('[v0] Login error:', err);
+                        document.getElementById('login-error').textContent = 'Error al conectar';
+                    }
+                });
             },
 
             showApp() {
