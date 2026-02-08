@@ -237,3 +237,250 @@ CREATE VIEW IF NOT EXISTS Vista_Datos_Dispositivo_Completo AS
     LEFT JOIN Procesador proc ON d.id_processor = proc.id
     LEFT JOIN RAM r ON d.id_ram = r.id
     LEFT JOIN Almacenamiento sto ON d.id_storage = sto.id;
+	
+BEGIN TRANSACTION;
+
+-- ==========================================
+-- 1. POBLAR TABLAS MAESTRAS (Catálogos)
+-- ==========================================
+
+-- Tipos de Dispositivo
+INSERT OR IGNORE INTO Tipo (type) VALUES ('PC'), ('Modem'), ('Switch');
+
+-- Sistemas Operativos
+INSERT OR IGNORE INTO Sistema_Operativo (os) VALUES 
+('Win 7'), ('Win 10'), ('Win 11'), ('Linux');
+
+-- RAM
+INSERT OR IGNORE INTO RAM (ram) VALUES 
+('512 MB'), ('1 GB'), ('1.5 GB'), ('2 GB'), ('4 GB');
+
+-- Almacenamiento
+INSERT OR IGNORE INTO Almacenamiento (storage) VALUES 
+('37 GB'), ('80 GB'), ('120 GB'), ('512 GB');
+
+-- Procesadores
+INSERT OR IGNORE INTO Procesador (processor) VALUES 
+('Intel Pentium G2010'), 
+('Genuine Intel 1.80GHz'), 
+('Intel Pentium 3.06Ghz'), 
+('Intel Pentium G2010 2.80GHz'), 
+('Intel Celeron 1.80GHz'), 
+('Intel Pentium 2.80GHz');
+
+-- Marcas
+INSERT OR IGNORE INTO Marca (brand) VALUES 
+('Dell'), ('Huawei'), ('CANTV'), ('TP-Link');
+
+-- Modelos (Vinculados a sus Marcas)
+INSERT OR IGNORE INTO Modelo (id_brand, model) VALUES 
+((SELECT id FROM Marca WHERE brand='Huawei'), 'AR 157'),
+((SELECT id FROM Marca WHERE brand='TP-Link'), 'SF1016D');
+
+-- ==========================================
+-- 2. JERARQUÍA DE UBICACIONES
+-- ==========================================
+
+-- Edificios
+INSERT OR IGNORE INTO Edificio (building) VALUES ('Edificio 01'), ('Edificio 02');
+
+-- Pisos
+INSERT OR IGNORE INTO Piso (id_building, floor) VALUES 
+((SELECT id FROM Edificio WHERE building='Edificio 01'), 'Piso 01'),
+((SELECT id FROM Edificio WHERE building='Edificio 02'), 'Piso 01');
+
+-- Áreas
+INSERT OR IGNORE INTO Area (id_floor, area) VALUES 
+((SELECT id FROM Piso WHERE floor='Piso 01' AND id_building=(SELECT id FROM Edificio WHERE building='Edificio 02')), 'Control de Estudios'),
+((SELECT id FROM Piso WHERE floor='Piso 01' AND id_building=(SELECT id FROM Edificio WHERE building='Edificio 01')), 'Área TIC'),
+((SELECT id FROM Piso WHERE floor='Piso 01' AND id_building=(SELECT id FROM Edificio WHERE building='Edificio 01')), 'Coordinación'),
+((SELECT id FROM Piso WHERE floor='Piso 01' AND id_building=(SELECT id FROM Edificio WHERE building='Edificio 02')), 'Archivo');
+
+-- Habitaciones
+INSERT OR IGNORE INTO Habitacion (id_area, room) VALUES 
+((SELECT id FROM Area WHERE area='Control de Estudios'), 'Jefe de Área'),
+((SELECT id FROM Area WHERE area='Control de Estudios'), 'Analista de Ingreso'),
+((SELECT id FROM Area WHERE area='Área TIC'), 'Soporte Técnico'),
+((SELECT id FROM Area WHERE area='Coordinación'), 'Asistente'),
+((SELECT id FROM Area WHERE area='Archivo'), 'Acta y Publicaciones'),
+((SELECT id FROM Area WHERE area='Archivo'), 'Jefe de Área'), -- Nota: Hay otro Jefe de Área pero en distinta Area
+((SELECT id FROM Area WHERE area='Área TIC'), 'Cuarto de Redes');
+
+-- Creación de UBICACIONES (Combinaciones Área-Habitación)
+-- Ubicación 1: Control de Estudios - Jefe de Área
+INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
+    (SELECT id FROM Area WHERE area='Control de Estudios'),
+    (SELECT id FROM Habitacion WHERE room='Jefe de Área' AND id_area=(SELECT id FROM Area WHERE area='Control de Estudios'))
+);
+-- Ubicación 2: Control de Estudios - Analista de Ingreso
+INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
+    (SELECT id FROM Area WHERE area='Control de Estudios'),
+    (SELECT id FROM Habitacion WHERE room='Analista de Ingreso' AND id_area=(SELECT id FROM Area WHERE area='Control de Estudios'))
+);
+-- Ubicación 3: Área TIC - Soporte Técnico
+INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
+    (SELECT id FROM Area WHERE area='Área TIC'),
+    (SELECT id FROM Habitacion WHERE room='Soporte Técnico' AND id_area=(SELECT id FROM Area WHERE area='Área TIC'))
+);
+-- Ubicación 4: Coordinación - Asistente
+INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
+    (SELECT id FROM Area WHERE area='Coordinación'),
+    (SELECT id FROM Habitacion WHERE room='Asistente' AND id_area=(SELECT id FROM Area WHERE area='Coordinación'))
+);
+-- Ubicación 5: Archivo - (SIN HABITACIÓN / PASILLO GENERAL)
+INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
+    (SELECT id FROM Area WHERE area='Archivo'),
+    NULL
+);
+-- Ubicación 6: Archivo - Acta y Publicaciones
+INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
+    (SELECT id FROM Area WHERE area='Archivo'),
+    (SELECT id FROM Habitacion WHERE room='Acta y Publicaciones' AND id_area=(SELECT id FROM Area WHERE area='Archivo'))
+);
+-- Ubicación 7: Archivo - Jefe de Área
+INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
+    (SELECT id FROM Area WHERE area='Archivo'),
+    (SELECT id FROM Habitacion WHERE room='Jefe de Área' AND id_area=(SELECT id FROM Area WHERE area='Archivo'))
+);
+-- Ubicación 8: Área TIC - Cuarto de Redes
+INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
+    (SELECT id FROM Area WHERE area='Área TIC'),
+    (SELECT id FROM Habitacion WHERE room='Cuarto de Redes' AND id_area=(SELECT id FROM Area WHERE area='Área TIC'))
+);
+
+-- ==========================================
+-- 3. INSERCIÓN DE DISPOSITIVOS (Los 12 ítems)
+-- ==========================================
+
+-- 1. PC | Control de Estudios | Jefe de Área | 802MXWE0B993
+INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, id_processor, serial) VALUES (
+    (SELECT id FROM Tipo WHERE type='PC'),
+    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Control de Estudios' AND h.room='Jefe de Área'),
+    (SELECT id FROM Sistema_Operativo WHERE os='Win 7'),
+    (SELECT id FROM RAM WHERE ram='4 GB'),
+    '64 bits',
+    (SELECT id FROM Almacenamiento WHERE storage='512 GB'),
+    (SELECT id FROM Procesador WHERE processor='Intel Pentium G2010'),
+    '802MXWE0B993'
+);
+
+-- 2. PC | Control de Estudios | Analista de Ingreso | CN9352W80
+INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, id_processor, serial) VALUES (
+    (SELECT id FROM Tipo WHERE type='PC'),
+    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Control de Estudios' AND h.room='Analista de Ingreso'),
+    (SELECT id FROM Sistema_Operativo WHERE os='Win 10'),
+    (SELECT id FROM RAM WHERE ram='2 GB'),
+    '64 bits',
+    (SELECT id FROM Almacenamiento WHERE storage='80 GB'),
+    (SELECT id FROM Procesador WHERE processor='Genuine Intel 1.80GHz'),
+    'CN9352W80'
+);
+
+-- 3. PC | Control de Estudios | Analista de Ingreso | C18D7BA005546
+INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, id_processor, serial) VALUES (
+    (SELECT id FROM Tipo WHERE type='PC'),
+    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Control de Estudios' AND h.room='Analista de Ingreso'),
+    (SELECT id FROM Sistema_Operativo WHERE os='Win 11'),
+    (SELECT id FROM RAM WHERE ram='2 GB'),
+    '32 bits',
+    (SELECT id FROM Almacenamiento WHERE storage='512 GB'),
+    (SELECT id FROM Procesador WHERE processor='Intel Pentium G2010'),
+    'C18D7BA005546'
+);
+
+-- 4. PC | Área TIC | Soporte Técnico | Dell | CN-0N8176...
+INSERT INTO Dispositivo (code, id_type, id_location, id_brand, id_os, id_ram, arch, id_storage, id_processor, serial) VALUES (
+    '4073',
+    (SELECT id FROM Tipo WHERE type='PC'),
+    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Área TIC' AND h.room='Soporte Técnico'),
+    (SELECT id FROM Marca WHERE brand='Dell'),
+    (SELECT id FROM Sistema_Operativo WHERE os='Linux'),
+    (SELECT id FROM RAM WHERE ram='1 GB'),
+    '32 bits',
+    (SELECT id FROM Almacenamiento WHERE storage='120 GB'),
+    (SELECT id FROM Procesador WHERE processor='Intel Pentium 3.06Ghz'),
+    'CN-0N8176...'
+);
+
+-- 5. PC | Coordinación | Asistente | CNC141QNT2
+INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, id_processor, serial) VALUES (
+    (SELECT id FROM Tipo WHERE type='PC'),
+    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Coordinación' AND h.room='Asistente'),
+    (SELECT id FROM Sistema_Operativo WHERE os='Win 10'),
+    (SELECT id FROM RAM WHERE ram='2 GB'),
+    '32 bits',
+    (SELECT id FROM Almacenamiento WHERE storage='512 GB'),
+    (SELECT id FROM Procesador WHERE processor='Intel Pentium G2010'),
+    'CNC141QNT2'
+);
+
+-- 6. PC | Archivo | (Sin Habitación) | (Sin Serial)
+INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage) VALUES (
+    (SELECT id FROM Tipo WHERE type='PC'),
+    (SELECT id FROM Ubicacion WHERE id_area=(SELECT id FROM Area WHERE area='Archivo') AND id_room IS NULL),
+    (SELECT id FROM Sistema_Operativo WHERE os='Win 7'),
+    (SELECT id FROM RAM WHERE ram='512 MB'),
+    '32 bits',
+    (SELECT id FROM Almacenamiento WHERE storage='37 GB')
+);
+
+-- 7. PC | Archivo | Acta y Publicaciones | (Sin Serial)
+INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, id_processor) VALUES (
+    (SELECT id FROM Tipo WHERE type='PC'),
+    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Archivo' AND h.room='Acta y Publicaciones'),
+    (SELECT id FROM Sistema_Operativo WHERE os='Win 10'),
+    (SELECT id FROM RAM WHERE ram='2 GB'),
+    '64 bits',
+    (SELECT id FROM Almacenamiento WHERE storage='512 GB'),
+    (SELECT id FROM Procesador WHERE processor='Intel Pentium G2010 2.80GHz')
+);
+
+-- 8. PC | Archivo | Acta y Publicaciones | (Sin Serial, diferente RAM/CPU)
+INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, id_processor) VALUES (
+    (SELECT id FROM Tipo WHERE type='PC'),
+    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Archivo' AND h.room='Acta y Publicaciones'),
+    (SELECT id FROM Sistema_Operativo WHERE os='Win 7'),
+    (SELECT id FROM RAM WHERE ram='1.5 GB'),
+    '32 bits',
+    (SELECT id FROM Almacenamiento WHERE storage='37 GB'),
+    (SELECT id FROM Procesador WHERE processor='Intel Celeron 1.80GHz')
+);
+
+-- 9. PC | Archivo | Jefe de Área | P/NMW9BBK
+INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, id_processor, serial) VALUES (
+    (SELECT id FROM Tipo WHERE type='PC'),
+    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Archivo' AND h.room='Jefe de Área'),
+    (SELECT id FROM Sistema_Operativo WHERE os='Win 7'),
+    (SELECT id FROM RAM WHERE ram='2 GB'),
+    '32 bits',
+    (SELECT id FROM Almacenamiento WHERE storage='512 GB'),
+    (SELECT id FROM Procesador WHERE processor='Intel Pentium 2.80GHz'),
+    'P/NMW9BBK'
+);
+
+-- 10. Modem | Área TIC | Soporte Técnico | Huawei | AR 157
+INSERT INTO Dispositivo (code, id_type, id_location, id_brand, id_model, serial) VALUES (
+    '708',
+    (SELECT id FROM Tipo WHERE type='Modem'),
+    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Área TIC' AND h.room='Soporte Técnico'),
+    (SELECT id FROM Marca WHERE brand='Huawei'),
+    (SELECT id FROM Modelo WHERE model='AR 157'),
+    '210235384810'
+);
+
+-- 11. Modem | Área TIC | Soporte Técnico | CANTV | (Sin Modelo, Sin Serial)
+INSERT INTO Dispositivo (id_type, id_location, id_brand) VALUES (
+    (SELECT id FROM Tipo WHERE type='Modem'),
+    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Área TIC' AND h.room='Soporte Técnico'),
+    (SELECT id FROM Marca WHERE brand='CANTV')
+);
+
+-- 12. Switch | Área TIC | Cuarto de Redes | TP-Link | SF1016D
+INSERT INTO Dispositivo (code, id_type, id_location, id_brand, id_model, serial) VALUES (
+    '725',
+    (SELECT id FROM Tipo WHERE type='Switch'),
+    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Área TIC' AND h.room='Cuarto de Redes'),
+    (SELECT id FROM Marca WHERE brand='TP-Link'),
+    (SELECT id FROM Modelo WHERE model='SF1016D'),
+    'Y21CO30000672'
+);
