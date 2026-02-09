@@ -155,6 +155,8 @@ CREATE TABLE IF NOT EXISTS Taller (
 	
     FOREIGN KEY (id_device) REFERENCES Dispositivo(id)
 		ON DELETE NO ACTION ON UPDATE CASCADE
+	
+	CONSTRAINT check_dates CHECK (date_out IS NULL OR date_out >= date_in)
 );
 
 CREATE TRIGGER IF NOT EXISTS validate_brand_model_match_ins
@@ -219,7 +221,8 @@ CREATE VIEW IF NOT EXISTS Vista_Datos_Dispositivo_Completo AS
     SELECT 
         d.id AS device_id,
         d.code,
-        t.id as device_type,
+		d.serial,
+        t.type as device_type,
         mar.brand AS brand,
         mod.model AS model,
         proc.processor AS processor,
@@ -237,8 +240,15 @@ CREATE VIEW IF NOT EXISTS Vista_Datos_Dispositivo_Completo AS
     LEFT JOIN Procesador proc ON d.id_processor = proc.id
     LEFT JOIN RAM r ON d.id_ram = r.id
     LEFT JOIN Almacenamiento sto ON d.id_storage = sto.id;
-	
-BEGIN TRANSACTION;
+
+CREATE VIEW IF NOT EXISTS Vista_Dispositivo_En_Taller AS
+	SELECT
+		d.id AS device_id,
+		CASE
+			WHEN t.status = 'pending' THEN t.status
+		END AS status
+	FROM Dispositivo d
+	JOIN Taller t ON d.id = t.id_device
 
 -- ==========================================
 -- 1. POBLAR TABLAS MAESTRAS (Catálogos)
