@@ -68,6 +68,7 @@ type Device struct {
 }
 
 // Estructura para Tickets de Taller
+// MODIFICADO: Se agregan campos técnicos para vista completa en modal
 type WorkshopTicket struct {
 	ID           int     `json:"id"`
 	DeviceID     int     `json:"id_device"`
@@ -76,6 +77,14 @@ type WorkshopTicket struct {
 	DeviceSerial string  `json:"device_serial"`
 	DeviceBrand  string  `json:"device_brand"`
 	DeviceModel  string  `json:"device_model"`
+	
+	// Campos Técnicos Extendidos (Solicitud explícita)
+	DeviceOS      string `json:"device_os"`
+	DeviceRAM     string `json:"device_ram"`
+	DeviceStorage string `json:"device_storage"`
+	DeviceCPU     string `json:"device_cpu"`
+	DeviceArch    string `json:"device_arch"`
+
 	// Campos de Ubicación Separados (Sin concatenar)
 	Building     string  `json:"building"`
 	Floor        string  `json:"floor"`
@@ -439,6 +448,8 @@ CREATE VIEW IF NOT EXISTS Vista_Datos_Dispositivo_Completo AS
         proc.processor AS processor,
         r.ram AS ram,
         sto.storage AS storage,
+		d.arch AS arch, -- Asegurando que arch esté en la vista
+		os.os AS os,    -- Asegurando que os esté en la vista
         vub.building AS building,
         vub.floor AS floor,
         vub.area AS area,
@@ -999,11 +1010,16 @@ func handleWorkshop(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// 2. Query de Datos Paginados
-		// Selección directa de campos de la vista sin concatenación de ubicación
+		// MODIFICACIÓN: Se incluyen los campos técnicos v.os, v.ram, etc. con COALESCE
 		finalQuery := `
 			SELECT t.id, t.id_device, t.date_in, t.details_in, t.status, t.date_out, t.details_out,
 			       v.code, v.serial, v.brand, v.model, v.device_type,
-				   v.building, v.floor, v.area, v.room
+				   v.building, v.floor, v.area, v.room,
+				   COALESCE(v.os, '') as os,
+				   COALESCE(v.ram, '') as ram,
+				   COALESCE(v.storage, '') as storage,
+				   COALESCE(v.processor, '') as processor,
+				   COALESCE(v.arch, '') as arch
 		` + baseQuery + " ORDER BY t.date_in DESC LIMIT ? OFFSET ?"
 		
 		args = append(args, limit, offset)
@@ -1019,10 +1035,14 @@ func handleWorkshop(w http.ResponseWriter, r *http.Request) {
 		for rows.Next() {
 			var t WorkshopTicket
 			var code, serial, brand, model, building, floor, area, room sql.NullString
+			// Variables para escaneo de técnicos
+			var osVal, ramVal, storageVal, cpuVal, archVal sql.NullString
 
-			rows.Scan(&t.ID, &t.DeviceID, &t.DateIn, &t.DetailsIn, &t.Status, &t.DateOut, &t.DetailsOut,
+			rows.Scan(
+				&t.ID, &t.DeviceID, &t.DateIn, &t.DetailsIn, &t.Status, &t.DateOut, &t.DetailsOut,
 				&code, &serial, &brand, &model, &t.DeviceType, 
-				&building, &floor, &area, &room)
+				&building, &floor, &area, &room,
+				&osVal, &ramVal, &storageVal, &cpuVal, &archVal)
 
 			t.DeviceCode = code.String
 			t.DeviceSerial = serial.String
@@ -1034,6 +1054,13 @@ func handleWorkshop(w http.ResponseWriter, r *http.Request) {
 			if floor.Valid { t.Floor = floor.String }
 			if area.Valid { t.Area = area.String }
 			if room.Valid { t.Room = room.String }
+			
+			// Asignación de datos técnicos al struct
+			if osVal.Valid { t.DeviceOS = osVal.String }
+			if ramVal.Valid { t.DeviceRAM = ramVal.String }
+			if storageVal.Valid { t.DeviceStorage = storageVal.String }
+			if cpuVal.Valid { t.DeviceCPU = cpuVal.String }
+			if archVal.Valid { t.DeviceArch = archVal.String }
 
 			tickets = append(tickets, t)
 		}

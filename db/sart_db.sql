@@ -228,6 +228,8 @@ CREATE VIEW IF NOT EXISTS Vista_Datos_Dispositivo_Completo AS
         proc.processor AS processor,
         r.ram AS ram,
         sto.storage AS storage,
+		d.arch AS arch,
+		os.os AS os,
         vub.building AS building,
         vub.floor AS floor,
         vub.area AS area,
@@ -240,15 +242,6 @@ CREATE VIEW IF NOT EXISTS Vista_Datos_Dispositivo_Completo AS
     LEFT JOIN Procesador proc ON d.id_processor = proc.id
     LEFT JOIN RAM r ON d.id_ram = r.id
     LEFT JOIN Almacenamiento sto ON d.id_storage = sto.id;
-
-CREATE VIEW IF NOT EXISTS Vista_Dispositivo_En_Taller AS
-	SELECT
-		d.id AS device_id,
-		CASE
-			WHEN t.status = 'pending' THEN t.status
-		END AS status
-	FROM Dispositivo d
-	JOIN Taller t ON d.id = t.id_device
 
 -- ==========================================
 -- 1. POBLAR TABLAS MAESTRAS (Catálogos)

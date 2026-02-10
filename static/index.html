@@ -830,7 +830,9 @@
                     document.getElementById('edit-room').value = data.room || '';
 
                     // Autofill
-                    document.getElementById('edit-device-info').innerHTML = `<strong>${data.device_type}</strong> - ${data.device_brand} ${data.device_model} (S/N: ${data.device_serial})`;
+					const deviceInfoStr = [data.device_brand, data.device_model, data.device_os, data.device_cpu, data.device_arch, data.device_serial].filter(Boolean).join(" - ");
+                    document.getElementById('edit-device-info').innerHTML = `${data.device_type} - ` + deviceInfoStr;
+					
                     document.getElementById('edit-date-in').value = data.date_in;
                     document.getElementById('edit-details-in').value = data.details_in;
                     
@@ -849,11 +851,12 @@
                     if (!data) return;
 
                     this.state.currentTicketId = id;
-                    title.textContent = 'Finalizar Ticket #' + id;
+                    title.textContent = 'Finalizar Ticket';
                     body.innerHTML = document.getElementById('tmpl-finalize-ticket').innerHTML;
                     
                     // Info
-                    document.getElementById('fin-device-info').innerHTML = `${data.device_type} - ${data.device_brand} ${data.device_model} (S/N: ${data.device_serial})`;
+					const deviceInfoStr = [data.device_brand, data.device_model, data.device_os, data.device_cpu, data.device_arch, data.device_serial].filter(Boolean).join(" - ");
+                    document.getElementById('fin-device-info').innerHTML = `${data.device_type} - ` + deviceInfoStr;
                     
                     const locationStr = [data.building, data.floor, data.area, data.room].filter(Boolean).join(" - ");
                     document.getElementById('fin-location-info').textContent = locationStr || "Sin ubicación registrada";
