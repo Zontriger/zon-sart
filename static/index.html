@@ -94,8 +94,8 @@
         .custom-table tbody tr:hover { background-color: #f9fafb; }
         .text-muted { color: #9ca3af; font-style: italic; text-align: center; padding: 2rem; }
 
-        /* Estilo Específico para Tabla Taller: Altura Fija de Fila */
-        #workshop-table tbody tr { height: 95px; }
+        /* Estilo Específico para Tablas: Altura Fija de Fila */
+        .custom-table tbody tr { height: 95px; }
 
         /* UTILIDADES TABLA */
         .cell-truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: block; }
@@ -105,13 +105,14 @@
         .badge.operativo { background-color: #D1FAE5; color: #059669; border: 1px solid #6EE7B7; }
         .badge.pending { background-color: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; }
 
-        /* ACCIONES TALLER */
+        /* ACCIONES */
         .action-btn { background: none; border: none; cursor: pointer; padding: 5px; border-radius: 4px; transition: background 0.2s; display: inline-flex; align-items: center; justify-content: center; }
         .action-btn:hover { background-color: #f3f4f6; }
         .action-btn.edit { color: var(--color-primary); }
         .action-btn.check { color: var(--color-success); }
+        .action-btn.view { color: #4B5563; }
         .action-btn.delete { color: var(--color-danger); }
-        .actions-cell { display: flex; gap: 8px; }
+        .actions-cell { display: flex; gap: 8px; justify-content: center; }
 
         /* PAGINACIÓN */
         .pagination-controls { padding: 1rem; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: #fff; }
@@ -140,6 +141,13 @@
         
         .char-counter { text-align: right; font-size: 0.8rem; color: var(--color-text-light); margin-top: 0.25rem; font-variant-numeric: tabular-nums; }
         .info-block { background: #f3f4f6; padding: 1rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.9rem; }
+        
+        /* DETALLES DE VISUALIZACIÓN MEJORADOS */
+        .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem; }
+        .detail-item { display: flex; flex-direction: column; }
+        .detail-full { grid-column: 1 / -1; }
+        .detail-label { font-size: 0.7rem; color: var(--color-text-light); text-transform: uppercase; font-weight: 700; margin-bottom: 0.35rem; letter-spacing: 0.5px; }
+        .detail-value { font-size: 0.95rem; color: var(--color-dark); font-weight: 500; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.25rem; min-height: 1.4rem; }
     </style>
 </head>
 <body>
@@ -310,37 +318,73 @@
                 <!-- SECCIÓN 3: INVENTARIO -->
                 <div id="section-inventory" class="section-view hidden">
                     <div class="filter-panel">
-                        <div class="search-box">
-                            <label class="form-label">Búsqueda</label>
-                            <input type="text" placeholder="Buscar equipo..." id="inv-search" disabled>
+                        <!-- FILA 1: Búsqueda Global -->
+                        <div class="search-box" style="flex-basis: 100%; margin-bottom: 0.5rem;">
+                            <label class="form-label">Búsqueda Global (Serial, Código, Marca, Ubicación)</label>
+                            <input type="text" id="inv-search" placeholder="Escriba para buscar..." onkeyup="app.debounceLoadInventory()">
                         </div>
-                        <div style="display:flex; gap:10px; align-items:flex-end;">
-                            <button class="btn-secondary" onclick="app.loadInventory(1)">Actualizar</button>
+
+                        <!-- FILA 2: Filtros Específicos -->
+                        <div style="flex: 1; min-width: 120px;">
+                            <label class="form-label">Tipo</label>
+                            <select id="inv-filter-type" onchange="app.loadInventory(1)"></select>
+                        </div>
+                        <div style="flex: 1; min-width: 120px;">
+                            <label class="form-label">Marca</label>
+                            <select id="inv-filter-brand" onchange="app.loadInventory(1)"></select>
+                        </div>
+                        <div style="flex: 1; min-width: 120px;">
+                            <label class="form-label">SO</label>
+                            <select id="inv-filter-os" onchange="app.loadInventory(1)"></select>
+                        </div>
+                        <div style="flex: 1; min-width: 120px;">
+                            <label class="form-label">Estado</label>
+                            <select id="inv-filter-status" onchange="app.loadInventory(1)">
+                                <option value="">Todos</option>
+                                <option value="operational">Operativo</option>
+                                <option value="workshop">En Taller</option>
+                            </select>
+                        </div>
+
+                        <!-- Botón Acción -->
+                        <div style="flex: 0 0 auto;">
+                             <button class="btn-primary" onclick="app.openModal('add-device')">+ Nuevo Equipo</button>
                         </div>
                     </div>
                     <div class="data-panel">
                         <div class="table-container">
                             <table class="custom-table" id="inventory-table">
+                                <colgroup>
+                                    <col style="width: 50px;"> <!-- N -->
+                                    <col style="width: 100px;"> <!-- Tipo -->
+                                    <col style="width: 20%;"> <!-- Marca/Modelo -->
+                                    <col style="width: 20%;"> <!-- Ubicación -->
+                                    <col style="width: 100px;"> <!-- Código -->
+                                    <col style="width: 120px;"> <!-- Serial -->
+                                    <col style="width: 100px;"> <!-- Estado -->
+                                    <col style="width: 140px;"> <!-- Acciones -->
+                                </colgroup>
                                 <thead>
                                     <tr>
-                                        <th style="width:50px;">ID</th>
-                                        <th>Código</th>
+                                        <th>N°</th>
                                         <th>Tipo</th>
                                         <th>Marca / Modelo</th>
                                         <th>Ubicación</th>
+                                        <th>Código</th>
                                         <th>Serial</th>
                                         <th>Estado</th>
+                                        <th style="text-align:center;">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr><td colspan="7" class="text-muted">Cargando inventario...</td></tr>
+                                    <tr><td colspan="8" class="text-muted" style="text-align:center;">Cargando inventario...</td></tr>
                                 </tbody>
                             </table>
                         </div>
                         <div class="pagination-controls">
-                            <button id="btn-prev" class="page-btn" onclick="app.prevPageLegacy()">Anterior</button>
-                            <span id="page-info" class="page-info">Página 1</span>
-                            <button id="btn-next" class="page-btn" onclick="app.nextPageLegacy()">Siguiente</button>
+                            <button id="inv-btn-prev" class="page-btn" onclick="app.prevPageLegacy()">Anterior</button>
+                            <span id="inv-page-info" class="page-info">Página 1</span>
+                            <button id="inv-btn-next" class="page-btn" onclick="app.nextPageLegacy()">Siguiente</button>
                         </div>
                     </div>
                 </div>
@@ -386,27 +430,27 @@
         </div>
     </div>
 
-    <!-- TEMPLATES DE MODAL -->
+    <!-- TEMPLATES DE MODAL TALLER -->
     <template id="tmpl-add-ticket">
         <div class="section-title">1. Ubicación del Equipo</div>
         <div class="grid-2">
             <div class="form-group">
                 <label class="form-label">Edificio</label>
-                <select id="sel-building" onchange="app.loadFloors(this.value)"><option value="">Seleccione...</option></select>
+                <select id="sel-building" onchange="app.handleBuildingChange(this.value)"><option value="">Seleccione...</option></select>
             </div>
             <div class="form-group">
                 <label class="form-label">Piso</label>
-                <select id="sel-floor" onchange="app.loadAreas(this.value)" disabled><option value="">Seleccione...</option></select>
+                <select id="sel-floor" onchange="app.handleFloorChange(this.value)" disabled><option value="">Seleccione...</option></select>
             </div>
         </div>
         <div class="grid-2">
             <div class="form-group">
                 <label class="form-label">Área</label>
-                <select id="sel-area" onchange="app.loadAreaContent(this.value)" disabled><option value="">Seleccione...</option></select>
+                <select id="sel-area" onchange="app.handleAreaChange(this.value)" disabled><option value="">Seleccione...</option></select>
             </div>
             <div class="form-group">
                 <label class="form-label">Habitación (Opcional)</label>
-                <select id="sel-room" onchange="app.filterByRoom(this.value)" disabled><option value="">Seleccione...</option></select>
+                <select id="sel-room" onchange="app.handleRoomChange(this.value)" disabled><option value="">Seleccione...</option></select>
             </div>
         </div>
 
@@ -432,7 +476,6 @@
         <div id="form-error" class="error-msg"></div>
     </template>
 
-    <!-- TEMPLATE EDITAR (Con campos de Ubicación bloqueados para guía) -->
     <template id="tmpl-edit-ticket">
         <div class="section-title">1. Ubicación del Equipo</div>
         <div class="grid-2">
@@ -457,9 +500,7 @@
         </div>
 
         <div class="section-title">2. Equipo en Taller</div>
-        <div class="info-block" id="edit-device-info">
-            <!-- Info del dispositivo -->
-        </div>
+        <div class="info-block" id="edit-device-info"></div>
 
         <div class="section-title">3. Detalles del Ingreso</div>
         <div class="grid-2">
@@ -477,7 +518,6 @@
         <div id="edit-form-error" class="error-msg"></div>
     </template>
 
-    <!-- TEMPLATE FINALIZAR -->
     <template id="tmpl-finalize-ticket">
         <div class="info-block" style="background: #eef2ff; border: 1px solid #c7d2fe;">
             <div style="font-weight:bold; color:var(--color-primary); margin-bottom:5px;">Equipo:</div>
@@ -511,11 +551,151 @@
         <div id="fin-error" class="error-msg"></div>
     </template>
 
-    <!-- TEMPLATE ELIMINAR -->
     <template id="tmpl-delete-confirm">
         <div style="text-align: center; padding: 1rem;">
-            <p style="font-size: 1.1rem; color: var(--color-text); margin-bottom: 0.5rem;">¿Está seguro de que desea eliminar este ticket?</p>
+            <p style="font-size: 1.1rem; color: var(--color-text); margin-bottom: 0.5rem;">¿Está seguro de que desea eliminar este registro?</p>
             <p style="font-size: 0.9rem; color: var(--color-text-light);">Esta acción no se puede deshacer.</p>
+        </div>
+    </template>
+
+    <!-- TEMPLATES DE MODAL INVENTARIO -->
+    <template id="tmpl-device-form">
+        <div class="section-title">Información General</div>
+        <div class="grid-2">
+            <div class="form-group">
+                <label class="form-label">Tipo *</label>
+                <select id="dev-type" required><option value="">Seleccione...</option></select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Marca</label>
+                <select id="dev-brand" onchange="app.filterModels(this.value)"><option value="">Seleccione...</option></select>
+            </div>
+        </div>
+        <div class="grid-2">
+            <div class="form-group">
+                <label class="form-label">Modelo</label>
+                <select id="dev-model" disabled><option value="">Seleccione Marca...</option></select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Serial</label>
+                <input type="text" id="dev-serial" placeholder="S/N">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Código del Bien</label>
+            <input type="text" id="dev-code" placeholder="Ej: 4030">
+        </div>
+
+        <div class="section-title">Ubicación Física</div>
+        <div class="grid-2">
+            <div class="form-group">
+                <label class="form-label">Edificio *</label>
+                <select id="sel-building" onchange="app.handleBuildingChange(this.value)" required><option value="">Seleccione...</option></select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Piso *</label>
+                <select id="sel-floor" onchange="app.handleFloorChange(this.value)" disabled required><option value="">Seleccione...</option></select>
+            </div>
+        </div>
+        <div class="grid-2">
+            <div class="form-group">
+                <label class="form-label">Área *</label>
+                <select id="sel-area" onchange="app.handleAreaChange(this.value)" disabled required><option value="">Seleccione...</option></select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Habitación</label>
+                <select id="sel-room" disabled><option value="">Seleccione...</option></select>
+            </div>
+        </div>
+
+        <div class="section-title">Especificaciones Técnicas</div>
+        <div class="grid-2">
+            <div class="form-group">
+                <label class="form-label">Sistema Operativo</label>
+                <select id="dev-os"><option value="">N/A</option></select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Arquitectura</label>
+                <select id="dev-arch"><option value="">N/A</option></select>
+            </div>
+        </div>
+        <div class="grid-2">
+            <div class="form-group">
+                <label class="form-label">Procesador (CPU)</label>
+                <select id="dev-cpu"><option value="">N/A</option></select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Memoria RAM</label>
+                <select id="dev-ram"><option value="">N/A</option></select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Almacenamiento</label>
+            <select id="dev-storage"><option value="">N/A</option></select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Detalles Adicionales</label>
+            <textarea id="dev-details" rows="2" style="resize: none;" maxlength="200"></textarea>
+        </div>
+        <div id="dev-form-error" class="error-msg"></div>
+    </template>
+
+    <template id="tmpl-view-device">
+        <div style="background: #f9fafb; padding: 1.5rem; border-radius: 8px; border: 1px solid #e5e7eb;">
+            <div class="section-title" style="margin-top:0;">Información General</div>
+            <div class="details-grid">
+                <div class="detail-item">
+                    <span class="detail-label">Tipo</span>
+                    <span class="detail-value" id="view-type"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Marca</span>
+                    <span class="detail-value" id="view-brand"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Modelo</span>
+                    <span class="detail-value" id="view-model"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Código</span>
+                    <span class="detail-value" id="view-code"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Serial</span>
+                    <span class="detail-value" id="view-serial"></span>
+                </div>
+                 <div class="detail-item detail-full">
+                    <span class="detail-label">Ubicación Actual</span>
+                    <span class="detail-value" id="view-location" style="color:var(--color-primary); font-weight:600;"></span>
+                </div>
+            </div>
+
+            <div class="section-title">Especificaciones Técnicas</div>
+            <div class="details-grid">
+                <div class="detail-item">
+                    <span class="detail-label">Sistema Operativo</span>
+                    <span class="detail-value" id="view-os"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Procesador (CPU)</span>
+                    <span class="detail-value" id="view-cpu"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Memoria RAM</span>
+                    <span class="detail-value" id="view-ram"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Almacenamiento</span>
+                    <span class="detail-value" id="view-storage"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Arquitectura</span>
+                    <span class="detail-value" id="view-arch"></span>
+                </div>
+            </div>
+            
+            <div class="section-title">Observaciones</div>
+            <div class="info-block" id="view-details" style="background:white; border:1px solid #e5e7eb; min-height:3rem; font-style:italic; color:#4b5563;"></div>
         </div>
     </template>
 
@@ -526,20 +706,24 @@
                 token: null, 
                 currentPage: 'home', 
                 
-                // Variables genéricas de paginación (para la vista activa)
+                // Paginación Genérica
                 page: 1, 
                 limit: 4, 
                 total: 0, 
 
-                // Variables heredadas para inventario (Legacy, no tocar)
-                invPage: 1, invLimit: 4, invTotal: 0,
+                // Cache Global
+                specs: null,
+                locations: null,
+                workshopData: [], // Cache para modales de taller
+                inventoryData: [], // Cache para modales de inventario
 
-                // Cache de datos de Taller
-                workshopData: [],
-
-                currentAreaId: 0, 
+                // Estado Modales
+                currentTicketId: null,
+                currentDeviceId: null,
                 debounceTimer: null,
-                currentTicketId: null // Para acciones de modal
+                
+                // Estado Selectores Ubicación
+                selBuilding: 0, selFloor: 0, selArea: 0, selRoom: 0
             },
 
             init() {
@@ -569,17 +753,19 @@
                 const titles = { 'home': 'Inicio', 'workshop': 'Gestión de Taller', 'inventory': 'Inventario General', 'reports': 'Reportes', 'data': 'Gestión de Datos', 'settings': 'Configuración' };
                 document.getElementById('page-title').textContent = titles[pageId] || 'SART';
 
-                // Reset page on nav
-                if (pageId === 'inventory') this.loadInventory(1);
+                if (pageId === 'inventory') {
+                    this.loadInventoryFilters();
+                    this.loadInventory(1);
+                }
                 if (pageId === 'workshop') {
-                    this.state.page = 1; // Reset a página 1 al entrar
+                    this.state.page = 1;
                     this.loadWorkshopFilters();
                     this.loadWorkshop(1);
                 }
                 if (pageId === 'home') this.loadDashboardData();
             },
 
-            // --- API HELPERS ---
+            // --- API CORE ---
             async fetchAPI(url, options = {}) {
                 options.headers = { ...options.headers, 'Authorization': 'Bearer ' + this.state.token };
                 const res = await fetch(url, options);
@@ -587,30 +773,38 @@
                 return res;
             },
 
-            // --- TALLER (FILTROS Y TABLA) ---
-            async loadWorkshopFilters() {
+            async loadGlobalData() {
+                try {
+                    const [resSpecs, resLocs] = await Promise.all([
+                        this.fetchAPI('/api/specs'),
+                        this.fetchAPI('/api/locations')
+                    ]);
+                    
+                    const jsonSpecs = await resSpecs.json();
+                    const jsonLocs = await resLocs.json();
+
+                    if(jsonSpecs.success) this.state.specs = jsonSpecs.data;
+                    if(jsonLocs.success) this.state.locations = jsonLocs.data;
+
+                } catch(e) { console.error("Error cargando datos globales", e); }
+            },
+
+            // --- TALLER ---
+            loadWorkshopFilters() {
                 if(document.getElementById('wk-filter-type').length > 0) return;
+                if(!this.state.specs) return;
 
-                const endpoints = [
-                    { id: 'wk-filter-type', url: '/api/types', field: 'type' },
-                    { id: 'wk-filter-brand', url: '/api/brands', field: 'brand' },
-                    { id: 'wk-filter-os', url: '/api/os', field: 'os' },
-                    { id: 'wk-filter-cpu', url: '/api/processors', field: 'processor' },
-                    { id: 'wk-filter-ram', url: '/api/rams', field: 'ram' },
-                ];
+                const fill = (id, items) => {
+                    const sel = document.getElementById(id);
+                    sel.innerHTML = '<option value="">Todos</option>';
+                    if(items) items.forEach(i => sel.innerHTML += `<option value="${i.id}">${i.value}</option>`);
+                };
 
-                for (let ep of endpoints) {
-                    const res = await this.fetchAPI(ep.url);
-                    const json = await res.json();
-                    if(json.success && json.data) {
-                        const sel = document.getElementById(ep.id);
-                        sel.innerHTML = '<option value="">Todos</option>';
-                        json.data.forEach(item => {
-                            const text = item[ep.field] || item.type || item.brand || item.os || item.processor || item.ram; 
-                            sel.innerHTML += `<option value="${item.id}">${text}</option>`;
-                        });
-                    }
-                }
+                fill('wk-filter-type', this.state.specs.types);
+                fill('wk-filter-brand', this.state.specs.brands);
+                fill('wk-filter-os', this.state.specs.os);
+                fill('wk-filter-cpu', this.state.specs.processors);
+                fill('wk-filter-ram', this.state.specs.rams);
             },
 
             debounceLoadWorkshop() {
@@ -619,11 +813,8 @@
             },
 
             async loadWorkshop(pageArg) {
-                // Actualizar estado
                 if (pageArg) this.state.page = pageArg;
-                const currentPage = this.state.page;
                 
-                // Recopilar filtros
                 const search = document.getElementById('wk-search').value;
                 const type = document.getElementById('wk-filter-type').value;
                 const brand = document.getElementById('wk-filter-brand').value;
@@ -631,20 +822,16 @@
                 const cpu = document.getElementById('wk-filter-cpu').value;
                 const ram = document.getElementById('wk-filter-ram').value;
 
-                let qs = `status=pending&page=${currentPage}&limit=${this.state.limit}&search=${encodeURIComponent(search)}`;
-                if(type) qs += `&type=${type}`;
-                if(brand) qs += `&brand=${brand}`;
-                if(os) qs += `&os=${os}`;
-                if(cpu) qs += `&cpu=${cpu}`;
-                if(ram) qs += `&ram=${ram}`;
-
+                let qs = `status=pending&page=${this.state.page}&limit=${this.state.limit}`;
+                if(search) qs += `&search=${encodeURIComponent(search)}`;
+                
                 try {
-                    const res = await this.fetchAPI('/api/workshop?' + qs);
+                    const res = await this.fetchAPI('/api/tickets?' + qs);
                     if (!res) return;
                     const result = await res.json();
                     
                     this.state.total = result.total || 0;
-                    this.state.workshopData = result.data || []; // Guardar en estado
+                    this.state.workshopData = result.data || [];
                     this.renderWorkshopTable(this.state.workshopData);
                     this.updatePaginationControls();
 
@@ -653,36 +840,34 @@
 
             renderWorkshopTable(data) {
                 const tbody = document.querySelector('#workshop-table tbody');
-                // IMPORTANTE: REGENERAR SIEMPRE 4 FILAS
                 tbody.innerHTML = '';
 
-                // Si no hay datos en absoluto
                 if (!data || data.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="7" class="text-muted" style="text-align:center;">No se encontraron equipos.</td></tr>';
-                    // Rellenar 3 filas vacías más para mantener altura
                     for(let i=0; i<3; i++) tbody.innerHTML += this.getEmptyRowHTML();
                     return;
                 }
 
-                // Generar filas de datos
                 data.forEach((t, index) => {
                     const realIndex = ((this.state.page - 1) * this.state.limit) + (index + 1);
-                    
+                    const brandModel = `${t.device_brand || ''} ${t.device_model || ''}`.trim();
+                    const codeSerial = `${t.device_code || ''} / ${t.device_serial || ''}`.trim();
+
                     tbody.innerHTML += `
                         <tr>
                             <td>${realIndex}</td>
                             <td>${t.date_in}</td>
                             <td>${t.device_type}</td>
                             <td>
-                                <div class="cell-truncate" title="${t.device_brand} ${t.device_model}">
-                                    <strong>${t.device_brand}</strong><br>
-                                    <small class="text-secondary">${t.device_model}</small>
+                                <div class="cell-truncate" title="${brandModel}">
+                                    <strong>${t.device_brand || '-'}</strong><br>
+                                    <small class="text-secondary">${t.device_model || '-'}</small>
                                 </div>
                             </td>
                             <td>
-                                <div class="cell-truncate" title="${t.device_code} ${t.device_serial}">
-                                    <strong>${t.device_code}</strong><br>
-                                    <small class="text-secondary">${t.device_serial}</small>
+                                <div class="cell-truncate" title="${codeSerial}">
+                                    <strong>${t.device_code || 'S/C'}</strong><br>
+                                    <small class="text-secondary">${t.device_serial || 'S/S'}</small>
                                 </div>
                             </td>
                             <td>
@@ -700,100 +885,130 @@
                         </tr>`;
                 });
 
-                // Rellenar filas faltantes si hay menos de 4
                 const missing = this.state.limit - data.length;
-                if(missing > 0) {
-                    for(let i=0; i<missing; i++) tbody.innerHTML += this.getEmptyRowHTML();
-                }
+                if(missing > 0) { for(let i=0; i<missing; i++) tbody.innerHTML += this.getEmptyRowHTML(); }
             },
 
             getEmptyRowHTML() {
-                // Fila vacía con altura controlada por CSS
-                return `
-                <tr style="pointer-events: none;">
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                </tr>`;
+                return '<tr style="pointer-events: none;"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>';
             },
 
             updatePaginationControls() {
                 const totalPages = Math.ceil(this.state.total / this.state.limit) || 1;
                 document.getElementById('wk-page-input').value = this.state.page;
                 document.getElementById('wk-total-info').textContent = `de ${totalPages}`;
-                
                 document.getElementById('wk-btn-prev').disabled = this.state.page <= 1;
                 document.getElementById('wk-btn-next').disabled = this.state.page >= totalPages;
             },
-
-            prevPage() {
-                if (this.state.page > 1) this.loadWorkshop(this.state.page - 1);
-            },
-
-            nextPage() {
+            prevPage() { if (this.state.page > 1) this.loadWorkshop(this.state.page - 1); },
+            nextPage() { 
                 const totalPages = Math.ceil(this.state.total / this.state.limit) || 1;
-                if (this.state.page < totalPages) this.loadWorkshop(this.state.page + 1);
+                if (this.state.page < totalPages) this.loadWorkshop(this.state.page + 1); 
             },
-
             inputPage(input) {
                 const val = parseInt(input.value);
                 const totalPages = Math.ceil(this.state.total / this.state.limit) || 1;
-                
-                if (!isNaN(val) && val >= 1 && val <= totalPages) {
-                    this.loadWorkshop(val);
-                }
+                if (!isNaN(val) && val >= 1 && val <= totalPages) this.loadWorkshop(val);
             },
 
-             // --- INVENTARIO (LEGACY - MANTENIDO COMO ESTABA) ---
-            async loadInventory(page) {
-                this.state.invPage = page;
+            // --- INVENTARIO ---
+            loadInventoryFilters() {
+                if(document.getElementById('inv-filter-type').length > 0) return;
+                if(!this.state.specs) return;
+
+                const fill = (id, items) => {
+                    const sel = document.getElementById(id);
+                    sel.innerHTML = '<option value="">Todos</option>';
+                    if(items) items.forEach(i => sel.innerHTML += `<option value="${i.id}">${i.value}</option>`);
+                };
+
+                fill('inv-filter-type', this.state.specs.types);
+                fill('inv-filter-brand', this.state.specs.brands);
+                fill('inv-filter-os', this.state.specs.os);
+            },
+
+            debounceLoadInventory() {
+                clearTimeout(this.state.debounceTimer);
+                this.state.debounceTimer = setTimeout(() => this.loadInventory(1), 400);
+            },
+
+            async loadInventory(pageArg) {
+                this.state.page = pageArg; 
+                
+                const search = document.getElementById('inv-search').value;
+                const type = document.getElementById('inv-filter-type').value;
+                const brand = document.getElementById('inv-filter-brand').value;
+                const os = document.getElementById('inv-filter-os').value;
+                const status = document.getElementById('inv-filter-status').value;
+
+                let qs = `page=${this.state.page}&limit=${this.state.limit}`;
+                if(search) qs += `&search=${encodeURIComponent(search)}`;
+                if(type) qs += `&type=${type}`;
+                if(brand) qs += `&brand=${brand}`;
+                if(os) qs += `&os=${os}`;
+                if(status) qs += `&status=${status}`;
+
                 try {
-                    const res = await this.fetchAPI(`/api/inventory?page=${page}&limit=${this.state.invLimit}`);
+                    const res = await this.fetchAPI('/api/devices?' + qs);
                     if (!res || !res.ok) return;
-                    const data = await res.json();
-                    this.state.invTotal = data.total;
-                    this.renderInvTable(data.data);
+                    const result = await res.json();
+                    
+                    this.state.total = result.total;
+                    this.state.inventoryData = result.data || [];
+                    this.renderInvTable(this.state.inventoryData);
                     this.renderPaginationLegacy();
                 } catch (err) { console.error(err); }
             },
+
             renderInvTable(items) {
                 const tbody = document.querySelector('#inventory-table tbody');
                 tbody.innerHTML = '';
+                
                 if (!items || items.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="text-muted">No hay dispositivos registrados.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-muted" style="text-align:center;">No hay dispositivos registrados.</td></tr>';
+                    for(let i=0; i<3; i++) tbody.innerHTML += this.getEmptyRowHTML();
                     return;
                 }
-                items.forEach(d => {
+                
+                items.forEach((d, index) => {
+                    const realIndex = ((this.state.page - 1) * this.state.limit) + (index + 1);
+
                     tbody.innerHTML += `
                         <tr>
-                            <td>${d.id}</td>
-                            <td>${d.code || '-'}</td>
+                            <td>${realIndex}</td>
                             <td>${d.type}</td>
-                            <td><strong>${d.brand}</strong><br><span style="font-size:0.8rem; color:#6b7280;">${d.model}</span></td>
-                            <td>${d.location}</td>
-                            <td>${d.serial}</td>
-                            <td><span class="badge ${d.status === 'Operativo' ? 'operativo' : 'pending'}">${d.status}</span></td>
+                            <td><strong>${d.brand || ''}</strong><br><span style="font-size:0.8rem; color:#6b7280;">${d.model || ''}</span></td>
+                            <td><strong>${d.area || ''}</strong><br><span style="font-size:0.8rem; color:#6b7280;">${d.room || ''}</span></td>
+                            <td>${d.code || '-'}</td>
+                            <td>${d.serial || ''}</td>
+                            <td><span class="badge ${d.status === 'operational' ? 'operativo' : 'pending'}">${d.status_label || d.status}</span></td>
+                            <td style="text-align:center;">
+                                <div class="actions-cell">
+                                    <button class="action-btn edit" onclick="app.openModal('edit-device', ${d.id})" title="Editar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                                    <button class="action-btn view" onclick="app.openModal('view-device', ${d.id})" title="Ver Detalles"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+                                    <button class="action-btn delete" onclick="app.openModal('delete-device', ${d.id})" title="Eliminar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                                </div>
+                            </td>
                         </tr>`;
                 });
-            },
-            renderPaginationLegacy() {
-                const { invPage, invLimit, invTotal } = this.state;
-                const totalPages = Math.ceil(invTotal / invLimit);
-                document.getElementById('page-info').textContent = `Página ${invPage} de ${totalPages || 1}`;
-                document.getElementById('btn-prev').disabled = invPage === 1;
-                document.getElementById('btn-next').disabled = invPage >= totalPages || totalPages === 0;
-            },
-            prevPageLegacy() { if (this.state.invPage > 1) this.loadInventory(this.state.invPage - 1); },
-            nextPageLegacy() { 
-                const totalPages = Math.ceil(this.state.invTotal / this.state.invLimit);
-                if (this.state.invPage < totalPages) this.loadInventory(this.state.invPage + 1); 
+
+                const missing = this.state.limit - items.length;
+                if(missing > 0) { for(let i=0; i<missing; i++) tbody.innerHTML += this.getEmptyRowHTML(); }
             },
 
-            // --- MODAL NUEVO INGRESO ---
+            renderPaginationLegacy() {
+                const totalPages = Math.ceil(this.state.total / this.state.limit);
+                document.getElementById('inv-page-info').textContent = `Página ${this.state.page} de ${totalPages || 1}`;
+                document.getElementById('inv-btn-prev').disabled = this.state.page === 1;
+                document.getElementById('inv-btn-next').disabled = this.state.page >= totalPages || totalPages === 0;
+            },
+            prevPageLegacy() { if (this.state.page > 1) this.loadInventory(this.state.page - 1); },
+            nextPageLegacy() { 
+                const totalPages = Math.ceil(this.state.total / this.state.limit);
+                if (this.state.page < totalPages) this.loadInventory(this.state.page + 1); 
+            },
+
+            // --- MODALES Y LÓGICA DE FORMULARIOS ---
             async openModal(type, id = null) {
                 const overlay = document.getElementById('modal-overlay');
                 const title = document.getElementById('modal-title');
@@ -801,276 +1016,472 @@
                 const footer = document.getElementById('modal-footer-content');
                 const today = new Date().toISOString().split("T")[0];
 
-                if (type === 'add-ticket') {
-                    title.textContent = 'Nuevo Ingreso a Taller';
-                    body.innerHTML = document.getElementById('tmpl-add-ticket').innerHTML;
-                    footer.innerHTML = `
-                        <button class="btn-secondary" onclick="app.closeModal()">Cancelar</button>
-                        <button class="btn-primary" onclick="app.submitTicket()">Guardar Ingreso</button>
-                    `;
-                    
-                    this.initCharCounter('details-in');
-                    const dateInput = document.getElementById('date-in');
-                    if(dateInput) { dateInput.value = today; dateInput.max = today; }
-                    
-                    await this.loadBuildings();
+                if (type === 'add-ticket' || type === 'edit' || type === 'finalize' || type === 'delete') {
+                    // Lógica existente de Taller (se mantiene)
+                    if (type === 'add-ticket') {
+                        title.textContent = 'Nuevo Ingreso a Taller';
+                        body.innerHTML = document.getElementById('tmpl-add-ticket').innerHTML;
+                        footer.innerHTML = `<button class="btn-secondary" onclick="app.closeModal()">Cancelar</button><button class="btn-primary" onclick="app.submitTicket()">Guardar Ingreso</button>`;
+                        this.initCharCounter('details-in');
+                        document.getElementById('date-in').value = today;
+                        this.populateSelect('sel-building', this.state.locations.buildings);
+                    } else if (type === 'edit') {
+                        const data = this.state.workshopData.find(t => t.id === id);
+                        if (!data) return;
+                        this.state.currentTicketId = id;
+                        title.textContent = 'Editar Ingreso';
+                        body.innerHTML = document.getElementById('tmpl-edit-ticket').innerHTML;
+                        document.getElementById('edit-building').value = data.building || '';
+                        document.getElementById('edit-floor').value = data.floor || '';
+                        document.getElementById('edit-area').value = data.area || '';
+                        document.getElementById('edit-room').value = data.room || '';
+                        const devInfo = [data.device_brand, data.device_model, data.device_os, data.device_cpu, data.device_arch, data.device_serial].filter(Boolean).join(" - ");
+                        document.getElementById('edit-device-info').innerHTML = `<strong>${data.device_type}</strong><br>${devInfo}`;
+                        document.getElementById('edit-date-in').value = data.date_in;
+                        document.getElementById('edit-details-in').value = data.details_in;
+                        this.initCharCounter('edit-details-in');
+                        footer.innerHTML = `<button class="btn-secondary" onclick="app.closeModal()">Cancelar</button><button class="btn-primary" onclick="app.submitEdit()">Guardar Cambios</button>`;
+                    } else if (type === 'finalize') {
+                        const data = this.state.workshopData.find(t => t.id === id);
+                        if (!data) return;
+                        this.state.currentTicketId = id;
+                        title.textContent = 'Finalizar Ticket';
+                        body.innerHTML = document.getElementById('tmpl-finalize-ticket').innerHTML;
+                        const deviceInfoStr = [data.device_brand, data.device_model, data.device_os, data.device_cpu, data.device_arch, data.device_serial].filter(Boolean).join(" - ");
+                        document.getElementById('fin-device-info').innerHTML = `${data.device_type} - ` + deviceInfoStr;
+                        const loc = [data.building, data.floor, data.area, data.room].filter(Boolean).join(" > ");
+                        document.getElementById('fin-location-info').textContent = loc;
+                        document.getElementById('fin-problem-info').textContent = data.details_in;
+                        const dateOut = document.getElementById('fin-date-out'); dateOut.value = today; dateOut.min = data.date_in;
+                        this.initCharCounter('fin-details-out');
+                        footer.innerHTML = `<button class="btn-secondary" onclick="app.closeModal()">Cancelar</button><button class="btn-primary" onclick="app.submitFinalize()">Finalizar Ticket</button>`;
+                    } else if (type === 'delete') {
+                        this.state.currentTicketId = id;
+                        title.textContent = 'Eliminar Registro';
+                        body.innerHTML = document.getElementById('tmpl-delete-confirm').innerHTML;
+                        footer.innerHTML = `<button class="btn-secondary" onclick="app.closeModal()">Cancelar</button><button class="btn-danger" onclick="app.confirmDelete()">Sí, Eliminar</button>`;
+                    }
+                } 
                 
-                } else if (type === 'edit') {
-                    const data = this.state.workshopData.find(t => t.id === id);
-                    if (!data) return;
-
-                    this.state.currentTicketId = id;
-                    title.textContent = 'Editar Ingreso';
-                    body.innerHTML = document.getElementById('tmpl-edit-ticket').innerHTML;
+                // --- NUEVAS MODALES DE INVENTARIO ---
+                else if (type === 'add-device' || type === 'edit-device') {
+                    const isEdit = type === 'edit-device';
+                    this.state.currentDeviceId = isEdit ? id : null;
+                    title.textContent = isEdit ? 'Editar Equipo' : 'Registrar Nuevo Equipo';
+                    body.innerHTML = document.getElementById('tmpl-device-form').innerHTML;
                     
-                    // Populate Read-Only Location
-                    document.getElementById('edit-building').value = data.building || '';
-                    document.getElementById('edit-floor').value = data.floor || '';
-                    document.getElementById('edit-area').value = data.area || '';
-                    document.getElementById('edit-room').value = data.room || '';
-
-                    // Autofill
-					const deviceInfoStr = [data.device_brand, data.device_model, data.device_os, data.device_cpu, data.device_arch, data.device_serial].filter(Boolean).join(" - ");
-                    document.getElementById('edit-device-info').innerHTML = `${data.device_type} - ` + deviceInfoStr;
-					
-                    document.getElementById('edit-date-in').value = data.date_in;
-                    document.getElementById('edit-details-in').value = data.details_in;
-                    
-                    const dateInput = document.getElementById('edit-date-in');
-                    if(dateInput) { dateInput.max = today; }
-                    
-                    this.initCharCounter('edit-details-in');
-
                     footer.innerHTML = `
                         <button class="btn-secondary" onclick="app.closeModal()">Cancelar</button>
-                        <button class="btn-primary" onclick="app.submitEdit()">Guardar Cambios</button>
+                        <button class="btn-primary" onclick="app.${isEdit ? 'submitEditDevice()' : 'submitDevice()'}">Guardar</button>
                     `;
 
-                } else if (type === 'finalize') {
-                    const data = this.state.workshopData.find(t => t.id === id);
+                    // Poblar Selectores Generales
+                    this.populateSelect('dev-type', this.state.specs.types);
+                    this.populateSelect('dev-brand', this.state.specs.brands);
+                    this.populateSelect('dev-os', this.state.specs.os);
+                    this.populateSelect('dev-arch', this.state.specs.architectures);
+                    this.populateSelect('dev-cpu', this.state.specs.processors);
+                    this.populateSelect('dev-ram', this.state.specs.rams);
+                    this.populateSelect('dev-storage', this.state.specs.storages);
+                    
+                    // Iniciar Cascada de Ubicación
+                    this.populateSelect('sel-building', this.state.locations.buildings);
+
+                    if (isEdit) {
+                        const data = this.state.inventoryData.find(d => d.id === id);
+                        if(data) {
+                            // Llenar campos
+                            document.getElementById('dev-code').value = data.code || '';
+                            document.getElementById('dev-serial').value = data.serial || '';
+                            document.getElementById('dev-details').value = data.details || '';
+                            
+                            // Selects simples (IDs) - Asumiendo que data trae los nombres, necesitamos mapear si el backend trae strings.
+                            // Nota: El endpoint /api/devices actual devuelve strings en brand, type, etc.
+                            // Para edición correcta, idealmente necesitamos los IDs. 
+                            // Como el backend actual devuelve strings en 'brand', 'type', etc., haremos matching por texto.
+                            this.setSelectByText('dev-type', data.type);
+                            this.setSelectByText('dev-brand', data.brand);
+                            this.filterModels(document.getElementById('dev-brand').value); // Cargar modelos
+                            this.setSelectByText('dev-model', data.model);
+                            
+                            this.setSelectByText('dev-os', data.os);
+                            this.setSelectByText('dev-arch', data.arch);
+                            this.setSelectByText('dev-cpu', data.cpu);
+                            this.setSelectByText('dev-ram', data.ram);
+                            this.setSelectByText('dev-storage', data.storage);
+
+                            // Ubicación (Cascada Inversa - Complicado sin IDs, se intenta por texto)
+                            // El backend devuelve building, floor, area como strings.
+                            this.setSelectByText('sel-building', data.building);
+                            this.handleBuildingChange(document.getElementById('sel-building').value);
+                            
+                            this.setSelectByText('sel-floor', data.floor);
+                            this.handleFloorChange(document.getElementById('sel-floor').value);
+                            
+                            this.setSelectByText('sel-area', data.area);
+                            this.handleAreaChange(document.getElementById('sel-area').value);
+                            
+                            this.setSelectByText('sel-room', data.room);
+                        }
+                    }
+
+                } else if (type === 'view-device') {
+                    const data = this.state.inventoryData.find(d => d.id === id);
                     if (!data) return;
+                    title.textContent = 'Detalles del Equipo';
+                    body.innerHTML = document.getElementById('tmpl-view-device').innerHTML;
+                    footer.innerHTML = `<button class="btn-secondary" onclick="app.closeModal()">Cerrar</button>`;
 
-                    this.state.currentTicketId = id;
-                    title.textContent = 'Finalizar Ticket';
-                    body.innerHTML = document.getElementById('tmpl-finalize-ticket').innerHTML;
+                    // Llenar datos
+                    const setTxt = (id, val) => document.getElementById(id).textContent = val || 'N/A';
+                    setTxt('view-type', data.type);
+                    setTxt('view-brand', data.brand);
+                    setTxt('view-model', data.model);
+                    setTxt('view-code', data.code);
+                    setTxt('view-serial', data.serial);
                     
-                    // Info
-					const deviceInfoStr = [data.device_brand, data.device_model, data.device_os, data.device_cpu, data.device_arch, data.device_serial].filter(Boolean).join(" - ");
-                    document.getElementById('fin-device-info').innerHTML = `${data.device_type} - ` + deviceInfoStr;
-                    
-                    const locationStr = [data.building, data.floor, data.area, data.room].filter(Boolean).join(" - ");
-                    document.getElementById('fin-location-info').textContent = locationStr || "Sin ubicación registrada";
-                    
-                    document.getElementById('fin-problem-info').textContent = data.details_in;
-                    
-                    const dateOutInput = document.getElementById('fin-date-out');
-                    dateOutInput.value = today;
-                    // Min Date Logic
-                    dateOutInput.min = data.date_in;
-                    
-                    this.initCharCounter('fin-details-out');
+                    const loc = [data.building, data.floor, data.area, data.room].filter(Boolean).join(" > ");
+                    setTxt('view-location', loc);
 
-                    footer.innerHTML = `
-                        <button class="btn-secondary" onclick="app.closeModal()">Cancelar</button>
-                        <button class="btn-primary" onclick="app.submitFinalize()">Finalizar Ticket</button>
-                    `;
+                    setTxt('view-os', data.os);
+                    setTxt('view-cpu', data.cpu);
+                    setTxt('view-ram', data.ram);
+                    setTxt('view-storage', data.storage);
+                    setTxt('view-arch', data.arch);
+                    setTxt('view-details', data.details);
 
-                } else if (type === 'delete') {
-                    this.state.currentTicketId = id;
-                    title.textContent = 'Eliminar Registro';
+                } else if (type === 'delete-device') {
+                    this.state.currentDeviceId = id;
+                    title.textContent = 'Eliminar Equipo';
                     body.innerHTML = document.getElementById('tmpl-delete-confirm').innerHTML;
-                    footer.innerHTML = `
-                        <button class="btn-secondary" onclick="app.closeModal()">Cancelar</button>
-                        <button class="btn-danger" onclick="app.confirmDelete()">Sí, Eliminar</button>
-                    `;
+                    footer.innerHTML = `<button class="btn-secondary" onclick="app.closeModal()">Cancelar</button><button class="btn-danger" onclick="app.confirmDeleteDevice()">Sí, Eliminar</button>`;
                 }
 
                 overlay.classList.add('open');
             },
 
-            initCharCounter(id) {
-                const txt = document.getElementById(id);
-                if (!txt) return;
-                const counter = txt.nextElementSibling;
-                // Init value
-                counter.textContent = `${txt.value.length}/300`;
-                txt.addEventListener('input', function() {
-                     counter.textContent = `${this.value.length}/300`;
-                });
-            },
-
-            closeModal() { document.getElementById('modal-overlay').classList.remove('open'); },
-
-            async loadBuildings() {
-                const res = await this.fetchAPI('/api/buildings');
-                const data = await res.json();
-                this.fillSelect('sel-building', data.data);
-            },
-            async loadFloors(buildingId) {
-                this.resetSelects(['sel-floor', 'sel-area', 'sel-room', 'sel-device']);
-                if (!buildingId) return;
-                const res = await this.fetchAPI(`/api/floors?id_building=${buildingId}`);
-                const data = await res.json();
-                this.fillSelect('sel-floor', data.data, false);
-            },
-            async loadAreas(floorId) {
-                this.resetSelects(['sel-area', 'sel-room', 'sel-device']);
-                if (!floorId) return;
-                const res = await this.fetchAPI(`/api/areas?id_floor=${floorId}`);
-                const data = await res.json();
-                this.fillSelect('sel-area', data.data, false);
-            },
-            async loadAreaContent(areaId) {
-                this.resetSelects(['sel-room', 'sel-device']);
-                if (!areaId) return;
-                this.state.currentAreaId = areaId;
-                const res = await this.fetchAPI(`/api/rooms?id_area=${areaId}`);
-                const data = await res.json();
-                this.fillSelect('sel-room', data.data, false);
-                this.loadDevices(areaId, null);
-            },
-            filterByRoom(roomId) {
-                if (this.state.currentAreaId) this.loadDevices(this.state.currentAreaId, roomId);
-            },
-            async loadDevices(areaId, roomId) {
-                const sel = document.getElementById('sel-device');
-                sel.disabled = true;
-                sel.innerHTML = '<option>Cargando equipos...</option>';
-                let query = `/api/devices?id_area=${areaId}`;
-                if (roomId) query += `&id_room=${roomId}`;
-                const res = await this.fetchAPI(query);
-                const json = await res.json();
-                if(json.data && json.data.length > 0) {
-                    sel.innerHTML = '<option value="">Seleccione Dispositivo (Tipo - Código - Marca - Modelo - Serial)...</option>';
-                    json.data.forEach(item => sel.innerHTML += `<option value="${item.id}">${item.display}</option>`);
-                    sel.disabled = false;
-                } else {
-                    sel.innerHTML = '<option>No hay dispositivos aquí</option>';
+            // --- LÓGICA DE FORMULARIOS DISPOSITIVO ---
+            setSelectByText(id, text) {
+                const sel = document.getElementById(id);
+                if (!text || !sel) return;
+                for (let i = 0; i < sel.options.length; i++) {
+                    if (sel.options[i].text === text) {
+                        sel.selectedIndex = i;
+                        break;
+                    }
                 }
             },
-            fillSelect(id, items, disabled = true) {
+            filterModels(brandId) {
+                const sel = document.getElementById('dev-model');
+                sel.innerHTML = '<option value="">Seleccione...</option>';
+                sel.disabled = true;
+                if(!brandId) return;
+                
+                const models = this.state.specs.models.filter(m => m.parent_id == brandId);
+                if(models.length > 0) {
+                    models.forEach(m => sel.innerHTML += `<option value="${m.id}">${m.value}</option>`);
+                    sel.disabled = false;
+                } else {
+                    sel.innerHTML = '<option value="">Sin modelos registrados</option>';
+                }
+            },
+            async submitDevice() {
+                // Recolección de datos
+                const getVal = (id) => document.getElementById(id).value;
+                const payload = {
+                    code: getVal('dev-code'),
+                    serial: getVal('dev-serial'),
+                    id_type: parseInt(getVal('dev-type')),
+                    id_brand: parseInt(getVal('dev-brand')) || null,
+                    id_model: parseInt(getVal('dev-model')) || null,
+                    
+                    id_os: parseInt(getVal('dev-os')) || null,
+                    id_ram: parseInt(getVal('dev-ram')) || null,
+                    id_storage: parseInt(getVal('dev-storage')) || null,
+                    id_processor: parseInt(getVal('dev-cpu')) || null,
+                    arch: getVal('dev-arch') || null,
+                    details: getVal('dev-details')
+                };
+
+                // Validación básica (SOLO TIPO Y UBICACION)
+                if(!payload.id_type) {
+                    document.getElementById('dev-form-error').textContent = 'El Tipo es obligatorio.';
+                    return;
+                }
+
+                // Resolver ID Ubicación
+                const areaId = getVal('sel-area');
+                const roomId = getVal('sel-room');
+                
+                if(!areaId) {
+                    document.getElementById('dev-form-error').textContent = 'La ubicación (Área) es obligatoria.';
+                    return;
+                }
+
+                // Enviar directamente los IDs de Area/Room para que el backend resuelva
+                payload.id_area = parseInt(areaId);
+                payload.id_room = parseInt(roomId) || null;
+
+                try {
+                    // Enviar POST
+                    const res = await this.fetchAPI('/api/devices', {
+                        method: 'POST',
+                        body: JSON.stringify(payload)
+                    });
+
+                    if(res && res.ok) {
+                        this.closeModal();
+                        this.loadInventory(1);
+                    } else {
+                        document.getElementById('dev-form-error').textContent = 'Error al registrar el equipo.';
+                    }
+                } catch(e) { console.error(e); }
+            },
+
+            async submitEditDevice() {
+                const id = this.state.currentDeviceId;
+                const getVal = (id) => document.getElementById(id).value;
+                
+                const payload = {
+                    code: getVal('dev-code'),
+                    serial: getVal('dev-serial'),
+                    id_type: parseInt(getVal('dev-type')),
+                    id_brand: parseInt(getVal('dev-brand')) || null,
+                    id_model: parseInt(getVal('dev-model')) || null,
+                    
+                    id_os: parseInt(getVal('dev-os')) || null,
+                    id_ram: parseInt(getVal('dev-ram')) || null,
+                    id_storage: parseInt(getVal('dev-storage')) || null,
+                    id_processor: parseInt(getVal('dev-cpu')) || null,
+                    arch: getVal('dev-arch') || null,
+                    details: getVal('dev-details')
+                };
+
+                if(!payload.id_type) {
+                     document.getElementById('dev-form-error').textContent = 'El Tipo es obligatorio.';
+                     return;
+                }
+
+                const areaId = getVal('sel-area');
+                const roomId = getVal('sel-room');
+                
+                if(!areaId) {
+                    document.getElementById('dev-form-error').textContent = 'La ubicación (Área) es obligatoria.';
+                    return;
+                }
+
+                payload.id_area = parseInt(areaId);
+                payload.id_room = parseInt(roomId) || null;
+
+                try {
+                    const res = await this.fetchAPI(`/api/devices?id=${id}`, {
+                        method: 'PUT',
+                        body: JSON.stringify(payload)
+                    });
+
+                    if(res && res.ok) {
+                        this.closeModal();
+                        this.loadInventory(this.state.page || 1);
+                    } else {
+                        document.getElementById('dev-form-error').textContent = 'Error al actualizar.';
+                    }
+                } catch(e) { console.error(e); }
+            },
+
+            async confirmDeleteDevice() {
+                const id = this.state.currentDeviceId;
+                const res = await this.fetchAPI(`/api/devices?id=${id}`, { method: 'DELETE' });
+                
+                if(res && res.ok) {
+                    this.closeModal();
+                    this.loadInventory(1);
+                } else if(res && res.status === 409) {
+                    alert("No se puede eliminar este equipo porque tiene historial en Taller.");
+                    this.closeModal();
+                } else {
+                    alert("Error al eliminar el equipo.");
+                }
+            },
+
+            // --- LÓGICA DE CASCADA (LOCAL) ---
+            populateSelect(id, items) {
                 const sel = document.getElementById(id);
                 sel.innerHTML = '<option value="">Seleccione...</option>';
-                if(items) items.forEach(i => sel.innerHTML += `<option value="${i.id}">${i.building || i.floor || i.area || i.room}</option>`); 
-                sel.disabled = items ? false : true;
+                if(items) items.forEach(i => sel.innerHTML += `<option value="${i.id}">${i.value}</option>`);
+                sel.disabled = false;
+            },
+            handleBuildingChange(val) {
+                this.state.selBuilding = val;
+                this.resetSelects(['sel-floor', 'sel-area', 'sel-room', 'sel-device']);
+                if(!val) return;
+                // Filtrar Pisos donde parent_id == building_id
+                const floors = this.state.locations.floors.filter(f => f.parent_id == val);
+                this.populateSelect('sel-floor', floors);
+            },
+            handleFloorChange(val) {
+                this.state.selFloor = val;
+                this.resetSelects(['sel-area', 'sel-room', 'sel-device']);
+                if(!val) return;
+                const areas = this.state.locations.areas.filter(a => a.parent_id == val);
+                this.populateSelect('sel-area', areas);
+            },
+            handleAreaChange(val) {
+                this.state.selArea = val;
+                this.resetSelects(['sel-room', 'sel-device']);
+                if(!val) return;
+                const rooms = this.state.locations.rooms.filter(r => r.parent_id == val);
+                this.populateSelect('sel-room', rooms);
+                // Si estamos en modal de Taller, cargar dispositivos
+                if(document.getElementById('sel-device')) this.loadDevicesForTicket(val, null);
+            },
+            handleRoomChange(val) {
+                this.state.selRoom = val;
+                if(document.getElementById('sel-device')) this.loadDevicesForTicket(this.state.selArea, val);
             },
             resetSelects(ids) {
                 ids.forEach(id => {
                     const sel = document.getElementById(id);
-                    sel.innerHTML = '<option value="">Seleccione...</option>';
-                    sel.disabled = true;
+                    if(sel) {
+                        sel.innerHTML = '<option value="">Seleccione...</option>';
+                        sel.disabled = true;
+                    }
                 });
             },
-            
-            // --- SUBMITS ---
-            async submitTicket() {
-                const deviceId = document.getElementById('sel-device').value;
-                const dateIn = document.getElementById('date-in').value;
-                const detailsIn = document.getElementById('details-in').value.trim();
-                const errorDiv = document.getElementById('form-error');
+
+            // --- CARGA DISPOSITIVOS PARA TICKET ---
+            async loadDevicesForTicket(areaId, roomId) {
+                const sel = document.getElementById('sel-device');
+                sel.disabled = true;
+                sel.innerHTML = '<option>Cargando...</option>';
                 
-                if (!deviceId || !dateIn || !detailsIn) {
-                    errorDiv.textContent = 'Complete todos los campos obligatorios.';
+                let qs = `limit=50&id_area=${areaId}`; // Límite alto para lookup
+                if(roomId) qs += `&id_room=${roomId}`;
+                // IMPORTANTE: Filtrar solo operativos
+                qs += `&status=operational`;
+
+                try {
+                    const res = await this.fetchAPI(`/api/devices?${qs}`);
+                    const json = await res.json();
+                    
+                    if(json.data && json.data.length > 0) {
+                        sel.innerHTML = '<option value="">Seleccione Dispositivo...</option>';
+                        json.data.forEach(d => {
+                            // Formato de etiqueta <option>
+                            const label = `${d.type} - ${d.code || '-'} - ${d.brand || ''} ${d.model || ''}`;
+                            sel.innerHTML += `<option value="${d.id}">${label}</option>`;
+                        });
+                        sel.disabled = false;
+                    } else {
+                        sel.innerHTML = '<option value="">No hay equipos operativos aquí</option>';
+                    }
+                } catch(e) { console.error(e); }
+            },
+
+            // --- ACCIONES (SUBMITS) ---
+            async submitTicket() {
+                const devId = document.getElementById('sel-device').value;
+                const date = document.getElementById('date-in').value;
+                const det = document.getElementById('details-in').value;
+                
+                if(!devId || !date || !det.trim()) {
+                    document.getElementById('form-error').textContent = 'Complete los campos obligatorios';
                     return;
                 }
+
+                const res = await this.fetchAPI('/api/tickets', {
+                    method: 'POST',
+                    body: JSON.stringify({ id_device: parseInt(devId), date_in: date, details_in: det })
+                });
                 
-                try {
-                    const res = await this.fetchAPI('/api/workshop', {
-                        method: 'POST',
-                        body: JSON.stringify({ 
-                            id_device: parseInt(deviceId), 
-                            date_in: dateIn, 
-                            details_in: detailsIn 
-                        })
-                    });
-                    const json = await res.json();
-                    if (res.ok) {
-                        this.closeModal();
-                        this.loadWorkshop(1);
-                        this.loadDashboardData();
-                    } else {
-                        errorDiv.textContent = json.message || 'Error al guardar';
-                        errorDiv.style.color = 'var(--color-danger)';
-                    }
-                } catch (e) { errorDiv.textContent = 'Error de conexión'; }
+                if(res && res.ok) {
+                    this.closeModal();
+                    this.navigate('workshop'); // Refresca y va a la tabla
+                } else {
+                    document.getElementById('form-error').textContent = 'Error al guardar';
+                }
             },
 
             async submitEdit() {
                 const id = this.state.currentTicketId;
-                const dateIn = document.getElementById('edit-date-in').value;
-                const detailsIn = document.getElementById('edit-details-in').value.trim();
-                
-                if (!dateIn || !detailsIn) {
-                    document.getElementById('edit-form-error').textContent = 'Complete todos los campos obligatorios.';
-                    return;
-                }
+                const date = document.getElementById('edit-date-in').value;
+                const det = document.getElementById('edit-details-in').value;
 
-                try {
-                    const res = await this.fetchAPI(`/api/workshop/action?id=${id}`, {
-                        method: 'PUT',
-                        body: JSON.stringify({ date_in: dateIn, details_in: detailsIn })
-                    });
-                    if (res && res.ok) {
-                        this.closeModal();
-                        this.loadWorkshop(this.state.page);
-                    }
-                } catch(e) { alert("Error al editar"); }
+                const res = await this.fetchAPI(`/api/tickets?id=${id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ date_in: date, details_in: det })
+                });
+                
+                if(res && res.ok) {
+                    this.closeModal();
+                    this.loadWorkshop();
+                }
             },
 
             async submitFinalize() {
                 const id = this.state.currentTicketId;
                 const status = document.getElementById('fin-status').value;
                 const dateOut = document.getElementById('fin-date-out').value;
-                const detailsOut = document.getElementById('fin-details-out').value.trim();
+                const detailsOut = document.getElementById('fin-details-out').value;
 
-                if (!dateOut || !detailsOut) {
-                    document.getElementById('fin-error').textContent = 'Complete todos los campos.';
+                if(!dateOut || !detailsOut.trim()) {
+                    document.getElementById('fin-error').textContent = 'Complete fecha y detalles de salida';
                     return;
                 }
 
-                try {
-                    const res = await this.fetchAPI(`/api/workshop/action?id=${id}&action=change_status`, {
-                        method: 'PUT',
-                        body: JSON.stringify({ status: status, date_out: dateOut, details_out: detailsOut })
-                    });
-                    if (res && res.ok) {
-                        this.closeModal();
-                        this.loadWorkshop(this.state.page);
-                        this.loadDashboardData();
-                    }
-                } catch(e) { alert("Error al finalizar"); }
+                const res = await this.fetchAPI(`/api/tickets?id=${id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ status: status, date_out: dateOut, details_out: detailsOut })
+                });
+
+                if(res && res.ok) {
+                    this.closeModal();
+                    this.loadWorkshop();
+                    this.loadDashboardData(); // Actualizar contadores
+                }
             },
 
             async confirmDelete() {
                 const id = this.state.currentTicketId;
-                try {
-                    const res = await this.fetchAPI(`/api/workshop/action?id=${id}`, { method: 'DELETE' });
-                    if (res && res.ok) {
-                        this.closeModal();
-                        this.loadWorkshop(this.state.page);
-                        this.loadDashboardData();
-                    }
-                } catch(e) { alert("Error al eliminar"); }
+                const res = await this.fetchAPI(`/api/tickets?id=${id}`, { method: 'DELETE' });
+                if(res && res.ok) {
+                    this.closeModal();
+                    this.loadWorkshop();
+                }
             },
 
-            // --- AUTH ---
+            // --- AUTH & UTILIDADES ---
+            initCharCounter(id) {
+                const el = document.getElementById(id);
+                if(!el) return;
+                const ctr = el.nextElementSibling;
+                el.oninput = () => ctr.textContent = `${el.value.length}/300`;
+            },
+            closeModal() { document.getElementById('modal-overlay').classList.remove('open'); },
             async handleLogin() {
-                const usernameInput = document.getElementById('username').value;
-                const passwordInput = document.getElementById('password').value;
-                const roleInput = document.getElementById('role').value;
-                const errorDiv = document.getElementById('login-error');
-                errorDiv.textContent = 'Verificando...';
-                if (usernameInput && passwordInput) {
-                    const mockUser = { username: usernameInput, full_name: 'Usuario Sistema', role: roleInput };
-                    const mockToken = 'mock-token-123';
-                    this.state.user = mockUser;
-                    this.state.token = mockToken;
-                    localStorage.setItem('sart_user', JSON.stringify(mockUser));
-                    localStorage.setItem('sart_token', mockToken);
-                    errorDiv.textContent = '';
-                    this.showApp();
-                } else {
-                    errorDiv.textContent = 'Datos incompletos';
+                // Mock login simplificado para demo, conectar con backend real si es necesario
+                // El endpoint /api/login existe en el backend actual
+                const u = document.getElementById('username').value;
+                const p = document.getElementById('password').value;
+                const r = document.getElementById('role').value;
+                
+                try {
+                    const res = await fetch('/api/login', {
+                        method: 'POST',
+                        body: JSON.stringify({ username: u, password: p, role: r })
+                    });
+                    const json = await res.json();
+                    
+                    if(json.token) {
+                        this.state.user = { username: json.username, full_name: json.full_name, role: json.role };
+                        this.state.token = json.token;
+                        localStorage.setItem('sart_user', JSON.stringify(this.state.user));
+                        localStorage.setItem('sart_token', this.state.token);
+                        this.showApp();
+                    } else {
+                        document.getElementById('login-error').textContent = 'Credenciales inválidas';
+                    }
+                } catch(e) {
+                    document.getElementById('login-error').textContent = 'Error de conexión';
                 }
             },
             showLogin() { document.getElementById('login-view').classList.remove('hidden'); document.getElementById('app-view').classList.add('hidden'); },
@@ -1086,7 +1497,7 @@
                         else item.classList.remove('hidden');
                     });
                 }
-                this.loadDashboardData();
+                this.loadGlobalData().then(() => this.navigate('home'));
             },
             logout() { 
                 localStorage.clear(); 
@@ -1096,15 +1507,16 @@
             },
             async loadDashboardData() {
                 try {
-                     const elWorkshop = document.getElementById('kpi-workshop');
-                    if (elWorkshop) elWorkshop.textContent = "3"; 
-                    const elRepaired = document.getElementById('kpi-repaired');
-                    if (elRepaired) elRepaired.textContent = "12"; 
-                    const elMonth = document.getElementById('kpi-month');
-                    if (elMonth) elMonth.textContent = "5"; 
+                    const res = await this.fetchAPI('/api/stats');
+                    const json = await res.json();
+                    if(json) {
+                        document.getElementById('kpi-workshop').textContent = json.in_workshop;
+                        document.getElementById('kpi-repaired').textContent = json.repaired;
+                        document.getElementById('kpi-month').textContent = json.total_month;
+                    }
                 } catch (err) { console.error(err); }
             },
-            printReport(mode) { alert("Generando reporte PDF... (Pronto)"); }
+            printReport(type) { alert("Generando reporte PDF... (Pronto)"); }
         };
 
         document.addEventListener('DOMContentLoaded', () => { app.init(); });
