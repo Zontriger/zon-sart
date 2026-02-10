@@ -106,7 +106,7 @@ type DeviceResponse struct {
 	Limit int      `json:"limit"`
 }
 
-// Estructura Unificada para Tickets (Taller)
+// Estructura Unificada para Tickets (Taller/Historial)
 type Ticket struct {
 	ID            int     `json:"id"`
 	DeviceID      int     `json:"id_device"`
@@ -145,7 +145,6 @@ type TicketResponse struct {
 // --- MAIN ---
 
 func main() {
-	// Verificación de integridad de archivos estáticos
 	if _, err := os.Stat(STATIC_DIR + "/index.html"); os.IsNotExist(err) {
 		log.Fatal("ERROR CRÍTICO: No se encuentra 'static/index.html'. El sistema requiere la carpeta static.")
 	}
@@ -153,7 +152,6 @@ func main() {
 	initDB()
 	defer db.Close()
 
-	// Servidor de Archivos Estáticos
 	fs := http.FileServer(http.Dir(STATIC_DIR))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
@@ -169,15 +167,11 @@ func main() {
 	http.HandleFunc("/api/devices", middlewareAuth(handleDevicesCRUD))
 	http.HandleFunc("/api/tickets", middlewareAuth(handleTicketsCRUD))
 	
-	// API - Helpers Específicos
-	// Eliminado endpoint redundante lookup, frontend usa filtros en /api/devices
-
 	// SPA Catch-all
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, STATIC_DIR+"/index.html")
 	})
 
-	// Lanzador del navegador
 	go func() {
 		time.Sleep(1 * time.Second)
 		fmt.Printf("Sistema SART v13 iniciado en: %s\n", URL)
@@ -214,11 +208,9 @@ func initDB() {
 		log.Fatal("Error fatal abriendo DB:", err)
 	}
 
-	// Optimizaciones SQLite
 	db.Exec("PRAGMA foreign_keys = ON;")
 	db.Exec("PRAGMA journal_mode = WAL;")
 
-	// Crear/Actualizar Esquema y Vistas
 	createTables()
 
 	if !exists {
@@ -408,7 +400,7 @@ func createTables() {
 	`
 	db.Exec(schema)
 
-	// 2. VISTAS (Fuente de Verdad Única para los Endpoints)
+	// 2. VISTAS
 	views := `
 	DROP VIEW IF EXISTS Vista_Datos_Dispositivo_Completo;
 	DROP VIEW IF EXISTS Vista_Ubicacion_Completa;
@@ -543,7 +535,6 @@ func seedData() {
 func handleLogin(w http.ResponseWriter, r *http.Request) {
 	var req LoginRequest
 	json.NewDecoder(r.Body).Decode(&req)
-	// En producción: validar hash real
 	respondJSON(w, UserResponse{ID: 1, Username: "admin", FullName: "Admin SART", Role: "admin", Token: "mock-token-123"})
 }
 
@@ -556,13 +547,11 @@ func handleStats(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, stats)
 }
 
-// --- ENDPOINTS AGREGADOS (CARGA MASIVA) ---
-
 func handleSpecs(w http.ResponseWriter, r *http.Request) {
 	resp := SpecsResponse{
 		Types:         getSelectItems("Tipo", "type"),
 		Brands:        getSelectItems("Marca", "brand"),
-		Models:        getModels(), // Models incluye parent_id
+		Models:        getModels(),
 		OS:            getSelectItems("Sistema_Operativo", "os"),
 		RAMs:          getSelectItems("RAM", "ram"),
 		Storages:      getSelectItems("Almacenamiento", "storage"),
@@ -586,18 +575,15 @@ func handleLocations(w http.ResponseWriter, r *http.Request) {
 
 func handleDevicesCRUD(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		// Paginación
 		page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 		limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
 		if page < 1 { page = 1 }
-		if limit < 1 { limit = 4 } // CORREGIDO: Límite por defecto 4
+		if limit < 1 { limit = 4 }
 		offset := (page - 1) * limit
 
-		// Filtros
 		where := " WHERE 1=1 "
 		args := []interface{}{}
 
-		// Búsqueda Global (Todos los campos)
 		search := r.URL.Query().Get("search")
 		if search != "" {
 			term := "%" + search + "%"
@@ -605,22 +591,18 @@ func handleDevicesCRUD(w http.ResponseWriter, r *http.Request) {
 				v.code LIKE ? OR v.serial LIKE ? OR v.brand LIKE ? OR v.model LIKE ? OR 
 				v.building LIKE ? OR v.area LIKE ? OR v.os LIKE ? OR v.details LIKE ?
 			) `
-			// Repetir el argumento para cada placeholder
 			for i := 0; i < 8; i++ { args = append(args, term) }
 		}
 		
-		// Filtros exactos
 		if val := r.URL.Query().Get("type"); val != "" { where += " AND v.id_type = ? "; args = append(args, val) }
 		if val := r.URL.Query().Get("brand"); val != "" { where += " AND v.id_brand = ? "; args = append(args, val) }
 		if val := r.URL.Query().Get("os"); val != "" { where += " AND v.id_os = ? "; args = append(args, val) }
 
-		// Filtros de Ubicación (Lookup)
 		if val := r.URL.Query().Get("id_building"); val != "" { where += " AND v.id_building = ? "; args = append(args, val) }
 		if val := r.URL.Query().Get("id_floor"); val != "" { where += " AND v.id_floor = ? "; args = append(args, val) }
 		if val := r.URL.Query().Get("id_area"); val != "" { where += " AND v.id_area = ? "; args = append(args, val) }
 		if val := r.URL.Query().Get("id_room"); val != "" { where += " AND v.id_room = ? "; args = append(args, val) }
 
-		// Filtro Status (Calculado)
 		statusSubQuery := "(SELECT 1 FROM Taller t WHERE t.id_device = v.device_id AND t.status = 'pending')"
 		statusFilter := r.URL.Query().Get("status")
 		if statusFilter == "workshop" {
@@ -629,11 +611,9 @@ func handleDevicesCRUD(w http.ResponseWriter, r *http.Request) {
 			where += fmt.Sprintf(" AND NOT EXISTS %s ", statusSubQuery)
 		}
 
-		// Count
 		var total int
 		db.QueryRow("SELECT COUNT(*) FROM Vista_Datos_Dispositivo_Completo v "+where, args...).Scan(&total)
 
-		// Query Data (Granular)
 		query := `
 			SELECT 
 				v.device_id, v.code, v.device_type, v.brand, v.model, v.serial,
@@ -646,34 +626,27 @@ func handleDevicesCRUD(w http.ResponseWriter, r *http.Request) {
 		
 		args = append(args, limit, offset)
 		rows, err := db.Query(query, args...)
-		if err != nil {
-			log.Printf("Query Error: %v", err)
-			respondError(w, 500, "Error DB")
-			return
-		}
+		if err != nil { respondError(w, 500, "Error DB"); return }
 		defer rows.Close()
 
 		items := []Device{}
 		for rows.Next() {
 			var d Device
-			// Scaneo usando punteros para permitir nulls
 			err := rows.Scan(
 				&d.ID, &d.Code, &d.Type, &d.Brand, &d.Model, &d.Serial,
 				&d.Building, &d.Floor, &d.Area, &d.Room,
 				&d.OS, &d.RAM, &d.Storage, &d.CPU, &d.Arch, &d.Details,
 				&d.Status, &d.StatusLabel)
-			
 			if err != nil { continue }
 			items = append(items, d)
 		}
-
 		respondJSON(w, DeviceResponse{Data: items, Total: total, Page: page, Limit: limit})
 
 	} else if r.Method == "POST" || r.Method == "PUT" {
 		type DeviceInput struct {
 			Code        *string `json:"code"`
 			IDType      int     `json:"id_type"`
-			IDBrand     *int    `json:"id_brand"` // Modificado: Puntero para ser opcional
+			IDBrand     *int    `json:"id_brand"`
 			IDModel     *int    `json:"id_model"`
 			Serial      *string `json:"serial"`
 			IDArea      int     `json:"id_area"`
@@ -685,24 +658,17 @@ func handleDevicesCRUD(w http.ResponseWriter, r *http.Request) {
 			Arch        *string `json:"arch"`
 			Details     *string `json:"details"`
 		}
-
 		var d DeviceInput
-		if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
-			respondError(w, 400, "JSON inválido")
-			return
-		}
+		if err := json.NewDecoder(r.Body).Decode(&d); err != nil { respondError(w, 400, "JSON inválido"); return }
 
-		// Validaciones comunes
 		if d.IDType == 0 { respondError(w, 400, "Tipo obligatorio"); return }
 		if d.IDArea == 0 { respondError(w, 400, "Ubicación (Área) obligatoria"); return }
 
-		// LIMPIEZA DE VACÍOS (Fix Unique Constraints)
 		if d.Code != nil && strings.TrimSpace(*d.Code) == "" { d.Code = nil }
 		if d.Serial != nil && strings.TrimSpace(*d.Serial) == "" { d.Serial = nil }
 		if d.Details != nil && strings.TrimSpace(*d.Details) == "" { d.Details = nil }
 		if d.Arch != nil && strings.TrimSpace(*d.Arch) == "" { d.Arch = nil }
 
-		// Resolución de Ubicación (Busca o Crea)
 		var idLocation int
 		var queryLoc string
 		var argsLoc []interface{}
@@ -721,9 +687,7 @@ func handleDevicesCRUD(w http.ResponseWriter, r *http.Request) {
 			if errIns != nil { respondError(w, 500, "Error creando ubicación: "+errIns.Error()); return }
 			id, _ := res.LastInsertId()
 			idLocation = int(id)
-		} else if err != nil {
-			respondError(w, 500, "Error ubicacion: "+err.Error()); return
-		}
+		} else if err != nil { respondError(w, 500, "Error ubicacion: "+err.Error()); return }
 
 		if r.Method == "POST" {
 			_, err = db.Exec(`INSERT INTO Dispositivo 
@@ -732,7 +696,6 @@ func handleDevicesCRUD(w http.ResponseWriter, r *http.Request) {
 				d.Code, d.IDType, idLocation, d.IDBrand, d.IDModel, d.Serial, d.IDOS, d.IDRAM, d.IDStorage, d.IDProcessor, d.Arch, d.Details)
 			if err != nil { respondError(w, 500, "Error crear: "+err.Error()); return }
 		} else {
-			// PUT
 			id := r.URL.Query().Get("id")
 			_, err = db.Exec(`UPDATE Dispositivo SET 
 				code=?, id_type=?, id_location=?, id_brand=?, id_model=?, serial=?, 
@@ -744,32 +707,13 @@ func handleDevicesCRUD(w http.ResponseWriter, r *http.Request) {
 		}
 		respondJSON(w, map[string]bool{"success": true})
 	} else if r.Method == "DELETE" {
-		// Implementación DELETE Dispositivo
 		id := r.URL.Query().Get("id")
-		if id == "" {
-			respondError(w, 400, "ID requerido")
-			return
-		}
-
-		// 1. Verificar integridad referencial (Historial en Taller)
+		if id == "" { respondError(w, 400, "ID requerido"); return }
 		var count int
-		err := db.QueryRow("SELECT COUNT(*) FROM Taller WHERE id_device = ?", id).Scan(&count)
-		if err != nil {
-			respondError(w, 500, "Error verificando historial: "+err.Error())
-			return
-		}
-		if count > 0 {
-			respondError(w, 409, "No se puede eliminar: El equipo tiene historial de reparaciones.")
-			return
-		}
-
-		// 2. Proceder con el borrado
-		_, err = db.Exec("DELETE FROM Dispositivo WHERE id = ?", id)
-		if err != nil {
-			respondError(w, 500, "Error eliminando dispositivo: "+err.Error())
-			return
-		}
-
+		db.QueryRow("SELECT COUNT(*) FROM Taller WHERE id_device = ?", id).Scan(&count)
+		if count > 0 { respondError(w, 409, "El equipo tiene historial."); return }
+		_, err := db.Exec("DELETE FROM Dispositivo WHERE id = ?", id)
+		if err != nil { respondError(w, 500, "Error eliminar: "+err.Error()); return }
 		respondJSON(w, map[string]bool{"success": true})
 	}
 }
@@ -788,17 +732,36 @@ func handleTicketsCRUD(w http.ResponseWriter, r *http.Request) {
 		args := []interface{}{}
 
 		status := r.URL.Query().Get("status")
-		if status != "" && status != "all" {
+		if status == "history" {
+			where += " AND t.status IN ('repaired', 'unrepaired') "
+		} else if status != "" && status != "all" {
 			where += " AND t.status = ? "
 			args = append(args, status)
+		}
+
+		if val := r.URL.Query().Get("after"); val != "" {
+			where += " AND t.date_out >= ? "
+			args = append(args, val)
+		}
+		if val := r.URL.Query().Get("before"); val != "" {
+			where += " AND t.date_out <= ? "
+			args = append(args, val)
 		}
 
 		search := r.URL.Query().Get("search")
 		if search != "" {
 			term := "%" + search + "%"
-			where += " AND (v.code LIKE ? OR v.serial LIKE ? OR v.brand LIKE ?) "
-			args = append(args, term, term, term)
+			// Búsqueda expandida para Historial
+			where += ` AND (
+				v.code LIKE ? OR v.serial LIKE ? OR v.brand LIKE ? OR v.model LIKE ? OR 
+				v.building LIKE ? OR v.area LIKE ? OR 
+				t.details_in LIKE ? OR t.details_out LIKE ?
+			) `
+			for i := 0; i < 8; i++ { args = append(args, term) }
 		}
+		
+		if val := r.URL.Query().Get("type"); val != "" { where += " AND v.id_type = ? "; args = append(args, val) }
+		if val := r.URL.Query().Get("brand"); val != "" { where += " AND v.id_brand = ? "; args = append(args, val) }
 
 		var total int
 		db.QueryRow("SELECT COUNT(*) FROM Taller t JOIN Vista_Datos_Dispositivo_Completo v ON t.id_device=v.device_id "+where, args...).Scan(&total)
@@ -854,23 +817,11 @@ func handleTicketsCRUD(w http.ResponseWriter, r *http.Request) {
 			db.Exec("UPDATE Taller SET date_in=?, details_in=? WHERE id=?", t["date_in"], t["details_in"], id)
 		}
 		respondJSON(w, map[string]bool{"success": true})
-
 	} else if r.Method == "DELETE" {
-		// Implementación DELETE Ticket
 		id := r.URL.Query().Get("id")
-		if id == "" {
-			respondError(w, 400, "ID requerido")
-			return
-		}
-
-		// En un sistema real, quizás solo admins podrían borrar tickets
-		// Aquí permitimos borrar directamente
+		if id == "" { respondError(w, 400, "ID requerido"); return }
 		_, err := db.Exec("DELETE FROM Taller WHERE id = ?", id)
-		if err != nil {
-			respondError(w, 500, "Error eliminando ticket: "+err.Error())
-			return
-		}
-
+		if err != nil { respondError(w, 500, "Error eliminando: "+err.Error()); return }
 		respondJSON(w, map[string]bool{"success": true})
 	}
 }

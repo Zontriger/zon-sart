@@ -104,6 +104,7 @@
         .badge { padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; display: inline-block; text-align: center; min-width: 80px; }
         .badge.operativo { background-color: #D1FAE5; color: #059669; border: 1px solid #6EE7B7; }
         .badge.pending { background-color: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; }
+        .badge.unrepaired { background-color: #fca5a5; color: #991b1b; border: 1px solid #f87171; }
 
         /* ACCIONES */
         .action-btn { background: none; border: none; cursor: pointer; padding: 5px; border-radius: 4px; transition: background 0.2s; display: inline-flex; align-items: center; justify-content: center; }
@@ -138,6 +139,7 @@
         .section-title { font-size: 0.9rem; color: var(--color-text-light); font-weight: 700; text-transform: uppercase; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1rem; margin-top: 1rem; }
         .section-title:first-child { margin-top: 0; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
         
         .char-counter { text-align: right; font-size: 0.8rem; color: var(--color-text-light); margin-top: 0.25rem; font-variant-numeric: tabular-nums; }
         .info-block { background: #f3f4f6; padding: 1rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.9rem; }
@@ -147,7 +149,20 @@
         .detail-item { display: flex; flex-direction: column; }
         .detail-full { grid-column: 1 / -1; }
         .detail-label { font-size: 0.7rem; color: var(--color-text-light); text-transform: uppercase; font-weight: 700; margin-bottom: 0.35rem; letter-spacing: 0.5px; }
-        .detail-value { font-size: 0.95rem; color: var(--color-dark); font-weight: 500; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.25rem; min-height: 1.4rem; }
+        
+        /* CORRECCIÓN: Romper palabras largas en valores de detalle */
+        .detail-value { 
+            font-size: 0.95rem; 
+            color: var(--color-dark); 
+            font-weight: 500; 
+            border-bottom: 1px solid #e5e7eb; 
+            padding-bottom: 0.25rem; 
+            min-height: 1.4rem;
+            white-space: pre-wrap;      /* Respeta saltos de línea y envuelve */
+            word-wrap: break-word;      /* Rompe palabras largas (Legacy) */
+            overflow-wrap: break-word;  /* Rompe palabras largas (Estándar) */
+            word-break: break-word;     /* Compatibilidad extra */
+        }
     </style>
 </head>
 <body>
@@ -194,7 +209,7 @@
                 <li><a class="nav-link active" onclick="app.navigate('home')"><svg class="nav-icon" viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg><span>Inicio</span></a></li>
                 <li><a class="nav-link" onclick="app.navigate('workshop')"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><span>Taller</span></a></li>
                 <li><a class="nav-link" onclick="app.navigate('inventory')"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg><span>Inventario</span></a></li>
-                <li><a class="nav-link" onclick="app.navigate('reports')"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg><span>Reportes</span></a></li>
+                <li><a class="nav-link" onclick="app.navigate('history')"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg><span>Historial</span></a></li>
                 <li><a class="nav-link" onclick="app.navigate('data')"><svg class="nav-icon" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s 9-1.34 9-3V5"/></svg><span>Gestión de Datos</span></a></li>
                 <li data-role-restricted="admin"><a class="nav-link" onclick="app.navigate('settings')"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.74v-.47a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg><span>Configuración</span></a></li>
             </ul>
@@ -389,12 +404,82 @@
                     </div>
                 </div>
 
-                <!-- SECCIÓN 4: REPORTES -->
-                <div id="section-reports" class="section-view hidden">
-                    <h3>Generación de Reportes</h3>
-                    <p class="text-secondary" style="margin-bottom: 2rem;">Seleccione el tipo de reporte que desea imprimir.</p>
-                    <div class="filter-panel" style="justify-content: flex-start;">
-                         <button class="btn-primary" onclick="app.printReport('view')">Imprimir Vista Actual</button>
+                <!-- SECCIÓN 4: HISTORIAL (ANTES REPORTES) -->
+                <div id="section-history" class="section-view hidden">
+                    <div class="filter-panel">
+                        <!-- FILA 1: Búsqueda Global -->
+                        <div class="search-box" style="flex-basis: 100%; margin-bottom: 0.5rem;">
+                            <label class="form-label">Búsqueda Global (Serial, Código, Marca, Falla)</label>
+                            <input type="text" id="hist-search" placeholder="Escriba para buscar..." onkeyup="app.debounceLoadHistory()">
+                        </div>
+
+                        <!-- FILA 2: Filtros -->
+                        <div style="flex: 1; min-width: 120px;">
+                            <label class="form-label">Tipo</label>
+                            <select id="hist-filter-type" onchange="app.loadHistory(1)"></select>
+                        </div>
+                        <div style="flex: 1; min-width: 120px;">
+                            <label class="form-label">Marca</label>
+                            <select id="hist-filter-brand" onchange="app.loadHistory(1)"></select>
+                        </div>
+                        <div style="flex: 1; min-width: 120px;">
+                            <label class="form-label">Estado</label>
+                            <select id="hist-filter-status" onchange="app.loadHistory(1)">
+                                <option value="">Todos</option>
+                                <option value="repaired">Reparado</option>
+                                <option value="unrepaired">No Reparado</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1; min-width: 120px;">
+                            <label class="form-label">Después de</label>
+                            <input type="date" id="hist-date-after" onchange="app.validateDates(); app.loadHistory(1)">
+                        </div>
+                        <div style="flex: 1; min-width: 120px;">
+                            <label class="form-label">Antes de</label>
+                            <input type="date" id="hist-date-before" onchange="app.validateDates(); app.loadHistory(1)">
+                        </div>
+                        
+                        <!-- Botón Acción -->
+                        <div style="flex: 0 0 auto;">
+                             <button class="btn-secondary" onclick="app.clearHistoryFilters()">Limpiar Filtros</button>
+                        </div>
+                    </div>
+                    
+                    <div class="data-panel">
+                        <div class="table-container">
+                            <table class="custom-table" id="history-table">
+                                <colgroup>
+                                    <col style="width: 50px;"> <!-- N -->
+                                    <col style="width: 110px;"> <!-- Salida -->
+                                    <col style="width: 80px;"> <!-- Tipo -->
+                                    <col style="width: 13%;"> <!-- Marca/Modelo -->
+                                    <col style="width: 13%;"> <!-- Código/Serial -->
+                                    <col style="width: auto;"> <!-- Detalles -->
+                                    <col style="width: 135px;"> <!-- Estado -->
+                                    <col style="width: 140px;"> <!-- Acciones -->
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <th>N°</th>
+                                        <th>Salida</th>
+                                        <th>Tipo</th>
+                                        <th>Marca / Modelo</th>
+                                        <th>Código / Serial</th>
+                                        <th>Detalles de Salida</th>
+                                        <th>Estado</th>
+                                        <th style="text-align:center;">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td colspan="8" class="text-muted" style="text-align:center;">Cargando historial...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination-controls">
+                            <button id="hist-btn-prev" class="page-btn" onclick="app.prevPageHistory()">Anterior</button>
+                            <span id="hist-page-info" class="page-info">Página 1</span>
+                            <button id="hist-btn-next" class="page-btn" onclick="app.nextPageHistory()">Siguiente</button>
+                        </div>
                     </div>
                 </div>
                 
@@ -430,124 +515,44 @@
         </div>
     </div>
 
-    <!-- TEMPLATES DE MODAL TALLER -->
+    <!-- TEMPLATES (TALLER / INVENTARIO / DELETE) EXISTENTES -->
     <template id="tmpl-add-ticket">
         <div class="section-title">1. Ubicación del Equipo</div>
         <div class="grid-2">
-            <div class="form-group">
-                <label class="form-label">Edificio</label>
-                <select id="sel-building" onchange="app.handleBuildingChange(this.value)"><option value="">Seleccione...</option></select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Piso</label>
-                <select id="sel-floor" onchange="app.handleFloorChange(this.value)" disabled><option value="">Seleccione...</option></select>
-            </div>
+            <div class="form-group"><label class="form-label">Edificio</label><select id="sel-building" onchange="app.handleBuildingChange(this.value)"><option value="">Seleccione...</option></select></div>
+            <div class="form-group"><label class="form-label">Piso</label><select id="sel-floor" onchange="app.handleFloorChange(this.value)" disabled><option value="">Seleccione...</option></select></div>
         </div>
         <div class="grid-2">
-            <div class="form-group">
-                <label class="form-label">Área</label>
-                <select id="sel-area" onchange="app.handleAreaChange(this.value)" disabled><option value="">Seleccione...</option></select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Habitación (Opcional)</label>
-                <select id="sel-room" onchange="app.handleRoomChange(this.value)" disabled><option value="">Seleccione...</option></select>
-            </div>
+            <div class="form-group"><label class="form-label">Área</label><select id="sel-area" onchange="app.handleAreaChange(this.value)" disabled><option value="">Seleccione...</option></select></div>
+            <div class="form-group"><label class="form-label">Habitación (Opcional)</label><select id="sel-room" onchange="app.handleRoomChange(this.value)" disabled><option value="">Seleccione...</option></select></div>
         </div>
-
         <div class="section-title">2. Selección del Dispositivo</div>
-        <div class="form-group">
-            <label class="form-label">Dispositivo</label>
-            <select id="sel-device" disabled><option value="">Seleccione Ubicación Primero...</option></select>
-        </div>
-
+        <div class="form-group"><label class="form-label">Dispositivo</label><select id="sel-device" disabled><option value="">Seleccione Ubicación Primero...</option></select></div>
         <div class="section-title">3. Detalles del Ingreso</div>
-        <div class="grid-2">
-            <div class="form-group">
-                <label class="form-label">Fecha Ingreso</label>
-                <input type="date" id="date-in" required>
-            </div>
-            <div></div> 
-        </div>
-        <div class="form-group">
-            <label class="form-label">Falla Reportada</label>
-            <textarea id="details-in" rows="3" placeholder="Describa la falla o motivo del ingreso..." required style="resize: none;" maxlength="300"></textarea>
-            <div class="char-counter">0/300</div>
-        </div>
+        <div class="grid-2"><div class="form-group"><label class="form-label">Fecha Ingreso</label><input type="date" id="date-in" required></div><div></div></div>
+        <div class="form-group"><label class="form-label">Falla Reportada</label><textarea id="details-in" rows="3" placeholder="Describa la falla o motivo del ingreso..." required style="resize: none;" maxlength="300"></textarea><div class="char-counter">0/300</div></div>
         <div id="form-error" class="error-msg"></div>
     </template>
-
+    
     <template id="tmpl-edit-ticket">
         <div class="section-title">1. Ubicación del Equipo</div>
-        <div class="grid-2">
-            <div class="form-group">
-                <label class="form-label">Edificio</label>
-                <input type="text" id="edit-building" disabled>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Piso</label>
-                <input type="text" id="edit-floor" disabled>
-            </div>
-        </div>
-        <div class="grid-2">
-            <div class="form-group">
-                <label class="form-label">Área</label>
-                <input type="text" id="edit-area" disabled>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Habitación</label>
-                <input type="text" id="edit-room" disabled>
-            </div>
-        </div>
-
-        <div class="section-title">2. Equipo en Taller</div>
-        <div class="info-block" id="edit-device-info"></div>
-
+        <div class="grid-2"><div class="form-group"><label class="form-label">Edificio</label><input type="text" id="edit-building" disabled></div><div class="form-group"><label class="form-label">Piso</label><input type="text" id="edit-floor" disabled></div></div>
+        <div class="grid-2"><div class="form-group"><label class="form-label">Área</label><input type="text" id="edit-area" disabled></div><div class="form-group"><label class="form-label">Habitación</label><input type="text" id="edit-room" disabled></div></div>
+        <div class="section-title">2. Equipo en Taller</div><div class="info-block" id="edit-device-info"></div>
         <div class="section-title">3. Detalles del Ingreso</div>
-        <div class="grid-2">
-            <div class="form-group">
-                <label class="form-label">Fecha Ingreso</label>
-                <input type="date" id="edit-date-in" required>
-            </div>
-            <div></div> 
-        </div>
-        <div class="form-group">
-            <label class="form-label">Falla Reportada</label>
-            <textarea id="edit-details-in" rows="3" required style="resize: none;" maxlength="300"></textarea>
-            <div class="char-counter">0/300</div>
-        </div>
+        <div class="grid-2"><div class="form-group"><label class="form-label">Fecha Ingreso</label><input type="date" id="edit-date-in" required></div><div></div></div>
+        <div class="form-group"><label class="form-label">Falla Reportada</label><textarea id="edit-details-in" placeholder="Describa la falla o motivo del ingreso..." rows="3" required style="resize: none;" maxlength="300"></textarea><div class="char-counter">0/300</div></div>
         <div id="edit-form-error" class="error-msg"></div>
     </template>
 
     <template id="tmpl-finalize-ticket">
         <div class="info-block" style="background: #eef2ff; border: 1px solid #c7d2fe;">
-            <div style="font-weight:bold; color:var(--color-primary); margin-bottom:5px;">Equipo:</div>
-            <div id="fin-device-info" style="margin-bottom:10px;"></div>
-            
-            <div style="font-weight:bold; color:var(--color-primary); margin-bottom:5px;">Ubicación:</div>
-            <div id="fin-location-info" style="margin-bottom:10px;"></div>
-
-            <div style="font-weight:bold; color:var(--color-primary); margin-bottom:5px;">Falla Reportada:</div>
-            <div id="fin-problem-info" style="font-style:italic;"></div>
+            <div style="font-weight:bold; color:var(--color-primary); margin-bottom:5px;">Equipo:</div><div id="fin-device-info" style="margin-bottom:10px;"></div>
+            <div style="font-weight:bold; color:var(--color-primary); margin-bottom:5px;">Ubicación:</div><div id="fin-location-info" style="margin-bottom:10px;"></div>
+            <div style="font-weight:bold; color:var(--color-primary); margin-bottom:5px;">Falla Reportada:</div><div id="fin-problem-info" style="font-style:italic;"></div>
         </div>
-
-        <div class="grid-2">
-            <div class="form-group">
-                <label class="form-label">Estado Final</label>
-                <select id="fin-status">
-                    <option value="repaired">Reparado</option>
-                    <option value="unrepaired">No Reparado</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Fecha Salida</label>
-                <input type="date" id="fin-date-out" required>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="form-label">Informe de Salida / Solución</label>
-            <textarea id="fin-details-out" rows="3" placeholder="Describa el procedimiento realizado..." required style="resize: none;" maxlength="300"></textarea>
-            <div class="char-counter">0/300</div>
-        </div>
+        <div class="grid-2"><div class="form-group"><label class="form-label">Estado Final</label><select id="fin-status"><option value="repaired">Reparado</option><option value="unrepaired">No Reparado</option></select></div><div class="form-group"><label class="form-label">Fecha Salida</label><input type="date" id="fin-date-out" required></div></div>
+        <div class="form-group"><label class="form-label">Informe de Salida</label><textarea id="fin-details-out" rows="3" placeholder="Describa el procedimiento realizado..." required style="resize: none;" maxlength="300"></textarea><div class="char-counter">0/300</div></div>
         <div id="fin-error" class="error-msg"></div>
     </template>
 
@@ -558,85 +563,19 @@
         </div>
     </template>
 
-    <!-- TEMPLATES DE MODAL INVENTARIO -->
     <template id="tmpl-device-form">
         <div class="section-title">Información General</div>
-        <div class="grid-2">
-            <div class="form-group">
-                <label class="form-label">Tipo *</label>
-                <select id="dev-type" required><option value="">Seleccione...</option></select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Marca</label>
-                <select id="dev-brand" onchange="app.filterModels(this.value)"><option value="">Seleccione...</option></select>
-            </div>
-        </div>
-        <div class="grid-2">
-            <div class="form-group">
-                <label class="form-label">Modelo</label>
-                <select id="dev-model" disabled><option value="">Seleccione Marca...</option></select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Serial</label>
-                <input type="text" id="dev-serial" placeholder="S/N">
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="form-label">Código del Bien</label>
-            <input type="text" id="dev-code" placeholder="Ej: 4030">
-        </div>
-
+        <div class="grid-2"><div class="form-group"><label class="form-label">Tipo *</label><select id="dev-type" required><option value="">Seleccione...</option></select></div><div class="form-group"><label class="form-label">Marca</label><select id="dev-brand" onchange="app.filterModels(this.value)"><option value="">Seleccione...</option></select></div></div>
+        <div class="grid-2"><div class="form-group"><label class="form-label">Modelo</label><select id="dev-model" disabled><option value="">Seleccione Marca...</option></select></div><div class="form-group"><label class="form-label">Serial</label><input type="text" id="dev-serial" placeholder="S/N"></div></div>
+        <div class="form-group"><label class="form-label">Código del Bien</label><input type="text" id="dev-code" placeholder="Ej: 4030"></div>
         <div class="section-title">Ubicación Física</div>
-        <div class="grid-2">
-            <div class="form-group">
-                <label class="form-label">Edificio *</label>
-                <select id="sel-building" onchange="app.handleBuildingChange(this.value)" required><option value="">Seleccione...</option></select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Piso *</label>
-                <select id="sel-floor" onchange="app.handleFloorChange(this.value)" disabled required><option value="">Seleccione...</option></select>
-            </div>
-        </div>
-        <div class="grid-2">
-            <div class="form-group">
-                <label class="form-label">Área *</label>
-                <select id="sel-area" onchange="app.handleAreaChange(this.value)" disabled required><option value="">Seleccione...</option></select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Habitación</label>
-                <select id="sel-room" disabled><option value="">Seleccione...</option></select>
-            </div>
-        </div>
-
+        <div class="grid-2"><div class="form-group"><label class="form-label">Edificio *</label><select id="sel-building" onchange="app.handleBuildingChange(this.value)" required><option value="">Seleccione...</option></select></div><div class="form-group"><label class="form-label">Piso *</label><select id="sel-floor" onchange="app.handleFloorChange(this.value)" disabled required><option value="">Seleccione...</option></select></div></div>
+        <div class="grid-2"><div class="form-group"><label class="form-label">Área *</label><select id="sel-area" onchange="app.handleAreaChange(this.value)" disabled required><option value="">Seleccione...</option></select></div><div class="form-group"><label class="form-label">Habitación</label><select id="sel-room" disabled><option value="">Seleccione...</option></select></div></div>
         <div class="section-title">Especificaciones Técnicas</div>
-        <div class="grid-2">
-            <div class="form-group">
-                <label class="form-label">Sistema Operativo</label>
-                <select id="dev-os"><option value="">N/A</option></select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Arquitectura</label>
-                <select id="dev-arch"><option value="">N/A</option></select>
-            </div>
-        </div>
-        <div class="grid-2">
-            <div class="form-group">
-                <label class="form-label">Procesador (CPU)</label>
-                <select id="dev-cpu"><option value="">N/A</option></select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Memoria RAM</label>
-                <select id="dev-ram"><option value="">N/A</option></select>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="form-label">Almacenamiento</label>
-            <select id="dev-storage"><option value="">N/A</option></select>
-        </div>
-        <div class="form-group">
-            <label class="form-label">Detalles Adicionales</label>
-            <textarea id="dev-details" rows="2" style="resize: none;" maxlength="200"></textarea>
-        </div>
+        <div class="grid-2"><div class="form-group"><label class="form-label">SO</label><select id="dev-os"><option value="">N/A</option></select></div><div class="form-group"><label class="form-label">Arquitectura</label><select id="dev-arch"><option value="">N/A</option></select></div></div>
+        <div class="grid-2"><div class="form-group"><label class="form-label">CPU</label><select id="dev-cpu"><option value="">N/A</option></select></div><div class="form-group"><label class="form-label">RAM</label><select id="dev-ram"><option value="">N/A</option></select></div></div>
+        <div class="form-group"><label class="form-label">Almacenamiento</label><select id="dev-storage"><option value="">N/A</option></select></div>
+        <div class="form-group"><label class="form-label">Detalles</label><textarea id="dev-details" rows="2" placeholder="Detalles adicionales..." style="resize: none;" maxlength="200"></textarea></div>
         <div id="dev-form-error" class="error-msg"></div>
     </template>
 
@@ -644,58 +583,55 @@
         <div style="background: #f9fafb; padding: 1.5rem; border-radius: 8px; border: 1px solid #e5e7eb;">
             <div class="section-title" style="margin-top:0;">Información General</div>
             <div class="details-grid">
-                <div class="detail-item">
-                    <span class="detail-label">Tipo</span>
-                    <span class="detail-value" id="view-type"></span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Marca</span>
-                    <span class="detail-value" id="view-brand"></span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Modelo</span>
-                    <span class="detail-value" id="view-model"></span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Código</span>
-                    <span class="detail-value" id="view-code"></span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Serial</span>
-                    <span class="detail-value" id="view-serial"></span>
-                </div>
-                 <div class="detail-item detail-full">
-                    <span class="detail-label">Ubicación Actual</span>
-                    <span class="detail-value" id="view-location" style="color:var(--color-primary); font-weight:600;"></span>
-                </div>
+                <div class="detail-item"><span class="detail-label">Tipo</span><span class="detail-value" id="view-type"></span></div>
+                <div class="detail-item"><span class="detail-label">Ubicación</span><span class="detail-value" id="view-location"></span></div>
+                <div class="detail-item"><span class="detail-label">Marca</span><span class="detail-value" id="view-brand"></span></div>
+                <div class="detail-item"><span class="detail-label">Modelo</span><span class="detail-value" id="view-model"></span></div>
+                <div class="detail-item"><span class="detail-label">Código</span><span class="detail-value" id="view-code"></span></div>
+                <div class="detail-item"><span class="detail-label">Serial</span><span class="detail-value" id="view-serial"></span></div>
+                 <div class="detail-item detail-full"><span class="detail-label">Ubicación Actual</span><span class="detail-value" id="view-location" style="color:var(--color-primary); font-weight:600;"></span></div>
             </div>
-
             <div class="section-title">Especificaciones Técnicas</div>
             <div class="details-grid">
-                <div class="detail-item">
-                    <span class="detail-label">Sistema Operativo</span>
-                    <span class="detail-value" id="view-os"></span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Procesador (CPU)</span>
-                    <span class="detail-value" id="view-cpu"></span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Memoria RAM</span>
-                    <span class="detail-value" id="view-ram"></span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Almacenamiento</span>
-                    <span class="detail-value" id="view-storage"></span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Arquitectura</span>
-                    <span class="detail-value" id="view-arch"></span>
-                </div>
+                <div class="detail-item"><span class="detail-label">SO</span><span class="detail-value" id="view-os"></span></div>
+                <div class="detail-item"><span class="detail-label">CPU</span><span class="detail-value" id="view-cpu"></span></div>
+                <div class="detail-item"><span class="detail-label">RAM</span><span class="detail-value" id="view-ram"></span></div>
+                <div class="detail-item"><span class="detail-label">Storage</span><span class="detail-value" id="view-storage"></span></div>
+                <div class="detail-item"><span class="detail-label">Arch</span><span class="detail-value" id="view-arch"></span></div>
             </div>
-            
             <div class="section-title">Observaciones</div>
             <div class="info-block" id="view-details" style="background:white; border:1px solid #e5e7eb; min-height:3rem; font-style:italic; color:#4b5563;"></div>
+        </div>
+    </template>
+
+    <!-- NUEVO TEMPLATE: VER DETALLES HISTORIAL -->
+    <template id="tmpl-view-ticket">
+        <div style="background: #f9fafb; padding: 1.5rem; border-radius: 8px; border: 1px solid #e5e7eb;">
+            <div class="section-title" style="margin-top:0;">1. Información del Equipo</div>
+            <div class="details-grid">
+                <div class="detail-item"><span class="detail-label">Tipo</span><span class="detail-value" id="vt-type"></span></div>
+                <div class="detail-item"><span class="detail-label">Marca / Modelo</span><span class="detail-value" id="vt-brand-model"></span></div>
+                <div class="detail-item"><span class="detail-label">Código</span><span class="detail-value" id="vt-code"></span></div>
+                <div class="detail-item"><span class="detail-label">Serial</span><span class="detail-value" id="vt-serial"></span></div>
+                <div class="detail-item detail-full"><span class="detail-label">Ubicación Origen</span><span class="detail-value" id="vt-location" style="font-weight:600;"></span></div>
+            </div>
+
+            <div class="section-title">2. Detalles del Servicio</div>
+            <div class="details-grid">
+                <div class="detail-item"><span class="detail-label">Fecha Entrada</span><span class="detail-value" id="vt-date-in"></span></div>
+                <div class="detail-item"><span class="detail-label">Fecha Salida</span><span class="detail-value" id="vt-date-out"></span></div>
+                <div class="detail-item"><span class="detail-label">Estado Final</span><span class="detail-value" id="vt-status"></span></div>
+            </div>
+            
+            <div class="detail-item detail-full" style="margin-bottom:1rem;">
+                <span class="detail-label">Motivo de Ingreso</span>
+                <div class="detail-value" id="vt-details-in" style="height:auto; min-height:1.4rem;"></div>
+            </div>
+            
+            <div class="detail-item detail-full">
+                <span class="detail-label">Informe de Salida</span>
+                <div class="detail-value" id="vt-details-out" style="height:auto; min-height:1.4rem; background:white; padding:5px; border:1px solid #eee;"></div>
+            </div>
         </div>
     </template>
 
@@ -716,6 +652,7 @@
                 locations: null,
                 workshopData: [], // Cache para modales de taller
                 inventoryData: [], // Cache para modales de inventario
+                historyData: [], // Cache para modales de historial
 
                 // Estado Modales
                 currentTicketId: null,
@@ -750,7 +687,7 @@
                 const targetSection = document.getElementById(`section-${pageId}`);
                 if (targetSection) targetSection.classList.remove('hidden');
 
-                const titles = { 'home': 'Inicio', 'workshop': 'Gestión de Taller', 'inventory': 'Inventario General', 'reports': 'Reportes', 'data': 'Gestión de Datos', 'settings': 'Configuración' };
+                const titles = { 'home': 'Inicio', 'workshop': 'Gestión de Taller', 'inventory': 'Inventario General', 'history': 'Historial de Servicios', 'data': 'Gestión de Datos', 'settings': 'Configuración' };
                 document.getElementById('page-title').textContent = titles[pageId] || 'SART';
 
                 if (pageId === 'inventory') {
@@ -761,6 +698,10 @@
                     this.state.page = 1;
                     this.loadWorkshopFilters();
                     this.loadWorkshop(1);
+                }
+                if (pageId === 'history') {
+                    this.loadHistoryFilters();
+                    this.loadHistory(1);
                 }
                 if (pageId === 'home') this.loadDashboardData();
             },
@@ -991,7 +932,7 @@
                             </td>
                         </tr>`;
                 });
-
+                
                 const missing = this.state.limit - items.length;
                 if(missing > 0) { for(let i=0; i<missing; i++) tbody.innerHTML += this.getEmptyRowHTML(); }
             },
@@ -1007,8 +948,121 @@
                 const totalPages = Math.ceil(this.state.total / this.state.limit);
                 if (this.state.page < totalPages) this.loadInventory(this.state.page + 1); 
             },
+            
+            // --- HISTORIAL ---
+            loadHistoryFilters() {
+                if(document.getElementById('hist-filter-type').length > 0) return;
+                if(!this.state.specs) return;
+                const fill = (id, items) => {
+                    const sel = document.getElementById(id);
+                    sel.innerHTML = '<option value="">Todos</option>';
+                    if(items) items.forEach(i => sel.innerHTML += `<option value="${i.id}">${i.value}</option>`);
+                };
+                fill('hist-filter-type', this.state.specs.types);
+                fill('hist-filter-brand', this.state.specs.brands);
+            },
+            
+            debounceLoadHistory() {
+                clearTimeout(this.state.debounceTimer);
+                this.state.debounceTimer = setTimeout(() => this.loadHistory(1), 400);
+            },
+            
+            validateDates() {
+                const after = document.getElementById('hist-date-after');
+                const before = document.getElementById('hist-date-before');
+                if(after.value) before.min = after.value;
+                if(before.value) after.max = before.value;
+            },
 
-            // --- MODALES Y LÓGICA DE FORMULARIOS ---
+            clearHistoryFilters() {
+                document.getElementById('hist-search').value = "";
+                document.getElementById('hist-filter-type').value = "";
+                document.getElementById('hist-filter-brand').value = "";
+                document.getElementById('hist-filter-status').value = "";
+                document.getElementById('hist-date-after').value = "";
+                document.getElementById('hist-date-before').value = "";
+                this.loadHistory(1);
+            },
+
+            async loadHistory(pageArg) {
+                this.state.page = pageArg;
+                const search = document.getElementById('hist-search').value;
+                const type = document.getElementById('hist-filter-type').value;
+                const brand = document.getElementById('hist-filter-brand').value;
+                const status = document.getElementById('hist-filter-status').value;
+                const after = document.getElementById('hist-date-after').value;
+                const before = document.getElementById('hist-date-before').value;
+
+                let qs = `page=${this.state.page}&limit=${this.state.limit}`;
+                // Default status to 'history' (repaired/unrepaired) if user selects 'Todos' or nothing
+                if(status) qs += `&status=${status}`;
+                else qs += `&status=history`; 
+
+                if(search) qs += `&search=${encodeURIComponent(search)}`;
+                if(type) qs += `&type=${type}`;
+                if(brand) qs += `&brand=${brand}`;
+                if(after) qs += `&after=${after}`;
+                if(before) qs += `&before=${before}`;
+
+                try {
+                    const res = await this.fetchAPI('/api/tickets?' + qs);
+                    if (!res) return;
+                    const result = await res.json();
+                    this.state.total = result.total || 0;
+                    this.state.historyData = result.data || [];
+                    this.renderHistoryTable(this.state.historyData);
+                    this.renderPaginationHistory();
+                } catch (err) { console.error(err); }
+            },
+
+            renderHistoryTable(data) {
+                const tbody = document.querySelector('#history-table tbody');
+                tbody.innerHTML = '';
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-muted" style="text-align:center;">No se encontraron registros.</td></tr>';
+                    for(let i=0; i<3; i++) tbody.innerHTML += this.getEmptyRowHTML();
+                    return;
+                }
+                data.forEach((t, index) => {
+                    const realIndex = ((this.state.page - 1) * this.state.limit) + (index + 1);
+                    const statusClass = t.status === 'repaired' ? 'operativo' : 'unrepaired';
+                    const statusLabel = t.status === 'repaired' ? 'Reparado' : 'No Reparado';
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${realIndex}</td>
+                            <td>${t.date_out || '-'}</td>
+                            <td>${t.device_type}</td>
+                            <td><strong>${t.device_brand || ''}</strong><br><span style="font-size:0.8rem; color:#6b7280;">${t.device_model || ''}</span></td>
+                            <td><strong>${t.device_code || ''}</strong><br><span style="font-size:0.8rem; color:#6b7280;">${t.device_serial || ''}</span></td>
+                            <td><div class="cell-multiline" title="${t.details_out}">${t.details_out || '-'}</div></td>
+                            <td><span class="badge ${statusClass}">${statusLabel}</span></td>
+                            <td style="text-align:center;">
+                                <div class="actions-cell" style="justify-content:center;">
+                                    <button class="action-btn view" onclick="app.openModal('view-ticket', ${t.id})" title="Ver Detalles"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+                                    <button class="action-btn" title="Exportar PDF" onclick="alert('Exportar PDF: Pendiente')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></button>
+                                    <button class="action-btn delete" onclick="app.openModal('delete-ticket', ${t.id})" title="Eliminar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                                </div>
+                            </td>
+                        </tr>`;
+                });
+                const missing = this.state.limit - data.length;
+                if(missing > 0) { for(let i=0; i<missing; i++) tbody.innerHTML += this.getEmptyRowHTML(); }
+            },
+
+            renderPaginationHistory() {
+                const totalPages = Math.ceil(this.state.total / this.state.limit);
+                document.getElementById('hist-page-info').textContent = `Página ${this.state.page} de ${totalPages || 1}`;
+                document.getElementById('hist-btn-prev').disabled = this.state.page === 1;
+                document.getElementById('hist-btn-next').disabled = this.state.page >= totalPages || totalPages === 0;
+            },
+            prevPageHistory() { if (this.state.page > 1) this.loadHistory(this.state.page - 1); },
+            nextPageHistory() { 
+                const totalPages = Math.ceil(this.state.total / this.state.limit);
+                if (this.state.page < totalPages) this.loadHistory(this.state.page + 1); 
+            },
+
+            // --- MODALES ---
             async openModal(type, id = null) {
                 const overlay = document.getElementById('modal-overlay');
                 const title = document.getElementById('modal-title');
@@ -1016,66 +1070,77 @@
                 const footer = document.getElementById('modal-footer-content');
                 const today = new Date().toISOString().split("T")[0];
 
-                if (type === 'add-ticket' || type === 'edit' || type === 'finalize' || type === 'delete') {
-                    // Lógica existente de Taller (se mantiene)
-                    if (type === 'add-ticket') {
-                        title.textContent = 'Nuevo Ingreso a Taller';
-                        body.innerHTML = document.getElementById('tmpl-add-ticket').innerHTML;
-                        footer.innerHTML = `<button class="btn-secondary" onclick="app.closeModal()">Cancelar</button><button class="btn-primary" onclick="app.submitTicket()">Guardar Ingreso</button>`;
-                        this.initCharCounter('details-in');
-                        document.getElementById('date-in').value = today;
-                        this.populateSelect('sel-building', this.state.locations.buildings);
-                    } else if (type === 'edit') {
-                        const data = this.state.workshopData.find(t => t.id === id);
-                        if (!data) return;
-                        this.state.currentTicketId = id;
-                        title.textContent = 'Editar Ingreso';
-                        body.innerHTML = document.getElementById('tmpl-edit-ticket').innerHTML;
-                        document.getElementById('edit-building').value = data.building || '';
-                        document.getElementById('edit-floor').value = data.floor || '';
-                        document.getElementById('edit-area').value = data.area || '';
-                        document.getElementById('edit-room').value = data.room || '';
-                        const devInfo = [data.device_brand, data.device_model, data.device_os, data.device_cpu, data.device_arch, data.device_serial].filter(Boolean).join(" - ");
-                        document.getElementById('edit-device-info').innerHTML = `<strong>${data.device_type}</strong><br>${devInfo}`;
-                        document.getElementById('edit-date-in').value = data.date_in;
-                        document.getElementById('edit-details-in').value = data.details_in;
-                        this.initCharCounter('edit-details-in');
-                        footer.innerHTML = `<button class="btn-secondary" onclick="app.closeModal()">Cancelar</button><button class="btn-primary" onclick="app.submitEdit()">Guardar Cambios</button>`;
-                    } else if (type === 'finalize') {
-                        const data = this.state.workshopData.find(t => t.id === id);
-                        if (!data) return;
-                        this.state.currentTicketId = id;
-                        title.textContent = 'Finalizar Ticket';
-                        body.innerHTML = document.getElementById('tmpl-finalize-ticket').innerHTML;
-                        const deviceInfoStr = [data.device_brand, data.device_model, data.device_os, data.device_cpu, data.device_arch, data.device_serial].filter(Boolean).join(" - ");
-                        document.getElementById('fin-device-info').innerHTML = `${data.device_type} - ` + deviceInfoStr;
-                        const loc = [data.building, data.floor, data.area, data.room].filter(Boolean).join(" > ");
-                        document.getElementById('fin-location-info').textContent = loc;
-                        document.getElementById('fin-problem-info').textContent = data.details_in;
-                        const dateOut = document.getElementById('fin-date-out'); dateOut.value = today; dateOut.min = data.date_in;
-                        this.initCharCounter('fin-details-out');
-                        footer.innerHTML = `<button class="btn-secondary" onclick="app.closeModal()">Cancelar</button><button class="btn-primary" onclick="app.submitFinalize()">Finalizar Ticket</button>`;
-                    } else if (type === 'delete') {
-                        this.state.currentTicketId = id;
-                        title.textContent = 'Eliminar Registro';
-                        body.innerHTML = document.getElementById('tmpl-delete-confirm').innerHTML;
-                        footer.innerHTML = `<button class="btn-secondary" onclick="app.closeModal()">Cancelar</button><button class="btn-danger" onclick="app.confirmDelete()">Sí, Eliminar</button>`;
-                    }
-                } 
-                
-                // --- NUEVAS MODALES DE INVENTARIO ---
-                else if (type === 'add-device' || type === 'edit-device') {
+                if (type === 'add-ticket') {
+                    title.textContent = 'Nuevo Ingreso a Taller';
+                    body.innerHTML = document.getElementById('tmpl-add-ticket').innerHTML;
+                    footer.innerHTML = `<button class="btn-secondary" onclick="app.closeModal()">Cancelar</button><button class="btn-primary" onclick="app.submitTicket()">Guardar Ingreso</button>`;
+                    this.initCharCounter('details-in');
+                    document.getElementById('date-in').value = today;
+                    this.populateSelect('sel-building', this.state.locations.buildings);
+                } else if (type === 'edit') {
+                    const data = this.state.workshopData.find(t => t.id === id);
+                    if (!data) return;
+                    this.state.currentTicketId = id;
+                    title.textContent = 'Editar Ingreso';
+                    body.innerHTML = document.getElementById('tmpl-edit-ticket').innerHTML;
+                    document.getElementById('edit-building').value = data.building || '';
+                    document.getElementById('edit-floor').value = data.floor || '';
+                    document.getElementById('edit-area').value = data.area || '';
+                    document.getElementById('edit-room').value = data.room || '';
+                    const devInfo = [data.device_brand, data.device_model, data.device_os, data.device_cpu, data.device_arch, data.device_serial].filter(Boolean).join(" - ");
+                    document.getElementById('edit-device-info').innerHTML = `<strong>${data.device_type}</strong><br>${devInfo}`;
+                    document.getElementById('edit-date-in').value = data.date_in;
+                    document.getElementById('edit-details-in').value = data.details_in;
+                    this.initCharCounter('edit-details-in');
+                    footer.innerHTML = `<button class="btn-secondary" onclick="app.closeModal()">Cancelar</button><button class="btn-primary" onclick="app.submitEdit()">Guardar Cambios</button>`;
+                } else if (type === 'finalize') {
+                    const data = this.state.workshopData.find(t => t.id === id);
+                    if (!data) return;
+                    this.state.currentTicketId = id;
+                    title.textContent = 'Finalizar Ticket';
+                    body.innerHTML = document.getElementById('tmpl-finalize-ticket').innerHTML;
+                    const deviceInfoStr = [data.device_brand, data.device_model, data.device_os, data.device_cpu, data.device_arch, data.device_serial].filter(Boolean).join(" - ");
+                    document.getElementById('fin-device-info').innerHTML = `${data.device_type} - ` + deviceInfoStr;
+                    const loc = [data.building, data.floor, data.area, data.room].filter(Boolean).join(" > ");
+                    document.getElementById('fin-location-info').textContent = loc;
+                    document.getElementById('fin-problem-info').textContent = data.details_in;
+                    const dateOut = document.getElementById('fin-date-out'); dateOut.value = today; dateOut.min = data.date_in;
+                    this.initCharCounter('fin-details-out');
+                    footer.innerHTML = `<button class="btn-secondary" onclick="app.closeModal()">Cancelar</button><button class="btn-primary" onclick="app.submitFinalize()">Finalizar Ticket</button>`;
+                } else if (type === 'delete') {
+                    this.state.currentTicketId = id;
+                    title.textContent = 'Eliminar Registro';
+                    body.innerHTML = document.getElementById('tmpl-delete-confirm').innerHTML;
+                    footer.innerHTML = `<button class="btn-secondary" onclick="app.closeModal()">Cancelar</button><button class="btn-danger" onclick="app.confirmDelete()">Sí, Eliminar</button>`;
+                } else if (type === 'delete-ticket') {
+                    this.state.currentTicketId = id;
+                    title.textContent = 'Eliminar Historial';
+                    body.innerHTML = document.getElementById('tmpl-delete-confirm').innerHTML;
+                    footer.innerHTML = `<button class="btn-secondary" onclick="app.closeModal()">Cancelar</button><button class="btn-danger" onclick="app.confirmDeleteTicketFromHistory()">Sí, Eliminar</button>`;
+                } else if (type === 'view-ticket') {
+                    const data = this.state.historyData.find(t => t.id === id);
+                    if(!data) return;
+                    title.textContent = 'Detalles del Servicio';
+                    body.innerHTML = document.getElementById('tmpl-view-ticket').innerHTML;
+                    footer.innerHTML = `<button class="btn-secondary" onclick="app.closeModal()">Cerrar</button>`;
+                    const setTxt = (id, val) => document.getElementById(id).textContent = val || '-';
+                    setTxt('vt-type', data.device_type);
+                    setTxt('vt-brand-model', `${data.device_brand || ''} ${data.device_model || ''}`);
+                    setTxt('vt-code', data.device_code);
+                    setTxt('vt-serial', data.device_serial);
+                    setTxt('vt-location', [data.building, data.floor, data.area, data.room].filter(Boolean).join(" > "));
+                    setTxt('vt-date-in', data.date_in);
+                    setTxt('vt-date-out', data.date_out);
+                    setTxt('vt-status', data.status === 'repaired' ? 'Reparado' : 'No Reparado');
+                    setTxt('vt-details-in', data.details_in);
+                    setTxt('vt-details-out', data.details_out);
+
+                } else if (type === 'add-device' || type === 'edit-device') {
                     const isEdit = type === 'edit-device';
                     this.state.currentDeviceId = isEdit ? id : null;
                     title.textContent = isEdit ? 'Editar Equipo' : 'Registrar Nuevo Equipo';
                     body.innerHTML = document.getElementById('tmpl-device-form').innerHTML;
-                    
-                    footer.innerHTML = `
-                        <button class="btn-secondary" onclick="app.closeModal()">Cancelar</button>
-                        <button class="btn-primary" onclick="app.${isEdit ? 'submitEditDevice()' : 'submitDevice()'}">Guardar</button>
-                    `;
-
-                    // Poblar Selectores Generales
+                    footer.innerHTML = `<button class="btn-secondary" onclick="app.closeModal()">Cancelar</button><button class="btn-primary" onclick="app.${isEdit ? 'submitEditDevice()' : 'submitDevice()'}">Guardar</button>`;
                     this.populateSelect('dev-type', this.state.specs.types);
                     this.populateSelect('dev-brand', this.state.specs.brands);
                     this.populateSelect('dev-os', this.state.specs.os);
@@ -1083,84 +1148,61 @@
                     this.populateSelect('dev-cpu', this.state.specs.processors);
                     this.populateSelect('dev-ram', this.state.specs.rams);
                     this.populateSelect('dev-storage', this.state.specs.storages);
-                    
-                    // Iniciar Cascada de Ubicación
                     this.populateSelect('sel-building', this.state.locations.buildings);
 
                     if (isEdit) {
                         const data = this.state.inventoryData.find(d => d.id === id);
                         if(data) {
-                            // Llenar campos
                             document.getElementById('dev-code').value = data.code || '';
                             document.getElementById('dev-serial').value = data.serial || '';
                             document.getElementById('dev-details').value = data.details || '';
-                            
-                            // Selects simples (IDs) - Asumiendo que data trae los nombres, necesitamos mapear si el backend trae strings.
-                            // Nota: El endpoint /api/devices actual devuelve strings en brand, type, etc.
-                            // Para edición correcta, idealmente necesitamos los IDs. 
-                            // Como el backend actual devuelve strings en 'brand', 'type', etc., haremos matching por texto.
                             this.setSelectByText('dev-type', data.type);
                             this.setSelectByText('dev-brand', data.brand);
-                            this.filterModels(document.getElementById('dev-brand').value); // Cargar modelos
+                            this.filterModels(document.getElementById('dev-brand').value);
                             this.setSelectByText('dev-model', data.model);
-                            
                             this.setSelectByText('dev-os', data.os);
                             this.setSelectByText('dev-arch', data.arch);
                             this.setSelectByText('dev-cpu', data.cpu);
                             this.setSelectByText('dev-ram', data.ram);
                             this.setSelectByText('dev-storage', data.storage);
-
-                            // Ubicación (Cascada Inversa - Complicado sin IDs, se intenta por texto)
-                            // El backend devuelve building, floor, area como strings.
                             this.setSelectByText('sel-building', data.building);
                             this.handleBuildingChange(document.getElementById('sel-building').value);
-                            
                             this.setSelectByText('sel-floor', data.floor);
                             this.handleFloorChange(document.getElementById('sel-floor').value);
-                            
                             this.setSelectByText('sel-area', data.area);
                             this.handleAreaChange(document.getElementById('sel-area').value);
-                            
                             this.setSelectByText('sel-room', data.room);
                         }
                     }
-
                 } else if (type === 'view-device') {
                     const data = this.state.inventoryData.find(d => d.id === id);
                     if (!data) return;
                     title.textContent = 'Detalles del Equipo';
                     body.innerHTML = document.getElementById('tmpl-view-device').innerHTML;
                     footer.innerHTML = `<button class="btn-secondary" onclick="app.closeModal()">Cerrar</button>`;
-
-                    // Llenar datos
                     const setTxt = (id, val) => document.getElementById(id).textContent = val || 'N/A';
                     setTxt('view-type', data.type);
                     setTxt('view-brand', data.brand);
                     setTxt('view-model', data.model);
                     setTxt('view-code', data.code);
                     setTxt('view-serial', data.serial);
-                    
                     const loc = [data.building, data.floor, data.area, data.room].filter(Boolean).join(" > ");
                     setTxt('view-location', loc);
-
                     setTxt('view-os', data.os);
                     setTxt('view-cpu', data.cpu);
                     setTxt('view-ram', data.ram);
                     setTxt('view-storage', data.storage);
                     setTxt('view-arch', data.arch);
                     setTxt('view-details', data.details);
-
                 } else if (type === 'delete-device') {
                     this.state.currentDeviceId = id;
                     title.textContent = 'Eliminar Equipo';
                     body.innerHTML = document.getElementById('tmpl-delete-confirm').innerHTML;
                     footer.innerHTML = `<button class="btn-secondary" onclick="app.closeModal()">Cancelar</button><button class="btn-danger" onclick="app.confirmDeleteDevice()">Sí, Eliminar</button>`;
                 }
-
                 overlay.classList.add('open');
             },
 
-            // --- LÓGICA DE FORMULARIOS DISPOSITIVO ---
             setSelectByText(id, text) {
                 const sel = document.getElementById(id);
                 if (!text || !sel) return;
@@ -1171,12 +1213,12 @@
                     }
                 }
             },
+            
             filterModels(brandId) {
                 const sel = document.getElementById('dev-model');
                 sel.innerHTML = '<option value="">Seleccione...</option>';
                 sel.disabled = true;
                 if(!brandId) return;
-                
                 const models = this.state.specs.models.filter(m => m.parent_id == brandId);
                 if(models.length > 0) {
                     models.forEach(m => sel.innerHTML += `<option value="${m.id}">${m.value}</option>`);
@@ -1185,8 +1227,8 @@
                     sel.innerHTML = '<option value="">Sin modelos registrados</option>';
                 }
             },
+            
             async submitDevice() {
-                // Recolección de datos
                 const getVal = (id) => document.getElementById(id).value;
                 const payload = {
                     code: getVal('dev-code'),
@@ -1194,7 +1236,6 @@
                     id_type: parseInt(getVal('dev-type')),
                     id_brand: parseInt(getVal('dev-brand')) || null,
                     id_model: parseInt(getVal('dev-model')) || null,
-                    
                     id_os: parseInt(getVal('dev-os')) || null,
                     id_ram: parseInt(getVal('dev-ram')) || null,
                     id_storage: parseInt(getVal('dev-storage')) || null,
@@ -1202,53 +1243,27 @@
                     arch: getVal('dev-arch') || null,
                     details: getVal('dev-details')
                 };
-
-                // Validación básica (SOLO TIPO Y UBICACION)
-                if(!payload.id_type) {
-                    document.getElementById('dev-form-error').textContent = 'El Tipo es obligatorio.';
-                    return;
-                }
-
-                // Resolver ID Ubicación
+                if(!payload.id_type) { document.getElementById('dev-form-error').textContent = 'El Tipo es obligatorio.'; return; }
                 const areaId = getVal('sel-area');
                 const roomId = getVal('sel-room');
-                
-                if(!areaId) {
-                    document.getElementById('dev-form-error').textContent = 'La ubicación (Área) es obligatoria.';
-                    return;
-                }
-
-                // Enviar directamente los IDs de Area/Room para que el backend resuelva
+                if(!areaId) { document.getElementById('dev-form-error').textContent = 'La ubicación (Área) es obligatoria.'; return; }
                 payload.id_area = parseInt(areaId);
                 payload.id_room = parseInt(roomId) || null;
-
                 try {
-                    // Enviar POST
-                    const res = await this.fetchAPI('/api/devices', {
-                        method: 'POST',
-                        body: JSON.stringify(payload)
-                    });
-
-                    if(res && res.ok) {
-                        this.closeModal();
-                        this.loadInventory(1);
-                    } else {
-                        document.getElementById('dev-form-error').textContent = 'Error al registrar el equipo.';
-                    }
+                    const res = await this.fetchAPI('/api/devices', { method: 'POST', body: JSON.stringify(payload) });
+                    if(res && res.ok) { this.closeModal(); this.loadInventory(1); } else { document.getElementById('dev-form-error').textContent = 'Error al registrar el equipo.'; }
                 } catch(e) { console.error(e); }
             },
-
+            
             async submitEditDevice() {
                 const id = this.state.currentDeviceId;
                 const getVal = (id) => document.getElementById(id).value;
-                
                 const payload = {
                     code: getVal('dev-code'),
                     serial: getVal('dev-serial'),
                     id_type: parseInt(getVal('dev-type')),
                     id_brand: parseInt(getVal('dev-brand')) || null,
                     id_model: parseInt(getVal('dev-model')) || null,
-                    
                     id_os: parseInt(getVal('dev-os')) || null,
                     id_ram: parseInt(getVal('dev-ram')) || null,
                     id_storage: parseInt(getVal('dev-storage')) || null,
@@ -1256,54 +1271,31 @@
                     arch: getVal('dev-arch') || null,
                     details: getVal('dev-details')
                 };
-
-                if(!payload.id_type) {
-                     document.getElementById('dev-form-error').textContent = 'El Tipo es obligatorio.';
-                     return;
-                }
-
+                if(!payload.id_type) { document.getElementById('dev-form-error').textContent = 'El Tipo es obligatorio.'; return; }
                 const areaId = getVal('sel-area');
                 const roomId = getVal('sel-room');
-                
-                if(!areaId) {
-                    document.getElementById('dev-form-error').textContent = 'La ubicación (Área) es obligatoria.';
-                    return;
-                }
-
+                if(!areaId) { document.getElementById('dev-form-error').textContent = 'La ubicación (Área) es obligatoria.'; return; }
                 payload.id_area = parseInt(areaId);
                 payload.id_room = parseInt(roomId) || null;
-
                 try {
-                    const res = await this.fetchAPI(`/api/devices?id=${id}`, {
-                        method: 'PUT',
-                        body: JSON.stringify(payload)
-                    });
-
-                    if(res && res.ok) {
-                        this.closeModal();
-                        this.loadInventory(this.state.page || 1);
-                    } else {
-                        document.getElementById('dev-form-error').textContent = 'Error al actualizar.';
-                    }
+                    const res = await this.fetchAPI(`/api/devices?id=${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+                    if(res && res.ok) { this.closeModal(); this.loadInventory(this.state.page || 1); } else { document.getElementById('dev-form-error').textContent = 'Error al actualizar.'; }
                 } catch(e) { console.error(e); }
             },
-
+            
             async confirmDeleteDevice() {
                 const id = this.state.currentDeviceId;
                 const res = await this.fetchAPI(`/api/devices?id=${id}`, { method: 'DELETE' });
-                
-                if(res && res.ok) {
-                    this.closeModal();
-                    this.loadInventory(1);
-                } else if(res && res.status === 409) {
-                    alert("No se puede eliminar este equipo porque tiene historial en Taller.");
-                    this.closeModal();
-                } else {
-                    alert("Error al eliminar el equipo.");
-                }
+                if(res && res.ok) { this.closeModal(); this.loadInventory(1); } else if(res && res.status === 409) { alert("No se puede eliminar este equipo porque tiene historial en Taller."); this.closeModal(); } else { alert("Error al eliminar el equipo."); }
+            },
+            
+            async confirmDeleteTicketFromHistory() {
+                const id = this.state.currentTicketId;
+                const res = await this.fetchAPI(`/api/tickets?id=${id}`, { method: 'DELETE' });
+                if(res && res.ok) { this.closeModal(); this.loadHistory(1); } else { alert("Error al eliminar el historial."); }
             },
 
-            // --- LÓGICA DE CASCADA (LOCAL) ---
+            // --- LÓGICA DE CASCADA ---
             populateSelect(id, items) {
                 const sel = document.getElementById(id);
                 sel.innerHTML = '<option value="">Seleccione...</option>';
@@ -1314,7 +1306,6 @@
                 this.state.selBuilding = val;
                 this.resetSelects(['sel-floor', 'sel-area', 'sel-room', 'sel-device']);
                 if(!val) return;
-                // Filtrar Pisos donde parent_id == building_id
                 const floors = this.state.locations.floors.filter(f => f.parent_id == val);
                 this.populateSelect('sel-floor', floors);
             },
@@ -1331,7 +1322,6 @@
                 if(!val) return;
                 const rooms = this.state.locations.rooms.filter(r => r.parent_id == val);
                 this.populateSelect('sel-room', rooms);
-                // Si estamos en modal de Taller, cargar dispositivos
                 if(document.getElementById('sel-device')) this.loadDevicesForTicket(val, null);
             },
             handleRoomChange(val) {
@@ -1348,25 +1338,19 @@
                 });
             },
 
-            // --- CARGA DISPOSITIVOS PARA TICKET ---
             async loadDevicesForTicket(areaId, roomId) {
                 const sel = document.getElementById('sel-device');
                 sel.disabled = true;
                 sel.innerHTML = '<option>Cargando...</option>';
-                
-                let qs = `limit=50&id_area=${areaId}`; // Límite alto para lookup
+                let qs = `limit=50&id_area=${areaId}`;
                 if(roomId) qs += `&id_room=${roomId}`;
-                // IMPORTANTE: Filtrar solo operativos
                 qs += `&status=operational`;
-
                 try {
                     const res = await this.fetchAPI(`/api/devices?${qs}`);
                     const json = await res.json();
-                    
                     if(json.data && json.data.length > 0) {
                         sel.innerHTML = '<option value="">Seleccione Dispositivo...</option>';
                         json.data.forEach(d => {
-                            // Formato de etiqueta <option>
                             const label = `${d.type} - ${d.code || '-'} - ${d.brand || ''} ${d.model || ''}`;
                             sel.innerHTML += `<option value="${d.id}">${label}</option>`;
                         });
@@ -1377,69 +1361,61 @@
                 } catch(e) { console.error(e); }
             },
 
-            // --- ACCIONES (SUBMITS) ---
+            // --- ACCIONES SUBMITS TALLER ---
             async submitTicket() {
                 const devId = document.getElementById('sel-device').value;
                 const date = document.getElementById('date-in').value;
                 const det = document.getElementById('details-in').value;
-                
                 if(!devId || !date || !det.trim()) {
                     document.getElementById('form-error').textContent = 'Complete los campos obligatorios';
                     return;
                 }
-
                 const res = await this.fetchAPI('/api/tickets', {
                     method: 'POST',
                     body: JSON.stringify({ id_device: parseInt(devId), date_in: date, details_in: det })
                 });
-                
                 if(res && res.ok) {
                     this.closeModal();
-                    this.navigate('workshop'); // Refresca y va a la tabla
+                    this.navigate('workshop');
                 } else {
                     document.getElementById('form-error').textContent = 'Error al guardar';
                 }
             },
-
+            
             async submitEdit() {
                 const id = this.state.currentTicketId;
                 const date = document.getElementById('edit-date-in').value;
                 const det = document.getElementById('edit-details-in').value;
-
                 const res = await this.fetchAPI(`/api/tickets?id=${id}`, {
                     method: 'PUT',
                     body: JSON.stringify({ date_in: date, details_in: det })
                 });
-                
                 if(res && res.ok) {
                     this.closeModal();
                     this.loadWorkshop();
                 }
             },
-
+            
             async submitFinalize() {
                 const id = this.state.currentTicketId;
                 const status = document.getElementById('fin-status').value;
                 const dateOut = document.getElementById('fin-date-out').value;
                 const detailsOut = document.getElementById('fin-details-out').value;
-
                 if(!dateOut || !detailsOut.trim()) {
                     document.getElementById('fin-error').textContent = 'Complete fecha y detalles de salida';
                     return;
                 }
-
                 const res = await this.fetchAPI(`/api/tickets?id=${id}`, {
                     method: 'PUT',
                     body: JSON.stringify({ status: status, date_out: dateOut, details_out: detailsOut })
                 });
-
                 if(res && res.ok) {
                     this.closeModal();
                     this.loadWorkshop();
-                    this.loadDashboardData(); // Actualizar contadores
+                    this.loadDashboardData();
                 }
             },
-
+            
             async confirmDelete() {
                 const id = this.state.currentTicketId;
                 const res = await this.fetchAPI(`/api/tickets?id=${id}`, { method: 'DELETE' });
@@ -1449,28 +1425,27 @@
                 }
             },
 
-            // --- AUTH & UTILIDADES ---
             initCharCounter(id) {
                 const el = document.getElementById(id);
                 if(!el) return;
                 const ctr = el.nextElementSibling;
                 el.oninput = () => ctr.textContent = `${el.value.length}/300`;
             },
-            closeModal() { document.getElementById('modal-overlay').classList.remove('open'); },
+            
+            closeModal() {
+                document.getElementById('modal-overlay').classList.remove('open');
+            },
+            
             async handleLogin() {
-                // Mock login simplificado para demo, conectar con backend real si es necesario
-                // El endpoint /api/login existe en el backend actual
                 const u = document.getElementById('username').value;
                 const p = document.getElementById('password').value;
                 const r = document.getElementById('role').value;
-                
                 try {
                     const res = await fetch('/api/login', {
                         method: 'POST',
                         body: JSON.stringify({ username: u, password: p, role: r })
                     });
                     const json = await res.json();
-                    
                     if(json.token) {
                         this.state.user = { username: json.username, full_name: json.full_name, role: json.role };
                         this.state.token = json.token;
@@ -1484,7 +1459,12 @@
                     document.getElementById('login-error').textContent = 'Error de conexión';
                 }
             },
-            showLogin() { document.getElementById('login-view').classList.remove('hidden'); document.getElementById('app-view').classList.add('hidden'); },
+            
+            showLogin() {
+                document.getElementById('login-view').classList.remove('hidden');
+                document.getElementById('app-view').classList.add('hidden');
+            },
+            
             showApp() {
                 document.getElementById('login-view').classList.add('hidden');
                 document.getElementById('app-view').classList.remove('hidden');
@@ -1499,12 +1479,14 @@
                 }
                 this.loadGlobalData().then(() => this.navigate('home'));
             },
-            logout() { 
-                localStorage.clear(); 
-                this.state.user = null; 
-                this.state.token = null; 
+            
+            logout() {
+                localStorage.clear();
+                this.state.user = null;
+                this.state.token = null;
                 window.location.reload();
             },
+            
             async loadDashboardData() {
                 try {
                     const res = await this.fetchAPI('/api/stats');
@@ -1516,9 +1498,9 @@
                     }
                 } catch (err) { console.error(err); }
             },
+            
             printReport(type) { alert("Generando reporte PDF... (Pronto)"); }
         };
-
         document.addEventListener('DOMContentLoaded', () => { app.init(); });
     </script>
 </body>
