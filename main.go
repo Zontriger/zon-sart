@@ -247,12 +247,15 @@ func initDB() {
 	db.Exec("PRAGMA foreign_keys = ON;")
 	db.Exec("PRAGMA journal_mode = WAL;")
 
-	createTables()
+	createTables() // 1. Crear Estructura (Sin Triggers)
 
 	if !exists {
 		fmt.Println("Base de datos nueva. Insertando datos semilla...")
-		seedData()
+		seedData() // 2. Insertar Datos (Sin Triggers que estorben)
 	}
+
+	createTriggers() // 3. Crear Triggers (Protección para uso futuro)
+	createViews()    // 4. Crear Vistas
 }
 
 func createTables() {
@@ -264,6 +267,14 @@ func createTables() {
 		full_name TEXT NOT NULL,
 		position TEXT,
 		rol TEXT CHECK(rol IN ('admin', 'viewer')) DEFAULT 'viewer'
+	);
+
+	CREATE TABLE IF NOT EXISTS Periodo (
+		code TEXT PRIMARY KEY,
+		date_ini TEXT NOT NULL CHECK (date_ini IS date(date_ini)),
+		date_end TEXT NOT NULL CHECK (date_end IS date(date_end)),
+		is_current INTEGER CHECK(is_current IN (0, 1)) DEFAULT 0,
+		CONSTRAINT valid_range CHECK (date_ini < date_end)
 	);
 
 	CREATE TABLE IF NOT EXISTS Edificio (
@@ -380,7 +391,12 @@ func createTables() {
 		FOREIGN KEY (id_device) REFERENCES Dispositivo(id) ON DELETE NO ACTION ON UPDATE CASCADE,
 		CONSTRAINT check_dates CHECK (date_out IS NULL OR date_out >= date_in)
 	);
+	`
+	db.Exec(schema)
+}
 
+func createTriggers() {
+	triggers := `
 	CREATE TRIGGER IF NOT EXISTS validate_brand_model_match_ins
 	BEFORE INSERT ON Dispositivo
 	FOR EACH ROW
@@ -425,8 +441,10 @@ func createTables() {
 		END;
 	END;
 	`
-	db.Exec(schema)
+	db.Exec(triggers)
+}
 
+func createViews() {
 	views := `
 	DROP VIEW IF EXISTS Vista_Datos_Dispositivo_Completo;
 	DROP VIEW IF EXISTS Vista_Ubicacion_Completa;
@@ -500,52 +518,253 @@ func createTables() {
 func seedData() {
 	seedSQL := `
 	BEGIN TRANSACTION;
+
 	INSERT OR IGNORE INTO Usuario (username, password, full_name, rol) VALUES ('admin', '1234', 'Admin SART', 'admin');
 	INSERT OR IGNORE INTO Usuario (username, password, full_name, rol) VALUES ('user', '1234', 'Consultor de Soporte', 'viewer');
 
+	-- ==========================================
+	-- 1. POBLAR TABLAS MAESTRAS (Catálogos)
+	-- ==========================================
+
+	-- Tipos de Dispositivo
 	INSERT OR IGNORE INTO Tipo (type) VALUES ('PC'), ('Modem'), ('Switch');
-	INSERT OR IGNORE INTO Sistema_Operativo (os) VALUES ('Win 7'), ('Win 10'), ('Win 11'), ('Linux');
-	INSERT OR IGNORE INTO RAM (ram) VALUES ('512 MB'), ('1 GB'), ('1.5 GB'), ('2 GB'), ('4 GB'), ('8 GB');
-	INSERT OR IGNORE INTO Almacenamiento (storage) VALUES ('37 GB'), ('80 GB'), ('120 GB'), ('512 GB');
-	INSERT OR IGNORE INTO Procesador (processor) VALUES ('Intel Pentium G2010'), ('Genuine Intel 1.80GHz'), ('Intel Pentium 3.06Ghz'), ('Intel Pentium G2010 2.80GHz'), ('Intel Celeron 1.80GHz');
 
-	INSERT OR IGNORE INTO Marca (brand) VALUES ('Dell'), ('Huawei'), ('CANTV'), ('TP-Link');
+	-- Sistemas Operativos
+	INSERT OR IGNORE INTO Sistema_Operativo (os) VALUES 
+	('Win 7'), ('Win 10'), ('Win 11'), ('Linux');
+
+	-- RAM
+	INSERT OR IGNORE INTO RAM (ram) VALUES 
+	('512 MB'), ('1 GB'), ('1.5 GB'), ('2 GB'), ('4 GB');
+
+	-- Almacenamiento
+	INSERT OR IGNORE INTO Almacenamiento (storage) VALUES 
+	('37 GB'), ('80 GB'), ('120 GB'), ('512 GB');
+
+	-- Procesadores
+	INSERT OR IGNORE INTO Procesador (processor) VALUES 
+	('Intel Pentium G2010'), 
+	('Genuine Intel 1.80GHz'), 
+	('Intel Pentium 3.06Ghz'), 
+	('Intel Pentium G2010 2.80GHz'), 
+	('Intel Celeron 1.80GHz'), 
+	('Intel Pentium 2.80GHz');
+
+	-- Marcas
+	INSERT OR IGNORE INTO Marca (brand) VALUES 
+	('Dell'), ('Huawei'), ('CANTV'), ('TP-Link');
+
+	-- Modelos (Vinculados a sus Marcas)
 	INSERT OR IGNORE INTO Modelo (id_brand, model) VALUES 
-		((SELECT id FROM Marca WHERE brand='Huawei'), 'AR 157'), 
-		((SELECT id FROM Marca WHERE brand='TP-Link'), 'SF1016D');
+	((SELECT id FROM Marca WHERE brand='Huawei'), 'AR 157'),
+	((SELECT id FROM Marca WHERE brand='TP-Link'), 'SF1016D');
 
+	-- ==========================================
+	-- 2. JERARQUÍA DE UBICACIONES
+	-- ==========================================
+
+	-- Edificios
 	INSERT OR IGNORE INTO Edificio (building) VALUES ('Edificio 01'), ('Edificio 02');
-	INSERT OR IGNORE INTO Piso (id_building, floor) VALUES (1, 'Piso 01'), (2, 'Piso 01');
-	INSERT OR IGNORE INTO Area (id_floor, area) VALUES (2, 'Control de Estudios'), (1, 'Área TIC'), (1, 'Coordinación'), (2, 'Archivo');
+
+	-- Pisos
+	INSERT OR IGNORE INTO Piso (id_building, floor) VALUES 
+	((SELECT id FROM Edificio WHERE building='Edificio 01'), 'Piso 01'),
+	((SELECT id FROM Edificio WHERE building='Edificio 02'), 'Piso 01');
+
+	-- Áreas
+	INSERT OR IGNORE INTO Area (id_floor, area) VALUES 
+	((SELECT id FROM Piso WHERE floor='Piso 01' AND id_building=(SELECT id FROM Edificio WHERE building='Edificio 02')), 'Control de Estudios'),
+	((SELECT id FROM Piso WHERE floor='Piso 01' AND id_building=(SELECT id FROM Edificio WHERE building='Edificio 01')), 'Área TIC'),
+	((SELECT id FROM Piso WHERE floor='Piso 01' AND id_building=(SELECT id FROM Edificio WHERE building='Edificio 01')), 'Coordinación'),
+	((SELECT id FROM Piso WHERE floor='Piso 01' AND id_building=(SELECT id FROM Edificio WHERE building='Edificio 02')), 'Archivo');
+
+	-- Habitaciones
 	INSERT OR IGNORE INTO Habitacion (id_area, room) VALUES 
-		(1, 'Jefe de Área'), (1, 'Analista de Ingreso'), (1, 'Recepción'),
-		(2, 'Soporte Técnico'), (2, 'Jefatura TIC'), (2, 'Cuarto de Redes'),
-		(3, 'Asistente'), (3, 'Jefe de Coordinación'), (3, 'Archivo de Coordinación'),
-		(4, 'Acta y Publicaciones'), (4, 'Jefe de Área');
+	((SELECT id FROM Area WHERE area='Control de Estudios'), 'Jefe de Área'),
+	((SELECT id FROM Area WHERE area='Control de Estudios'), 'Analista de Ingreso'),
+	((SELECT id FROM Area WHERE area='Área TIC'), 'Soporte Técnico'),
+	((SELECT id FROM Area WHERE area='Coordinación'), 'Asistente'),
+	((SELECT id FROM Area WHERE area='Archivo'), 'Acta y Publicaciones'),
+	((SELECT id FROM Area WHERE area='Archivo'), 'Jefe de Área'), -- Nota: Hay otro Jefe de Área pero en distinta Area
+	((SELECT id FROM Area WHERE area='Área TIC'), 'Cuarto de Redes');
 
-	INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES 
-		(1, 1), (1, 2), (2, 3), (3, 4), (4, NULL), (4, 9), (4, 10), (2, 6), (3, 8), (3, 9), (2, 5), (1, 3);
+	-- Creación de UBICACIONES (Combinaciones Área-Habitación)
+	-- Ubicación 1: Control de Estudios - Jefe de Área
+	INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
+		(SELECT id FROM Area WHERE area='Control de Estudios'),
+		(SELECT id FROM Habitacion WHERE room='Jefe de Área' AND id_area=(SELECT id FROM Area WHERE area='Control de Estudios'))
+	);
+	-- Ubicación 2: Control de Estudios - Analista de Ingreso
+	INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
+		(SELECT id FROM Area WHERE area='Control de Estudios'),
+		(SELECT id FROM Habitacion WHERE room='Analista de Ingreso' AND id_area=(SELECT id FROM Area WHERE area='Control de Estudios'))
+	);
+	-- Ubicación 3: Área TIC - Soporte Técnico
+	INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
+		(SELECT id FROM Area WHERE area='Área TIC'),
+		(SELECT id FROM Habitacion WHERE room='Soporte Técnico' AND id_area=(SELECT id FROM Area WHERE area='Área TIC'))
+	);
+	-- Ubicación 4: Coordinación - Asistente
+	INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
+		(SELECT id FROM Area WHERE area='Coordinación'),
+		(SELECT id FROM Habitacion WHERE room='Asistente' AND id_area=(SELECT id FROM Area WHERE area='Coordinación'))
+	);
+	-- Ubicación 5: Archivo - (SIN HABITACIÓN / PASILLO GENERAL)
+	INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
+		(SELECT id FROM Area WHERE area='Archivo'),
+		NULL
+	);
+	-- Ubicación 6: Archivo - Acta y Publicaciones
+	INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
+		(SELECT id FROM Area WHERE area='Archivo'),
+		(SELECT id FROM Habitacion WHERE room='Acta y Publicaciones' AND id_area=(SELECT id FROM Area WHERE area='Archivo'))
+	);
+	-- Ubicación 7: Archivo - Jefe de Área
+	INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
+		(SELECT id FROM Area WHERE area='Archivo'),
+		(SELECT id FROM Habitacion WHERE room='Jefe de Área' AND id_area=(SELECT id FROM Area WHERE area='Archivo'))
+	);
+	-- Ubicación 8: Área TIC - Cuarto de Redes
+	INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
+		(SELECT id FROM Area WHERE area='Área TIC'),
+		(SELECT id FROM Habitacion WHERE room='Cuarto de Redes' AND id_area=(SELECT id FROM Area WHERE area='Área TIC'))
+	);
 
-	INSERT OR IGNORE INTO Dispositivo (code, id_type, id_location, id_os, id_ram, arch, id_storage, id_processor, id_brand, serial) VALUES (
-		'388', 1, 1, 
+	-- ==========================================
+	-- 3. INSERCIÓN DE DISPOSITIVOS (Los 12 ítems)
+	-- ==========================================
+
+	-- 1. PC | Control de Estudios | Jefe de Área | 802MXWE0B993
+	INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, id_processor, serial) VALUES (
+		(SELECT id FROM Tipo WHERE type='PC'),
+		(SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Control de Estudios' AND h.room='Jefe de Área'),
 		(SELECT id FROM Sistema_Operativo WHERE os='Win 7'),
-		(SELECT id FROM RAM WHERE ram='2 GB'),
-		'32 bits',
-		(SELECT id FROM Almacenamiento WHERE storage='37 GB'),
+		(SELECT id FROM RAM WHERE ram='4 GB'),
+		'64 bits',
+		(SELECT id FROM Almacenamiento WHERE storage='512 GB'),
 		(SELECT id FROM Procesador WHERE processor='Intel Pentium G2010'),
-		(SELECT id FROM Marca WHERE brand='Dell'),
 		'802MXWE0B993'
 	);
-	
-	INSERT OR IGNORE INTO Dispositivo (code, id_type, id_location, id_os, id_ram, arch, id_storage, id_processor, id_brand, serial) VALUES (
-		'405', 1, 2,
+
+	-- 2. PC | Control de Estudios | Analista de Ingreso | CN9352W80
+	INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, id_processor, serial) VALUES (
+		(SELECT id FROM Tipo WHERE type='PC'),
+		(SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Control de Estudios' AND h.room='Analista de Ingreso'),
 		(SELECT id FROM Sistema_Operativo WHERE os='Win 10'),
+		(SELECT id FROM RAM WHERE ram='2 GB'),
+		'64 bits',
+		(SELECT id FROM Almacenamiento WHERE storage='80 GB'),
+		(SELECT id FROM Procesador WHERE processor='Genuine Intel 1.80GHz'),
+		'CN9352W80'
+	);
+
+	-- 3. PC | Control de Estudios | Analista de Ingreso | C18D7BA005546
+	INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, id_processor, serial) VALUES (
+		(SELECT id FROM Tipo WHERE type='PC'),
+		(SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Control de Estudios' AND h.room='Analista de Ingreso'),
+		(SELECT id FROM Sistema_Operativo WHERE os='Win 11'),
+		(SELECT id FROM RAM WHERE ram='2 GB'),
+		'32 bits',
+		(SELECT id FROM Almacenamiento WHERE storage='512 GB'),
+		(SELECT id FROM Procesador WHERE processor='Intel Pentium G2010'),
+		'C18D7BA005546'
+	);
+
+	-- 4. PC | Área TIC | Soporte Técnico | Dell | CN-0N8176...
+	INSERT INTO Dispositivo (code, id_type, id_location, id_brand, id_os, id_ram, arch, id_storage, id_processor, serial) VALUES (
+		'4073',
+		(SELECT id FROM Tipo WHERE type='PC'),
+		(SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Área TIC' AND h.room='Soporte Técnico'),
+		(SELECT id FROM Marca WHERE brand='Dell'),
+		(SELECT id FROM Sistema_Operativo WHERE os='Linux'),
+		(SELECT id FROM RAM WHERE ram='1 GB'),
+		'32 bits',
+		(SELECT id FROM Almacenamiento WHERE storage='120 GB'),
+		(SELECT id FROM Procesador WHERE processor='Intel Pentium 3.06Ghz'),
+		'CN-0N8176...'
+	);
+
+	-- 5. PC | Coordinación | Asistente | CNC141QNT2
+	INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, id_processor, serial) VALUES (
+		(SELECT id FROM Tipo WHERE type='PC'),
+		(SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Coordinación' AND h.room='Asistente'),
+		(SELECT id FROM Sistema_Operativo WHERE os='Win 10'),
+		(SELECT id FROM RAM WHERE ram='2 GB'),
+		'32 bits',
+		(SELECT id FROM Almacenamiento WHERE storage='512 GB'),
+		(SELECT id FROM Procesador WHERE processor='Intel Pentium G2010'),
+		'CNC141QNT2'
+	);
+
+	-- 6. PC | Archivo | (Sin Habitación) | (Sin Serial)
+	INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage) VALUES (
+		(SELECT id FROM Tipo WHERE type='PC'),
+		(SELECT id FROM Ubicacion WHERE id_area=(SELECT id FROM Area WHERE area='Archivo') AND id_room IS NULL),
+		(SELECT id FROM Sistema_Operativo WHERE os='Win 7'),
+		(SELECT id FROM RAM WHERE ram='512 MB'),
+		'32 bits',
+		(SELECT id FROM Almacenamiento WHERE storage='37 GB')
+	);
+
+	-- 7. PC | Archivo | Acta y Publicaciones | (Sin Serial)
+	INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, id_processor) VALUES (
+		(SELECT id FROM Tipo WHERE type='PC'),
+		(SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Archivo' AND h.room='Acta y Publicaciones'),
+		(SELECT id FROM Sistema_Operativo WHERE os='Win 10'),
+		(SELECT id FROM RAM WHERE ram='2 GB'),
+		'64 bits',
+		(SELECT id FROM Almacenamiento WHERE storage='512 GB'),
+		(SELECT id FROM Procesador WHERE processor='Intel Pentium G2010 2.80GHz')
+	);
+
+	-- 8. PC | Archivo | Acta y Publicaciones | (Sin Serial, diferente RAM/CPU)
+	INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, id_processor) VALUES (
+		(SELECT id FROM Tipo WHERE type='PC'),
+		(SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Archivo' AND h.room='Acta y Publicaciones'),
+		(SELECT id FROM Sistema_Operativo WHERE os='Win 7'),
 		(SELECT id FROM RAM WHERE ram='1.5 GB'),
 		'32 bits',
 		(SELECT id FROM Almacenamiento WHERE storage='37 GB'),
-		(SELECT id FROM Procesador WHERE processor='Intel Pentium G2010'),
-		(SELECT id FROM Marca WHERE brand='Dell'),
-		'8H2MXWE0B993'
+		(SELECT id FROM Procesador WHERE processor='Intel Celeron 1.80GHz')
+	);
+
+	-- 9. PC | Archivo | Jefe de Área | P/NMW9BBK
+	INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, id_processor, serial) VALUES (
+		(SELECT id FROM Tipo WHERE type='PC'),
+		(SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Archivo' AND h.room='Jefe de Área'),
+		(SELECT id FROM Sistema_Operativo WHERE os='Win 7'),
+		(SELECT id FROM RAM WHERE ram='2 GB'),
+		'32 bits',
+		(SELECT id FROM Almacenamiento WHERE storage='512 GB'),
+		(SELECT id FROM Procesador WHERE processor='Intel Pentium 2.80GHz'),
+		'P/NMW9BBK'
+	);
+
+	-- 10. Modem | Área TIC | Soporte Técnico | Huawei | AR 157
+	INSERT INTO Dispositivo (code, id_type, id_location, id_brand, id_model, serial) VALUES (
+		'708',
+		(SELECT id FROM Tipo WHERE type='Modem'),
+		(SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Área TIC' AND h.room='Soporte Técnico'),
+		(SELECT id FROM Marca WHERE brand='Huawei'),
+		(SELECT id FROM Modelo WHERE model='AR 157'),
+		'210235384810'
+	);
+
+	-- 11. Modem | Área TIC | Soporte Técnico | CANTV | (Sin Modelo, Sin Serial)
+	INSERT INTO Dispositivo (id_type, id_location, id_brand) VALUES (
+		(SELECT id FROM Tipo WHERE type='Modem'),
+		(SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Área TIC' AND h.room='Soporte Técnico'),
+		(SELECT id FROM Marca WHERE brand='CANTV')
+	);
+
+	-- 12. Switch | Área TIC | Cuarto de Redes | TP-Link | SF1016D
+	INSERT INTO Dispositivo (code, id_type, id_location, id_brand, id_model, serial) VALUES (
+		'725',
+		(SELECT id FROM Tipo WHERE type='Switch'),
+		(SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Área TIC' AND h.room='Cuarto de Redes'),
+		(SELECT id FROM Marca WHERE brand='TP-Link'),
+		(SELECT id FROM Modelo WHERE model='SF1016D'),
+		'Y21CO30000672'
 	);
 
 	COMMIT;
@@ -575,6 +794,8 @@ func handleDbError(w http.ResponseWriter, err error) {
 			respondError(w, 409, "Ya existe esa marca.")
 		} else if strings.Contains(msg, "Ubicacion") {
 			respondError(w, 409, "Esta ubicación ya está registrada.")
+		} else if strings.Contains(msg, "Usuario.username") {
+			respondError(w, 409, "El nombre de usuario ya está en uso.")
 		} else {
 			respondError(w, 409, "Ya existe un registro con estos datos.")
 		}
@@ -591,7 +812,13 @@ func handleDbError(w http.ResponseWriter, err error) {
 func handleLogin(w http.ResponseWriter, r *http.Request) {
 	var req LoginRequest
 	json.NewDecoder(r.Body).Decode(&req)
-	respondJSON(w, UserResponse{ID: 1, Username: "admin", FullName: "Admin SART", Role: "admin", Token: "mock-token-123"})
+	var user User
+	err := db.QueryRow("SELECT id, username, full_name, rol FROM Usuario WHERE username=? AND password=? AND rol=?", req.Username, req.Password, req.Role).Scan(&user.ID, &user.Username, &user.FullName, &user.Role)
+	if err != nil {
+		respondError(w, 401, "Credenciales inválidas")
+		return
+	}
+	respondJSON(w, UserResponse{ID: user.ID, Username: user.Username, FullName: user.FullName, Role: user.Role, Token: "mock-token-123"})
 }
 
 func handleStats(w http.ResponseWriter, r *http.Request) {
@@ -635,12 +862,12 @@ func handleUsersCRUD(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if u.Password != "" {
-			_, err := db.Exec("UPDATE Usuario SET full_name=?, position=?, rol=?, password=? WHERE id=?", 
-				u.FullName, u.Position, u.Role, u.Password, id)
+			_, err := db.Exec("UPDATE Usuario SET full_name=?, username=?, position=?, rol=?, password=? WHERE id=?", 
+				u.FullName, u.Username, u.Position, u.Role, u.Password, id)
 			if err != nil { handleDbError(w, err); return }
 		} else {
-			_, err := db.Exec("UPDATE Usuario SET full_name=?, position=?, rol=? WHERE id=?", 
-				u.FullName, u.Position, u.Role, id)
+			_, err := db.Exec("UPDATE Usuario SET full_name=?, username=?, position=?, rol=? WHERE id=?", 
+				u.FullName, u.Username, u.Position, u.Role, id)
 			if err != nil { handleDbError(w, err); return }
 		}
 		respondJSON(w, map[string]bool{"success": true})
