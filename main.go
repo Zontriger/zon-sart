@@ -42,17 +42,25 @@ type UserResponse struct {
 	Token    string `json:"token"`
 }
 
+type User struct {
+	ID       int    `json:"id"`
+	Username string `json:"username"`
+	Password string `json:"password,omitempty"`
+	FullName string `json:"full_name"`
+	Position string `json:"position"`
+	Role     string `json:"role"`
+}
+
 type StatsResponse struct {
 	InWorkshop     int `json:"in_workshop"`
 	Repaired       int `json:"repaired"`
 	TotalThisMonth int `json:"total_month"`
 }
 
-// Estructura Genérica para Selectores (Estandarizada)
 type SelectItem struct {
-	ID       interface{} `json:"id"`        // int para BD, string para valores fijos si aplica
-	Value    string      `json:"value"`     // Texto a mostrar
-	ParentID int         `json:"parent_id,omitempty"` // Para filtrado en cascada
+	ID       interface{} `json:"id"`
+	Value    string      `json:"value"`
+	ParentID int         `json:"parent_id,omitempty"`
 }
 
 type SpecsResponse struct {
@@ -73,8 +81,7 @@ type LocationsResponse struct {
 	Rooms     []SelectItem `json:"rooms"`
 }
 
-// Estructura Completa para Dispositivos (Inventario)
-// Se usan punteros (*string) para manejar correctamente los valores NULL de la BD
+// Device : Estructura completa con IDs para autorrelleno
 type Device struct {
 	ID          int     `json:"id"`
 	Code        *string `json:"code"`
@@ -82,21 +89,22 @@ type Device struct {
 	Brand       *string `json:"brand"`
 	Model       *string `json:"model"`
 	Serial      *string `json:"serial"`
-	// Ubicación desagregada (Granular)
 	Building    string  `json:"building"`
 	Floor       string  `json:"floor"`
 	Area        string  `json:"area"`
 	Room        *string `json:"room"`
-	// Specs Técnicas
+	IDBuilding  int     `json:"id_building"`
+	IDFloor     int     `json:"id_floor"`
+	IDArea      int     `json:"id_area"`
+	IDRoom      *int    `json:"id_room"`
 	OS          *string `json:"os"`
 	RAM         *string `json:"ram"`
 	Storage     *string `json:"storage"`
 	CPU         *string `json:"cpu"`
 	Arch        *string `json:"arch"`
 	Details     *string `json:"details"`
-	// Estado Calculado
-	Status      string  `json:"status"`       // "operational" | "workshop"
-	StatusLabel string  `json:"status_label"` // "Operativo" | "En Taller"
+	Status      string  `json:"status"`
+	StatusLabel string  `json:"status_label"`
 }
 
 type DeviceResponse struct {
@@ -106,28 +114,23 @@ type DeviceResponse struct {
 	Limit int      `json:"limit"`
 }
 
-// Estructura Unificada para Tickets (Taller/Historial)
 type Ticket struct {
 	ID            int     `json:"id"`
 	DeviceID      int     `json:"id_device"`
-	// Snapshot del Dispositivo
 	DeviceType    string  `json:"device_type"`
 	DeviceCode    *string `json:"device_code"`
 	DeviceSerial  *string `json:"device_serial"`
 	DeviceBrand   *string `json:"device_brand"`
 	DeviceModel   *string `json:"device_model"`
-	// Datos Técnicos
 	DeviceOS      *string `json:"device_os"`
 	DeviceRAM     *string `json:"device_ram"`
 	DeviceStorage *string `json:"device_storage"`
 	DeviceCPU     *string `json:"device_cpu"`
 	DeviceArch    *string `json:"device_arch"`
-	// Ubicación Origen
 	Building      string  `json:"building"`
 	Floor         string  `json:"floor"`
 	Area          string  `json:"area"`
 	Room          *string `json:"room"`
-	// Datos del Ticket
 	DateIn        string  `json:"date_in"`
 	DetailsIn     string  `json:"details_in"`
 	Status        string  `json:"status"`
@@ -140,6 +143,20 @@ type TicketResponse struct {
 	Total int      `json:"total"`
 	Page  int      `json:"page"`
 	Limit int      `json:"limit"`
+}
+
+// Estructura para CRUD de Tablas Maestras
+type MasterItem struct {
+	ID       int         `json:"id"`
+	Value    string      `json:"value"`
+	ParentID interface{} `json:"parent_id,omitempty"`
+}
+
+type MasterResponse struct {
+	Data  []MasterItem `json:"data"`
+	Total int          `json:"total"`
+	Page  int          `json:"page"`
+	Limit int          `json:"limit"`
 }
 
 // --- MAIN ---
@@ -155,19 +172,38 @@ func main() {
 	fs := http.FileServer(http.Dir(STATIC_DIR))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	// API - Core
+	// Auth & Core
 	http.HandleFunc("/api/login", handleLogin)
 	http.HandleFunc("/api/stats", middlewareAuth(handleStats))
+	http.HandleFunc("/api/users", middlewareAuth(handleUsersCRUD))
 
-	// API - Carga Masiva (Inicialización)
+	// Selectores
 	http.HandleFunc("/api/specs", middlewareAuth(handleSpecs))
 	http.HandleFunc("/api/locations", middlewareAuth(handleLocations))
 
-	// API - CRUD Unificado
+	// Módulos Principales
 	http.HandleFunc("/api/devices", middlewareAuth(handleDevicesCRUD))
 	http.HandleFunc("/api/tickets", middlewareAuth(handleTicketsCRUD))
+
+	// --- GESTIÓN DE DATOS (CATÁLOGOS) ---
+	http.HandleFunc("/api/data/types", middlewareAuth(makeSimpleMasterHandler("Tipo", "type", "id_type")))
+	http.HandleFunc("/api/data/os", middlewareAuth(makeSimpleMasterHandler("Sistema_Operativo", "os", "id_os")))
+	http.HandleFunc("/api/data/rams", middlewareAuth(makeSimpleMasterHandler("RAM", "ram", "id_ram")))
+	http.HandleFunc("/api/data/storages", middlewareAuth(makeSimpleMasterHandler("Almacenamiento", "storage", "id_storage")))
+	http.HandleFunc("/api/data/processors", middlewareAuth(makeSimpleMasterHandler("Procesador", "processor", "id_processor")))
+	http.HandleFunc("/api/data/brands", middlewareAuth(makeSimpleMasterHandler("Marca", "brand", "id_brand")))
+	http.HandleFunc("/api/data/models", middlewareAuth(handleModelMasterCRUD))
+
+	// --- GESTIÓN DE DATOS (INFRAESTRUCTURA) ---
+	http.HandleFunc("/api/data/buildings_infra", middlewareAuth(handleBuildingMasterCRUD))
+	http.HandleFunc("/api/data/floors", middlewareAuth(handleFloorMasterCRUD))
+	http.HandleFunc("/api/data/areas", middlewareAuth(handleAreaMasterCRUD))
+	http.HandleFunc("/api/data/rooms", middlewareAuth(handleRoomMasterCRUD))
 	
-	// SPA Catch-all
+	// Vista de Ubicaciones (Links - Solo Lectura/Edición Detalles)
+	http.HandleFunc("/api/data/locations", middlewareAuth(handleLocationMasterCRUD))
+
+	// Fallback SPA
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, STATIC_DIR+"/index.html")
 	})
@@ -220,7 +256,6 @@ func initDB() {
 }
 
 func createTables() {
-	// 1. ESQUEMA FÍSICO + TRIGGERS (COPIADO EXACTAMENTE DE SART_DB.SQL)
 	schema := `
 	CREATE TABLE IF NOT EXISTS Usuario (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -229,14 +264,6 @@ func createTables() {
 		full_name TEXT NOT NULL,
 		position TEXT,
 		rol TEXT CHECK(rol IN ('admin', 'viewer')) DEFAULT 'viewer'
-	);
-
-	CREATE TABLE IF NOT EXISTS Periodo (
-		code TEXT PRIMARY KEY,
-		date_ini TEXT NOT NULL CHECK (date_ini IS date(date_ini)),
-		date_end TEXT NOT NULL CHECK (date_end IS date(date_end)),
-		is_current INTEGER CHECK(is_current IN (0, 1)) DEFAULT 0,
-		CONSTRAINT valid_range CHECK (date_ini < date_end)
 	);
 
 	CREATE TABLE IF NOT EXISTS Edificio (
@@ -400,7 +427,6 @@ func createTables() {
 	`
 	db.Exec(schema)
 
-	// 2. VISTAS
 	views := `
 	DROP VIEW IF EXISTS Vista_Datos_Dispositivo_Completo;
 	DROP VIEW IF EXISTS Vista_Ubicacion_Completa;
@@ -500,7 +526,6 @@ func seedData() {
 	INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES 
 		(1, 1), (1, 2), (2, 3), (3, 4), (4, NULL), (4, 9), (4, 10), (2, 6), (3, 8), (3, 9), (2, 5), (1, 3);
 
-	-- 1. PC | Control de Estudios | Jefe de Área | Dell | Win 7 | 32 bits
 	INSERT OR IGNORE INTO Dispositivo (code, id_type, id_location, id_os, id_ram, arch, id_storage, id_processor, id_brand, serial) VALUES (
 		'388', 1, 1, 
 		(SELECT id FROM Sistema_Operativo WHERE os='Win 7'),
@@ -530,7 +555,38 @@ func seedData() {
 	}
 }
 
-// --- HANDLERS ---
+// --- HELPERS PARA ERRORES (MENSAJES AMIGABLES) ---
+func handleDbError(w http.ResponseWriter, err error) {
+	if err == nil { return }
+	msg := err.Error()
+	// Detectar restricciones UNIQUE
+	if strings.Contains(msg, "UNIQUE constraint failed") {
+		if strings.Contains(msg, "Edificio.building") {
+			respondError(w, 409, "Ya existe un edificio con ese nombre.")
+		} else if strings.Contains(msg, "Piso.id_building") && strings.Contains(msg, "Piso.floor") {
+			respondError(w, 409, "Ya existe ese piso en este edificio.")
+		} else if strings.Contains(msg, "Area.id_floor") && strings.Contains(msg, "Area.area") {
+			respondError(w, 409, "Ya existe esa área en este piso.")
+		} else if strings.Contains(msg, "Habitacion.id_area") && strings.Contains(msg, "Habitacion.room") {
+			respondError(w, 409, "Ya existe esa habitación en esta área.")
+		} else if strings.Contains(msg, "Tipo.type") {
+			respondError(w, 409, "Ya existe ese tipo de equipo.")
+		} else if strings.Contains(msg, "Marca.brand") {
+			respondError(w, 409, "Ya existe esa marca.")
+		} else if strings.Contains(msg, "Ubicacion") {
+			respondError(w, 409, "Esta ubicación ya está registrada.")
+		} else {
+			respondError(w, 409, "Ya existe un registro con estos datos.")
+		}
+	} else if strings.Contains(msg, "Conflicto:") { // Triggers personalizados
+		respondError(w, 409, strings.Split(msg, "Conflicto:")[1]) 
+	} else {
+		log.Printf("DB Error: %v", msg)
+		respondError(w, 500, "Error interno de base de datos.")
+	}
+}
+
+// --- HANDLERS AUTH & STATS ---
 
 func handleLogin(w http.ResponseWriter, r *http.Request) {
 	var req LoginRequest
@@ -547,6 +603,52 @@ func handleStats(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, stats)
 }
 
+func handleUsersCRUD(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		rows, err := db.Query("SELECT id, username, full_name, COALESCE(position, ''), rol FROM Usuario")
+		if err != nil {
+			respondError(w, 500, "Error DB: "+err.Error())
+			return
+		}
+		defer rows.Close()
+
+		users := []User{}
+		for rows.Next() {
+			var u User
+			if err := rows.Scan(&u.ID, &u.Username, &u.FullName, &u.Position, &u.Role); err != nil {
+				continue
+			}
+			users = append(users, u)
+		}
+		respondJSON(w, map[string]interface{}{"data": users})
+
+	} else if r.Method == "PUT" {
+		var u User
+		if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
+			respondError(w, 400, "JSON inválido")
+			return
+		}
+		id := r.URL.Query().Get("id")
+		if id == "" {
+			respondError(w, 400, "ID requerido")
+			return
+		}
+
+		if u.Password != "" {
+			_, err := db.Exec("UPDATE Usuario SET full_name=?, position=?, rol=?, password=? WHERE id=?", 
+				u.FullName, u.Position, u.Role, u.Password, id)
+			if err != nil { handleDbError(w, err); return }
+		} else {
+			_, err := db.Exec("UPDATE Usuario SET full_name=?, position=?, rol=? WHERE id=?", 
+				u.FullName, u.Position, u.Role, id)
+			if err != nil { handleDbError(w, err); return }
+		}
+		respondJSON(w, map[string]bool{"success": true})
+	}
+}
+
+// --- HANDLERS SELECTORES ---
+
 func handleSpecs(w http.ResponseWriter, r *http.Request) {
 	resp := SpecsResponse{
 		Types:         getSelectItems("Tipo", "type"),
@@ -562,6 +664,7 @@ func handleSpecs(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleLocations(w http.ResponseWriter, r *http.Request) {
+	// IMPORTANTE: Devuelve valores SIN concatenar para el autorrelleno y selectores limpios del frontend
 	resp := LocationsResponse{
 		Buildings: getSelectItems("Edificio", "building"),
 		Floors:    getSelectItemsWithParent("Piso", "floor", "id_building"),
@@ -571,7 +674,411 @@ func handleLocations(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, map[string]interface{}{"success": true, "data": resp})
 }
 
-// --- CRUD DEVICES (INVENTARIO) ---
+// --- HANDLERS GESTIÓN DE DATOS (CRUD MAESTROS) ---
+
+// Factory para CRUD de tablas simples (Tipo, OS, RAM, etc)
+func makeSimpleMasterHandler(table, field, fkCheck string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "GET" {
+			page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+			limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
+			if page < 1 { page = 1 }
+			if limit < 1 { limit = 10 }
+			offset := (page - 1) * limit
+			
+			search := r.URL.Query().Get("search")
+			where := " WHERE 1=1 "
+			args := []interface{}{}
+
+			if search != "" {
+				where += fmt.Sprintf(" AND %s LIKE ? ", field)
+				args = append(args, "%"+search+"%")
+			}
+
+			var total int
+			db.QueryRow(fmt.Sprintf("SELECT COUNT(*) FROM %s %s", table, where), args...).Scan(&total)
+
+			query := fmt.Sprintf("SELECT id, %s FROM %s %s ORDER BY id DESC LIMIT ? OFFSET ?", field, table, where)
+			args = append(args, limit, offset)
+
+			rows, _ := db.Query(query, args...)
+			defer rows.Close()
+
+			items := []MasterItem{}
+			for rows.Next() {
+				var i MasterItem
+				rows.Scan(&i.ID, &i.Value)
+				items = append(items, i)
+			}
+			respondJSON(w, MasterResponse{Data: items, Total: total, Page: page, Limit: limit})
+
+		} else if r.Method == "POST" {
+			var d MasterItem
+			json.NewDecoder(r.Body).Decode(&d)
+			val := strings.TrimSpace(d.Value)
+			if val == "" { respondError(w, 400, "Valor vacío"); return }
+			
+			_, err := db.Exec(fmt.Sprintf("INSERT INTO %s (%s) VALUES (?)", table, field), val)
+			if err != nil { handleDbError(w, err); return }
+			respondJSON(w, map[string]bool{"success": true})
+
+		} else if r.Method == "PUT" {
+			var d MasterItem
+			json.NewDecoder(r.Body).Decode(&d)
+			id := r.URL.Query().Get("id")
+			val := strings.TrimSpace(d.Value)
+			if id == "" || val == "" { respondError(w, 400, "Datos inválidos"); return }
+
+			_, err := db.Exec(fmt.Sprintf("UPDATE %s SET %s=? WHERE id=?", table, field), val, id)
+			if err != nil { handleDbError(w, err); return }
+			respondJSON(w, map[string]bool{"success": true})
+
+		} else if r.Method == "DELETE" {
+			id := r.URL.Query().Get("id")
+			if id == "" { respondError(w, 400, "ID requerido"); return }
+
+			// Validación de Integridad Referencial
+			if fkCheck != "" {
+				var count int
+				db.QueryRow(fmt.Sprintf("SELECT COUNT(*) FROM Dispositivo WHERE %s = ?", fkCheck), id).Scan(&count)
+				if count > 0 {
+					respondError(w, 409, "No se puede eliminar: El dato está asociado a dispositivos.")
+					return
+				}
+			}
+			
+			if table == "Marca" {
+				var count int
+				db.QueryRow("SELECT COUNT(*) FROM Modelo WHERE id_brand = ?", id).Scan(&count)
+				if count > 0 {
+					respondError(w, 409, "No se puede eliminar: La marca tiene modelos asociados.")
+					return
+				}
+			}
+
+			_, err := db.Exec(fmt.Sprintf("DELETE FROM %s WHERE id=?", table), id)
+			if err != nil { handleDbError(w, err); return }
+			respondJSON(w, map[string]bool{"success": true})
+		}
+	}
+}
+
+// Handler específico para Modelos (incluye Marca en visualización)
+func handleModelMasterCRUD(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+		limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
+		if page < 1 { page = 1 }
+		if limit < 1 { limit = 10 }
+		offset := (page - 1) * limit
+
+		search := r.URL.Query().Get("search")
+		where := " WHERE 1=1 "
+		args := []interface{}{}
+
+		if search != "" {
+			where += " AND (mar.brand || ' ' || m.model) LIKE ? "
+			args = append(args, "%"+search+"%")
+		}
+
+		var total int
+		db.QueryRow("SELECT COUNT(*) FROM Modelo m JOIN Marca mar ON m.id_brand=mar.id "+where, args...).Scan(&total)
+
+		query := `SELECT m.id, (mar.brand || ' ' || m.model), m.id_brand 
+				  FROM Modelo m JOIN Marca mar ON m.id_brand=mar.id ` + where + ` ORDER BY m.id DESC LIMIT ? OFFSET ?`
+		
+		args = append(args, limit, offset)
+		rows, _ := db.Query(query, args...)
+		defer rows.Close()
+
+		items := []MasterItem{}
+		for rows.Next() {
+			var i MasterItem
+			rows.Scan(&i.ID, &i.Value, &i.ParentID)
+			items = append(items, i)
+		}
+		respondJSON(w, MasterResponse{Data: items, Total: total, Page: page, Limit: limit})
+
+	} else if r.Method == "POST" {
+		var d MasterItem
+		json.NewDecoder(r.Body).Decode(&d)
+		var brandID int
+		if pid, ok := d.ParentID.(float64); ok { brandID = int(pid) } else { respondError(w, 400, "Marca (parent_id) inválida"); return }
+		
+		_, err := db.Exec("INSERT INTO Modelo (model, id_brand) VALUES (?, ?)", d.Value, brandID)
+		if err != nil { handleDbError(w, err); return }
+		respondJSON(w, map[string]bool{"success": true})
+
+	} else if r.Method == "PUT" {
+		var d MasterItem
+		json.NewDecoder(r.Body).Decode(&d)
+		id := r.URL.Query().Get("id")
+		var brandID int
+		if pid, ok := d.ParentID.(float64); ok { brandID = int(pid) } else { respondError(w, 400, "Marca (parent_id) inválida"); return }
+
+		_, err := db.Exec("UPDATE Modelo SET model=?, id_brand=? WHERE id=?", d.Value, brandID, id)
+		if err != nil { handleDbError(w, err); return }
+		respondJSON(w, map[string]bool{"success": true})
+
+	} else if r.Method == "DELETE" {
+		id := r.URL.Query().Get("id")
+		if id == "" { respondError(w, 400, "ID requerido"); return }
+		var count int
+		db.QueryRow("SELECT COUNT(*) FROM Dispositivo WHERE id_model = ?", id).Scan(&count)
+		if count > 0 { respondError(w, 409, "Modelo en uso por dispositivos."); return }
+		_, err := db.Exec("DELETE FROM Modelo WHERE id=?", id)
+		if err != nil { handleDbError(w, err); return }
+		respondJSON(w, map[string]bool{"success": true})
+	}
+}
+
+// --- HANDLERS INFRAESTRUCTURA ESPECÍFICOS ---
+
+// Edificios
+func handleBuildingMasterCRUD(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "DELETE" {
+		id := r.URL.Query().Get("id")
+		if id == "" { respondError(w, 400, "ID requerido"); return }
+		var count int
+		db.QueryRow("SELECT COUNT(*) FROM Piso WHERE id_building = ?", id).Scan(&count)
+		if count > 0 { respondError(w, 409, "No se puede eliminar: El edificio tiene pisos registrados."); return }
+		_, err := db.Exec("DELETE FROM Edificio WHERE id=?", id)
+		if err != nil { handleDbError(w, err); return }
+		respondJSON(w, map[string]bool{"success": true})
+	} else {
+		makeSimpleMasterHandler("Edificio", "building", "")(w, r)
+	}
+}
+
+// Pisos (Hierarchical: Parent = Building)
+func handleFloorMasterCRUD(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+		limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
+		if page < 1 { page = 1 }
+		if limit < 1 { limit = 10 }
+		offset := (page - 1) * limit
+		search := r.URL.Query().Get("search")
+		
+		where := " WHERE 1=1 "
+		args := []interface{}{}
+		if search != "" { where += " AND (e.building || ' > ' || p.floor) LIKE ? "; args = append(args, "%"+search+"%") }
+
+		var total int
+		db.QueryRow("SELECT COUNT(*) FROM Piso p JOIN Edificio e ON p.id_building=e.id "+where, args...).Scan(&total)
+
+		query := `SELECT p.id, (e.building || ' > ' || p.floor), p.id_building 
+				  FROM Piso p JOIN Edificio e ON p.id_building=e.id ` + where + ` ORDER BY p.id DESC LIMIT ? OFFSET ?`
+		args = append(args, limit, offset)
+		
+		rows, _ := db.Query(query, args...)
+		defer rows.Close()
+		items := []MasterItem{}; for rows.Next() { var i MasterItem; rows.Scan(&i.ID, &i.Value, &i.ParentID); items = append(items, i) }
+		respondJSON(w, MasterResponse{Data: items, Total: total, Page: page, Limit: limit})
+
+	} else if r.Method == "POST" {
+		var d MasterItem; json.NewDecoder(r.Body).Decode(&d)
+		var pid int; if p, ok := d.ParentID.(float64); ok { pid = int(p) } else { respondError(w, 400, "Edificio requerido"); return }
+		_, err := db.Exec("INSERT INTO Piso (floor, id_building) VALUES (?, ?)", d.Value, pid)
+		if err != nil { handleDbError(w, err); return }
+		respondJSON(w, map[string]bool{"success": true})
+
+	} else if r.Method == "PUT" {
+		var d MasterItem; json.NewDecoder(r.Body).Decode(&d)
+		id := r.URL.Query().Get("id")
+		var pid int; if p, ok := d.ParentID.(float64); ok { pid = int(p) } else { respondError(w, 400, "Edificio requerido"); return }
+		_, err := db.Exec("UPDATE Piso SET floor=?, id_building=? WHERE id=?", d.Value, pid, id)
+		if err != nil { handleDbError(w, err); return }
+		respondJSON(w, map[string]bool{"success": true})
+
+	} else if r.Method == "DELETE" {
+		id := r.URL.Query().Get("id")
+		var count int
+		db.QueryRow("SELECT COUNT(*) FROM Area WHERE id_floor = ?", id).Scan(&count)
+		if count > 0 { respondError(w, 409, "Piso tiene áreas asociadas."); return }
+		_, err := db.Exec("DELETE FROM Piso WHERE id=?", id)
+		if err != nil { handleDbError(w, err); return }
+		respondJSON(w, map[string]bool{"success": true})
+	}
+}
+
+// Areas (Hierarchical: Parent = Floor)
+func handleAreaMasterCRUD(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+		limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
+		if page < 1 { page = 1 }
+		if limit < 1 { limit = 10 }
+		offset := (page - 1) * limit
+		search := r.URL.Query().Get("search")
+		
+		where := " WHERE 1=1 "
+		args := []interface{}{}
+		if search != "" { where += " AND (e.building || ' > ' || p.floor || ' > ' || a.area) LIKE ? "; args = append(args, "%"+search+"%") }
+
+		var total int
+		db.QueryRow("SELECT COUNT(*) FROM Area a JOIN Piso p ON a.id_floor=p.id JOIN Edificio e ON p.id_building=e.id "+where, args...).Scan(&total)
+
+		query := `SELECT a.id, (e.building || ' > ' || p.floor || ' > ' || a.area), a.id_floor 
+				  FROM Area a JOIN Piso p ON a.id_floor=p.id JOIN Edificio e ON p.id_building=e.id ` + where + ` ORDER BY a.id DESC LIMIT ? OFFSET ?`
+		args = append(args, limit, offset)
+		
+		rows, _ := db.Query(query, args...)
+		defer rows.Close()
+		items := []MasterItem{}; for rows.Next() { var i MasterItem; rows.Scan(&i.ID, &i.Value, &i.ParentID); items = append(items, i) }
+		respondJSON(w, MasterResponse{Data: items, Total: total, Page: page, Limit: limit})
+
+	} else if r.Method == "POST" {
+		var d MasterItem; json.NewDecoder(r.Body).Decode(&d)
+		var pid int; if p, ok := d.ParentID.(float64); ok { pid = int(p) } else { respondError(w, 400, "Piso requerido"); return }
+		_, err := db.Exec("INSERT INTO Area (area, id_floor) VALUES (?, ?)", d.Value, pid)
+		if err != nil { handleDbError(w, err); return }
+		respondJSON(w, map[string]bool{"success": true})
+
+	} else if r.Method == "PUT" {
+		var d MasterItem; json.NewDecoder(r.Body).Decode(&d)
+		id := r.URL.Query().Get("id")
+		var pid int; if p, ok := d.ParentID.(float64); ok { pid = int(p) } else { respondError(w, 400, "Piso requerido"); return }
+		_, err := db.Exec("UPDATE Area SET area=?, id_floor=? WHERE id=?", d.Value, pid, id)
+		if err != nil { handleDbError(w, err); return }
+		respondJSON(w, map[string]bool{"success": true})
+
+	} else if r.Method == "DELETE" {
+		id := r.URL.Query().Get("id")
+		var count int
+		// Check Habitaciones
+		db.QueryRow("SELECT COUNT(*) FROM Habitacion WHERE id_area = ?", id).Scan(&count)
+		if count > 0 { respondError(w, 409, "Área tiene habitaciones asociadas."); return }
+		// Check Ubicacion (link table)
+		db.QueryRow("SELECT COUNT(*) FROM Ubicacion WHERE id_area = ?", id).Scan(&count)
+		if count > 0 { respondError(w, 409, "Área está en uso en ubicaciones."); return }
+		
+		_, err := db.Exec("DELETE FROM Area WHERE id=?", id)
+		if err != nil { handleDbError(w, err); return }
+		respondJSON(w, map[string]bool{"success": true})
+	}
+}
+
+// Habitaciones (Hierarchical: Parent = Area)
+func handleRoomMasterCRUD(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+		limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
+		if page < 1 { page = 1 }
+		if limit < 1 { limit = 10 }
+		offset := (page - 1) * limit
+		search := r.URL.Query().Get("search")
+		
+		where := " WHERE 1=1 "
+		args := []interface{}{}
+		if search != "" { where += " AND (e.building || ' > ' || p.floor || ' > ' || a.area || ' > ' || h.room) LIKE ? "; args = append(args, "%"+search+"%") }
+
+		// JOIN Completo para mostrar jerarquia total
+		var total int
+		db.QueryRow("SELECT COUNT(*) FROM Habitacion h JOIN Area a ON h.id_area=a.id JOIN Piso p ON a.id_floor=p.id JOIN Edificio e ON p.id_building=e.id "+where, args...).Scan(&total)
+
+		query := `SELECT h.id, (e.building || ' > ' || p.floor || ' > ' || a.area || ' > ' || h.room), h.id_area 
+				  FROM Habitacion h JOIN Area a ON h.id_area=a.id JOIN Piso p ON a.id_floor=p.id JOIN Edificio e ON p.id_building=e.id ` + where + ` ORDER BY h.id DESC LIMIT ? OFFSET ?`
+		args = append(args, limit, offset)
+		
+		rows, _ := db.Query(query, args...)
+		defer rows.Close()
+		items := []MasterItem{}; for rows.Next() { var i MasterItem; rows.Scan(&i.ID, &i.Value, &i.ParentID); items = append(items, i) }
+		respondJSON(w, MasterResponse{Data: items, Total: total, Page: page, Limit: limit})
+
+	} else if r.Method == "POST" {
+		var d MasterItem; json.NewDecoder(r.Body).Decode(&d)
+		var pid int; if p, ok := d.ParentID.(float64); ok { pid = int(p) } else { respondError(w, 400, "Área requerida"); return }
+		_, err := db.Exec("INSERT INTO Habitacion (room, id_area) VALUES (?, ?)", d.Value, pid)
+		if err != nil { handleDbError(w, err); return }
+		respondJSON(w, map[string]bool{"success": true})
+
+	} else if r.Method == "PUT" {
+		var d MasterItem; json.NewDecoder(r.Body).Decode(&d)
+		id := r.URL.Query().Get("id")
+		var pid int; if p, ok := d.ParentID.(float64); ok { pid = int(p) } else { respondError(w, 400, "Área requerida"); return }
+		_, err := db.Exec("UPDATE Habitacion SET room=?, id_area=? WHERE id=?", d.Value, pid, id)
+		if err != nil { handleDbError(w, err); return }
+		respondJSON(w, map[string]bool{"success": true})
+
+	} else if r.Method == "DELETE" {
+		id := r.URL.Query().Get("id")
+		var count int
+		db.QueryRow("SELECT COUNT(*) FROM Ubicacion WHERE id_room = ?", id).Scan(&count)
+		if count > 0 { respondError(w, 409, "Habitación en uso."); return }
+		_, err := db.Exec("DELETE FROM Habitacion WHERE id=?", id)
+		if err != nil { handleDbError(w, err); return }
+		respondJSON(w, map[string]bool{"success": true})
+	}
+}
+
+// Handler para Ubicaciones (Concatenadas) - Incluye Detalles
+func handleLocationMasterCRUD(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+		limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
+		if page < 1 { page = 1 }
+		if limit < 1 { limit = 10 }
+		offset := (page - 1) * limit
+
+		search := r.URL.Query().Get("search")
+		where := " WHERE 1=1 "
+		args := []interface{}{}
+
+		if search != "" {
+			term := "%" + search + "%"
+			where += " AND (building LIKE ? OR floor LIKE ? OR area LIKE ? OR room LIKE ? OR details LIKE ?) "
+			for i := 0; i < 5; i++ { args = append(args, term) }
+		}
+
+		var total int
+		db.QueryRow("SELECT COUNT(*) FROM Vista_Ubicacion_Completa "+where, args...).Scan(&total)
+
+		// SQL Modificado: Detalles al final separados por " - "
+		query := `SELECT id_ubicacion, 
+				  (building || ' > ' || floor || ' > ' || area || COALESCE(' > ' || room, '') || COALESCE(' - ' || details, '')) 
+				  FROM Vista_Ubicacion_Completa ` + where + ` ORDER BY id_ubicacion DESC LIMIT ? OFFSET ?`
+		
+		args = append(args, limit, offset)
+		rows, _ := db.Query(query, args...)
+		defer rows.Close()
+
+		items := []MasterItem{}
+		for rows.Next() {
+			var i MasterItem
+			rows.Scan(&i.ID, &i.Value)
+			items = append(items, i)
+		}
+		respondJSON(w, MasterResponse{Data: items, Total: total, Page: page, Limit: limit})
+
+	} else if r.Method == "PUT" {
+		// Solo permite editar detalles de la ubicación (links)
+		type LocInput struct {
+			Details string `json:"details"`
+		}
+		var d LocInput
+		if err := json.NewDecoder(r.Body).Decode(&d); err != nil { respondError(w, 400, "JSON inválido"); return }
+		id := r.URL.Query().Get("id")
+		
+		_, err := db.Exec("UPDATE Ubicacion SET details=? WHERE id=?", d.Details, id)
+		if err != nil { handleDbError(w, err); return }
+		respondJSON(w, map[string]bool{"success": true})
+
+	} else if r.Method == "DELETE" {
+		id := r.URL.Query().Get("id")
+		if id == "" { respondError(w, 400, "ID requerido"); return }
+
+		var count int
+		db.QueryRow("SELECT COUNT(*) FROM Dispositivo WHERE id_location = ?", id).Scan(&count)
+		if count > 0 { respondError(w, 409, "Ubicación contiene dispositivos."); return }
+
+		_, err := db.Exec("DELETE FROM Ubicacion WHERE id=?", id)
+		if err != nil { handleDbError(w, err); return }
+		respondJSON(w, map[string]bool{"success": true})
+	}
+}
+
+// --- HANDLERS DISPOSITIVOS ---
 
 func handleDevicesCRUD(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
@@ -597,7 +1104,6 @@ func handleDevicesCRUD(w http.ResponseWriter, r *http.Request) {
 		if val := r.URL.Query().Get("type"); val != "" { where += " AND v.id_type = ? "; args = append(args, val) }
 		if val := r.URL.Query().Get("brand"); val != "" { where += " AND v.id_brand = ? "; args = append(args, val) }
 		if val := r.URL.Query().Get("os"); val != "" { where += " AND v.id_os = ? "; args = append(args, val) }
-
 		if val := r.URL.Query().Get("id_building"); val != "" { where += " AND v.id_building = ? "; args = append(args, val) }
 		if val := r.URL.Query().Get("id_floor"); val != "" { where += " AND v.id_floor = ? "; args = append(args, val) }
 		if val := r.URL.Query().Get("id_area"); val != "" { where += " AND v.id_area = ? "; args = append(args, val) }
@@ -618,6 +1124,7 @@ func handleDevicesCRUD(w http.ResponseWriter, r *http.Request) {
 			SELECT 
 				v.device_id, v.code, v.device_type, v.brand, v.model, v.serial,
 				v.building, v.floor, v.area, v.room,
+				v.id_building, v.id_floor, v.id_area, v.id_room,
 				v.os, v.ram, v.storage, v.processor, v.arch, v.details,
 				CASE WHEN EXISTS ` + statusSubQuery + ` THEN 'workshop' ELSE 'operational' END,
 				CASE WHEN EXISTS ` + statusSubQuery + ` THEN 'En Taller' ELSE 'Operativo' END
@@ -626,7 +1133,11 @@ func handleDevicesCRUD(w http.ResponseWriter, r *http.Request) {
 		
 		args = append(args, limit, offset)
 		rows, err := db.Query(query, args...)
-		if err != nil { respondError(w, 500, "Error DB"); return }
+		if err != nil {
+			log.Printf("Query Error: %v", err)
+			respondError(w, 500, "Error DB")
+			return
+		}
 		defer rows.Close()
 
 		items := []Device{}
@@ -635,18 +1146,21 @@ func handleDevicesCRUD(w http.ResponseWriter, r *http.Request) {
 			err := rows.Scan(
 				&d.ID, &d.Code, &d.Type, &d.Brand, &d.Model, &d.Serial,
 				&d.Building, &d.Floor, &d.Area, &d.Room,
+				&d.IDBuilding, &d.IDFloor, &d.IDArea, &d.IDRoom,
 				&d.OS, &d.RAM, &d.Storage, &d.CPU, &d.Arch, &d.Details,
 				&d.Status, &d.StatusLabel)
+			
 			if err != nil { continue }
 			items = append(items, d)
 		}
+
 		respondJSON(w, DeviceResponse{Data: items, Total: total, Page: page, Limit: limit})
 
 	} else if r.Method == "POST" || r.Method == "PUT" {
 		type DeviceInput struct {
 			Code        *string `json:"code"`
 			IDType      int     `json:"id_type"`
-			IDBrand     *int    `json:"id_brand"`
+			IDBrand     *int    `json:"id_brand"` 
 			IDModel     *int    `json:"id_model"`
 			Serial      *string `json:"serial"`
 			IDArea      int     `json:"id_area"`
@@ -658,8 +1172,12 @@ func handleDevicesCRUD(w http.ResponseWriter, r *http.Request) {
 			Arch        *string `json:"arch"`
 			Details     *string `json:"details"`
 		}
+
 		var d DeviceInput
-		if err := json.NewDecoder(r.Body).Decode(&d); err != nil { respondError(w, 400, "JSON inválido"); return }
+		if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
+			respondError(w, 400, "JSON inválido")
+			return
+		}
 
 		if d.IDType == 0 { respondError(w, 400, "Tipo obligatorio"); return }
 		if d.IDArea == 0 { respondError(w, 400, "Ubicación (Área) obligatoria"); return }
@@ -684,17 +1202,19 @@ func handleDevicesCRUD(w http.ResponseWriter, r *http.Request) {
 		err := db.QueryRow(queryLoc, argsLoc...).Scan(&idLocation)
 		if err == sql.ErrNoRows {
 			res, errIns := db.Exec("INSERT INTO Ubicacion (id_area, id_room) VALUES (?, ?)", d.IDArea, d.IDRoom)
-			if errIns != nil { respondError(w, 500, "Error creando ubicación: "+errIns.Error()); return }
+			if errIns != nil { handleDbError(w, errIns); return }
 			id, _ := res.LastInsertId()
 			idLocation = int(id)
-		} else if err != nil { respondError(w, 500, "Error ubicacion: "+err.Error()); return }
+		} else if err != nil {
+			respondError(w, 500, "Error ubicacion: "+err.Error()); return
+		}
 
 		if r.Method == "POST" {
 			_, err = db.Exec(`INSERT INTO Dispositivo 
 				(code, id_type, id_location, id_brand, id_model, serial, id_os, id_ram, id_storage, id_processor, arch, details)
 				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 				d.Code, d.IDType, idLocation, d.IDBrand, d.IDModel, d.Serial, d.IDOS, d.IDRAM, d.IDStorage, d.IDProcessor, d.Arch, d.Details)
-			if err != nil { respondError(w, 500, "Error crear: "+err.Error()); return }
+			if err != nil { handleDbError(w, err); return }
 		} else {
 			id := r.URL.Query().Get("id")
 			_, err = db.Exec(`UPDATE Dispositivo SET 
@@ -703,7 +1223,7 @@ func handleDevicesCRUD(w http.ResponseWriter, r *http.Request) {
 				WHERE id=?`,
 				d.Code, d.IDType, idLocation, d.IDBrand, d.IDModel, d.Serial, 
 				d.IDOS, d.IDRAM, d.IDStorage, d.IDProcessor, d.Arch, d.Details, id)
-			if err != nil { respondError(w, 500, "Error actualizar: "+err.Error()); return }
+			if err != nil { handleDbError(w, err); return }
 		}
 		respondJSON(w, map[string]bool{"success": true})
 	} else if r.Method == "DELETE" {
@@ -713,12 +1233,12 @@ func handleDevicesCRUD(w http.ResponseWriter, r *http.Request) {
 		db.QueryRow("SELECT COUNT(*) FROM Taller WHERE id_device = ?", id).Scan(&count)
 		if count > 0 { respondError(w, 409, "El equipo tiene historial."); return }
 		_, err := db.Exec("DELETE FROM Dispositivo WHERE id = ?", id)
-		if err != nil { respondError(w, 500, "Error eliminar: "+err.Error()); return }
+		if err != nil { handleDbError(w, err); return }
 		respondJSON(w, map[string]bool{"success": true})
 	}
 }
 
-// --- CRUD TICKETS ---
+// --- HANDLERS TICKETS ---
 
 func handleTicketsCRUD(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
@@ -751,7 +1271,6 @@ func handleTicketsCRUD(w http.ResponseWriter, r *http.Request) {
 		search := r.URL.Query().Get("search")
 		if search != "" {
 			term := "%" + search + "%"
-			// Búsqueda expandida para Historial
 			where += ` AND (
 				v.code LIKE ? OR v.serial LIKE ? OR v.brand LIKE ? OR v.model LIKE ? OR 
 				v.building LIKE ? OR v.area LIKE ? OR 
@@ -821,7 +1340,7 @@ func handleTicketsCRUD(w http.ResponseWriter, r *http.Request) {
 		id := r.URL.Query().Get("id")
 		if id == "" { respondError(w, 400, "ID requerido"); return }
 		_, err := db.Exec("DELETE FROM Taller WHERE id = ?", id)
-		if err != nil { respondError(w, 500, "Error eliminando: "+err.Error()); return }
+		if err != nil { handleDbError(w, err); return }
 		respondJSON(w, map[string]bool{"success": true})
 	}
 }
@@ -862,22 +1381,6 @@ func getModels() []SelectItem {
 		items = append(items, i)
 	}
 	return items
-}
-
-func makeHandler(table, pk, label string, filters ...string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		query := fmt.Sprintf("SELECT %s, %s FROM %s ORDER BY %s ASC", pk, label, table, label)
-		rows, _ := db.Query(query)
-		defer rows.Close()
-		items := []map[string]interface{}{}
-		for rows.Next() {
-			var id int
-			var val string
-			rows.Scan(&id, &val)
-			items = append(items, map[string]interface{}{"id": id, "value": val})
-		}
-		respondJSON(w, map[string]interface{}{"data": items})
-	}
 }
 
 func middlewareAuth(next http.HandlerFunc) http.HandlerFunc {

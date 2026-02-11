@@ -84,8 +84,8 @@
         /* TABLAS Y PANELES DE DATOS */
         .filter-panel { background: white; padding: 1rem 1.5rem; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; }
         .search-box { flex: 1; min-width: 200px; }
-        .data-panel { background: white; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border-color); display: flex; flex-direction: column; overflow-y: auto; }
-        .table-container { overflow: auto; }
+        .data-panel { background: white; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border-color); display: flex; flex-direction: column; overflow-y: auto; height: 100%; }
+        .table-container { overflow: auto; flex: 1; }
         
         .custom-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; table-layout: fixed; }
         .custom-table thead { background-color: var(--color-primary); color: white; position: sticky; top: 0; z-index: 10; }
@@ -95,7 +95,7 @@
         .text-muted { color: #9ca3af; font-style: italic; text-align: center; padding: 2rem; }
 
         /* Estilo Específico para Tablas: Altura Fija de Fila */
-        .custom-table tbody tr { height: 95px; }
+        .custom-table tbody tr { height: 60px; }
 
         /* UTILIDADES TABLA */
         .cell-truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: block; }
@@ -144,13 +144,12 @@
         .char-counter { text-align: right; font-size: 0.8rem; color: var(--color-text-light); margin-top: 0.25rem; font-variant-numeric: tabular-nums; }
         .info-block { background: #f3f4f6; padding: 1rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.9rem; }
         
-        /* DETALLES DE VISUALIZACIÓN MEJORADOS */
+        /* DETALLES DE VISUALIZACIÓN */
         .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem; }
         .detail-item { display: flex; flex-direction: column; }
         .detail-full { grid-column: 1 / -1; }
         .detail-label { font-size: 0.7rem; color: var(--color-text-light); text-transform: uppercase; font-weight: 700; margin-bottom: 0.35rem; letter-spacing: 0.5px; }
         
-        /* CORRECCIÓN: Romper palabras largas en valores de detalle */
         .detail-value { 
             font-size: 0.95rem; 
             color: var(--color-dark); 
@@ -158,16 +157,32 @@
             border-bottom: 1px solid #e5e7eb; 
             padding-bottom: 0.25rem; 
             min-height: 1.4rem;
-            white-space: pre-wrap;      /* Respeta saltos de línea y envuelve */
-            word-wrap: break-word;      /* Rompe palabras largas (Legacy) */
-            overflow-wrap: break-word;  /* Rompe palabras largas (Estándar) */
-            word-break: break-word;     /* Compatibilidad extra */
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            overflow-wrap: break-word; 
+            word-break: break-word;
         }
         
-        /* Botones de reporte en header */
+        /* Header Actions */
         .header-actions { display: flex; gap: 10px; align-items: center; }
         .btn-report-filter { background-color: var(--color-secondary); color: white; padding: 0.4rem 0.8rem; font-size: 0.85rem; border-radius: 4px; border:none; cursor: pointer; font-weight: bold; }
         .btn-report-full { background-color: var(--color-danger); color: white; padding: 0.4rem 0.8rem; font-size: 0.85rem; border-radius: 4px; border:none; cursor: pointer; font-weight: bold; }
+
+        /* --- ESTILOS GESTIÓN DE DATOS (NUEVO) --- */
+        .dm-layout { display: flex; height: 100%; gap: 1.5rem; }
+        .dm-sidebar { width: 220px; background: var(--color-white); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border-color); display: flex; flex-direction: column; overflow: hidden; height: 100%; overflow-y: auto; }
+        .dm-menu-item { padding: 12px 15px; border-bottom: 1px solid var(--color-bg); cursor: pointer; font-size: 0.9rem; color: var(--color-text); transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
+        .dm-menu-item:hover { background-color: #f9fafb; color: var(--color-primary); }
+        .dm-menu-item.active { background-color: #eff6ff; color: var(--color-primary); font-weight: 700; border-left: 4px solid var(--color-primary); }
+        
+        .dm-container { flex: 1; display: flex; flex-direction: column; background: var(--color-white); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border-color); overflow: hidden; height: 100%; }
+        
+        .crud-header { padding: 1rem; gap: 1rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: #fafafa; }
+        .crud-content { flex: 1; overflow-y: auto; padding: 0; display: flex; flex-direction: column; }
+
+        /* Input Group Toggle */
+        .input-group-toggle { display: flex; align-items: center; gap: 5px; }
+        .input-group-toggle select, .input-group-toggle input { flex: 1; }
     </style>
 </head>
 <body>
@@ -254,16 +269,13 @@
                     </div>
                 </div>
 
-                <!-- SECCIÓN 2: TALLER (FILTROS COMPLETOS) -->
+                <!-- SECCIÓN 2: TALLER -->
                 <div id="section-workshop" class="section-view hidden">
                     <div class="filter-panel">
-                        <!-- FILA 1: Búsqueda Global -->
                         <div class="search-box" style="flex-basis: 100%; margin-bottom: 0.5rem;">
                             <label class="form-label">Búsqueda Global (Serial, Código, Marca)</label>
                             <input type="text" id="wk-search" placeholder="Escriba para buscar..." onkeyup="app.debounceLoadWorkshop()">
                         </div>
-
-                        <!-- FILA 2: Filtros Específicos -->
                         <div style="flex: 1; min-width: 120px;">
                             <label class="form-label">Tipo</label>
                             <select id="wk-filter-type" onchange="app.loadWorkshop(1)"></select>
@@ -284,8 +296,6 @@
                             <label class="form-label">RAM</label>
                             <select id="wk-filter-ram" onchange="app.loadWorkshop(1)"></select>
                         </div>
-
-                        <!-- Botón Acción -->
                         <div style="flex: 0 0 auto;">
                              <button class="btn-primary" onclick="app.openModal('add-ticket')">Nuevo Ingreso</button>
                         </div>
@@ -314,7 +324,6 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <!-- Filas vacías iniciales para altura fija -->
                                     <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
                                     <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
                                     <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
@@ -322,7 +331,6 @@
                                 </tbody>
                             </table>
                         </div>
-                         <!-- PAGINACIÓN TALLER -->
                         <div class="pagination-controls">
                             <button id="wk-btn-prev" class="page-btn" onclick="app.prevPage()">Anterior</button>
                             <div class="page-info">
@@ -338,13 +346,10 @@
                 <!-- SECCIÓN 3: INVENTARIO -->
                 <div id="section-inventory" class="section-view hidden">
                     <div class="filter-panel">
-                        <!-- FILA 1: Búsqueda Global -->
                         <div class="search-box" style="flex-basis: 100%; margin-bottom: 0.5rem;">
                             <label class="form-label">Búsqueda Global (Serial, Código, Marca, Ubicación)</label>
                             <input type="text" id="inv-search" placeholder="Escriba para buscar..." onkeyup="app.debounceLoadInventory()">
                         </div>
-
-                        <!-- FILA 2: Filtros Específicos -->
                         <div style="flex: 1; min-width: 120px;">
                             <label class="form-label">Tipo</label>
                             <select id="inv-filter-type" onchange="app.loadInventory(1)"></select>
@@ -365,8 +370,6 @@
                                 <option value="workshop">En Taller</option>
                             </select>
                         </div>
-
-                        <!-- Botón Acción -->
                         <div style="flex: 0 0 auto;">
                              <button class="btn-primary" onclick="app.openModal('add-device')">+ Nuevo Equipo</button>
                         </div>
@@ -375,14 +378,14 @@
                         <div class="table-container">
                             <table class="custom-table" id="inventory-table">
                                 <colgroup>
-                                    <col style="width: 50px;"> <!-- N -->
-                                    <col style="width: 100px;"> <!-- Tipo -->
-                                    <col style="width: 20%;"> <!-- Marca/Modelo -->
-                                    <col style="width: 20%;"> <!-- Ubicación -->
-                                    <col style="width: 100px;"> <!-- Código -->
-                                    <col style="width: 120px;"> <!-- Serial -->
-                                    <col style="width: 100px;"> <!-- Estado -->
-                                    <col style="width: 140px;"> <!-- Acciones -->
+                                    <col style="width: 50px;">
+                                    <col style="width: 100px;">
+                                    <col style="width: 20%;">
+                                    <col style="width: 20%;">
+                                    <col style="width: 100px;">
+                                    <col style="width: 120px;">
+                                    <col style="width: 100px;">
+                                    <col style="width: 140px;">
                                 </colgroup>
                                 <thead>
                                     <tr>
@@ -409,10 +412,9 @@
                     </div>
                 </div>
 
-                <!-- SECCIÓN 4: HISTORIAL (ANTES REPORTES) -->
+                <!-- SECCIÓN 4: HISTORIAL -->
                 <div id="section-history" class="section-view hidden">
                     <div class="filter-panel">
-                        <!-- FILA 1: Búsqueda Global y Botones Exportar -->
                         <div class="search-box" style="flex-basis: 100%; margin-bottom: 0.5rem;">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.25rem;">
                                 <label class="form-label" style="margin-bottom:0;">Búsqueda Global (Serial, Código, Marca, Falla)</label>
@@ -423,8 +425,6 @@
                             </div>
                             <input type="text" id="hist-search" placeholder="Escriba para buscar..." onkeyup="app.debounceLoadHistory()">
                         </div>
-
-                        <!-- FILA 2: Filtros -->
                         <div style="flex: 1; min-width: 120px;">
                             <label class="form-label">Tipo</label>
                             <select id="hist-filter-type" onchange="app.loadHistory(1)"></select>
@@ -449,8 +449,6 @@
                             <label class="form-label">Antes de</label>
                             <input type="date" id="hist-date-before" onchange="app.validateDates(); app.loadHistory(1)">
                         </div>
-                        
-                        <!-- Botón Acción -->
                         <div style="flex: 0 0 auto;">
                              <button class="btn-secondary" onclick="app.clearHistoryFilters()">Limpiar Filtros</button>
                         </div>
@@ -460,14 +458,14 @@
                         <div class="table-container">
                             <table class="custom-table" id="history-table">
                                 <colgroup>
-                                    <col style="width: 50px;"> <!-- N -->
-                                    <col style="width: 110px;"> <!-- Salida -->
-                                    <col style="width: 80px;"> <!-- Tipo -->
-                                    <col style="width: 13%;"> <!-- Marca/Modelo -->
-                                    <col style="width: 13%;"> <!-- Código/Serial -->
-                                    <col style="width: auto;"> <!-- Detalles -->
-                                    <col style="width: 140px;"> <!-- Estado -->
-                                    <col style="width: 130px;"> <!-- Acciones -->
+                                    <col style="width: 50px;">
+                                    <col style="width: 110px;">
+                                    <col style="width: 80px;">
+                                    <col style="width: 13%;">
+                                    <col style="width: 13%;">
+                                    <col style="width: auto;">
+                                    <col style="width: 140px;">
+                                    <col style="width: 130px;">
                                 </colgroup>
                                 <thead>
                                     <tr>
@@ -494,10 +492,9 @@
                     </div>
                 </div>
                 
-                 <!-- SECCIÓN 5: DATOS -->
-                <div id="section-data" class="section-view hidden">
-                    <h3>Gestión de Datos Maestros</h3>
-                    <p class="text-secondary">Próximamente...</p>
+                 <!-- SECCIÓN 5: GESTIÓN DE DATOS (IMPLEMENTADA) -->
+                <div id="section-data" class="section-view hidden" style="height: 100%;">
+                    <!-- Se inyecta dinámicamente con DataManagementModule -->
                 </div>
 
                  <!-- SECCIÓN 6: CONFIGURACIÓN -->
@@ -517,16 +514,12 @@
                 <h3 class="modal-title" id="modal-title">Título Modal</h3>
                 <button class="btn-close-modal" onclick="app.closeModal()">×</button>
             </div>
-            <div class="modal-body" id="modal-body-content">
-                <!-- Se llena con JS -->
-            </div>
-            <div class="modal-footer" id="modal-footer-content">
-                <!-- Se llena con JS -->
-            </div>
+            <div class="modal-body" id="modal-body-content"></div>
+            <div class="modal-footer" id="modal-footer-content"></div>
         </div>
     </div>
 
-    <!-- TEMPLATES (TALLER / INVENTARIO / DELETE) EXISTENTES -->
+    <!-- TEMPLATES -->
     <template id="tmpl-add-ticket">
         <div class="section-title">1. Ubicación del Equipo</div>
         <div class="grid-2">
@@ -614,7 +607,6 @@
         </div>
     </template>
 
-    <!-- NUEVO TEMPLATE: VER DETALLES HISTORIAL -->
     <template id="tmpl-view-ticket">
         <div style="background: #f9fafb; padding: 1.5rem; border-radius: 8px; border: 1px solid #e5e7eb;">
             <div class="section-title" style="margin-top:0;">1. Información del Equipo</div>
@@ -625,19 +617,16 @@
                 <div class="detail-item"><span class="detail-label">Serial</span><span class="detail-value" id="vt-serial"></span></div>
                 <div class="detail-item detail-full"><span class="detail-label">Ubicación Origen</span><span class="detail-value" id="vt-location" style="font-weight:600;"></span></div>
             </div>
-
             <div class="section-title">2. Detalles del Servicio</div>
             <div class="details-grid">
                 <div class="detail-item"><span class="detail-label">Fecha Entrada</span><span class="detail-value" id="vt-date-in"></span></div>
                 <div class="detail-item"><span class="detail-label">Fecha Salida</span><span class="detail-value" id="vt-date-out"></span></div>
                 <div class="detail-item"><span class="detail-label">Estado Final</span><span class="detail-value" id="vt-status"></span></div>
             </div>
-            
             <div class="detail-item detail-full" style="margin-bottom:1rem;">
                 <span class="detail-label">Motivo de Ingreso</span>
                 <div class="detail-value" id="vt-details-in" style="height:auto; min-height:1.4rem;"></div>
             </div>
-            
             <div class="detail-item detail-full">
                 <span class="detail-label">Informe de Salida</span>
                 <div class="detail-value" id="vt-details-out" style="height:auto; min-height:1.4rem; background:white; padding:5px; border:1px solid #eee;"></div>
@@ -646,33 +635,466 @@
     </template>
 
     <script>
+        // --- DATA MANAGEMENT MODULE CLASSES ---
+        class DataManagementModule {
+            constructor(container) {
+                this.container = container;
+                this.activeTable = 'locations'; 
+                // Updated Tables List with Infrastructure Split
+                this.tables = [
+                    { id: 'locations', label: 'Ubicaciones (Links)', endpoint: 'locations', readOnly: true },
+                    { id: 'buildings_infra', label: 'Edificios', endpoint: 'buildings_infra' },
+                    { id: 'floors', label: 'Pisos', endpoint: 'floors', parentCollection: 'buildings' },
+                    { id: 'areas', label: 'Áreas', endpoint: 'areas', parentCollection: 'floors' },
+                    { id: 'rooms', label: 'Habitaciones', endpoint: 'rooms', parentCollection: 'areas' },
+                    { id: 'brands', label: 'Marcas', endpoint: 'brands' },
+                    { id: 'models', label: 'Modelos', endpoint: 'models', parentCollection: 'brands' },
+                    { id: 'types', label: 'Tipos Equipo', endpoint: 'types' },
+                    { id: 'os', label: 'Sis. Operativo', endpoint: 'os' },
+                    { id: 'rams', label: 'Memoria RAM', endpoint: 'rams' },
+                    { id: 'processors', label: 'Procesadores', endpoint: 'processors' },
+                    { id: 'storages', label: 'Almacenamiento', endpoint: 'storages' }
+                ];
+                this.crudInstance = null;
+            }
+
+            render() {
+                this.container.innerHTML = `
+                    <div class="dm-layout">
+                        <div class="dm-sidebar" id="dmMenu"></div>
+                        <div class="dm-container" id="dmWorkspace"></div>
+                    </div>
+                `;
+                this.renderMenu();
+                this.loadTable(this.activeTable);
+            }
+
+            renderMenu() {
+                const menu = document.getElementById('dmMenu');
+                menu.innerHTML = this.tables.map(t => `
+                    <div class="dm-menu-item ${this.activeTable === t.id ? 'active' : ''}" onclick="app.dataModule.loadTable('${t.id}')">
+                        <span>${t.label}</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </div>
+                `).join('');
+            }
+
+            loadTable(tableId) {
+                this.activeTable = tableId;
+                this.renderMenu(); 
+                const tableConfig = this.tables.find(t => t.id === tableId);
+                const workspace = document.getElementById('dmWorkspace');
+                workspace.innerHTML = ''; 
+                this.crudInstance = new MasterCRUD(workspace, tableConfig);
+                this.crudInstance.init();
+            }
+        }
+
+        class MasterCRUD {
+            constructor(container, config) {
+                this.container = container;
+                this.config = config;
+                this.state = { data: [], total: 0, page: 1, limit: 10, search: '' };
+                this.debounceTimer = null;
+            }
+
+            init() {
+                this.renderFrame();
+                this.fetchData();
+            }
+
+            renderFrame() {
+                // If readOnly is true (Locations), don't show Add button
+                const addBtn = this.config.readOnly ? '' : `<button class="btn-primary" onclick="app.dataModule.crudInstance.openModal('add')">+ Añadir</button>`;
+                
+                this.container.innerHTML = `
+                    <div class="crud-header">
+                        <div class="search-box">
+                            <input type="text" placeholder="Buscar ${this.config.label}..." onkeyup="app.dataModule.crudInstance.handleSearch(this.value)">
+                        </div>
+                        ${addBtn}
+                    </div>
+                    <div class="crud-content">
+                        <div class="table-container">
+                            <table class="custom-table" style="border-top:none;">
+                                <thead><tr><th>Nombre / Valor</th><th style="width:100px; text-align:center;">Acciones</th></tr></thead>
+                                <tbody id="crudTableBody"></tbody>
+                            </table>
+                        </div>
+                        <div class="pagination-controls" style="border-top:1px solid #eee;">
+                            <button class="page-btn" onclick="app.dataModule.crudInstance.changePage(-1)" id="crud-prev">Anterior</button>
+                            <span class="page-info" id="crud-page-info">0 - 0</span>
+                            <button class="page-btn" onclick="app.dataModule.crudInstance.changePage(1)" id="crud-next">Siguiente</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            async fetchData() {
+                try {
+                    const q = `?page=${this.state.page}&limit=${this.state.limit}&search=${encodeURIComponent(this.state.search)}`;
+                    const url = `/api/data/${this.config.endpoint}${q}`;
+                    const res = await app.fetchAPI(url);
+                    if(!res) return;
+
+                    const contentType = res.headers.get("content-type");
+                    if (!contentType || !contentType.includes("application/json")) {
+                        throw new Error(`Error de Protocolo: El servidor devolvió HTML en lugar de JSON. (Ruta no encontrada: ${url})`);
+                    }
+
+                    const json = await res.json();
+                    this.state.data = json.data || [];
+                    this.state.total = json.total || 0;
+                    this.renderTable();
+                    this.updatePagination();
+                } catch (e) { 
+                    console.error("SART Error:", e);
+                    const tbody = document.getElementById('crudTableBody');
+                    tbody.innerHTML = `<tr><td colspan="2" class="text-muted" style="color:var(--color-danger)!important;">
+                        <strong>Error de Conexión:</strong><br>
+                        El sistema no puede obtener los datos.<br>
+                        <small>${e.message}</small>
+                    </td></tr>`;
+                }
+            }
+
+            renderTable() {
+                const tbody = document.getElementById('crudTableBody');
+                tbody.innerHTML = '';
+                if (this.state.data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="2" class="text-muted">No se encontraron datos</td></tr>';
+                    return;
+                }
+                this.state.data.forEach(item => {
+                    let displayValue = item.value;
+                    // Hierarchy Visuals
+                    if (this.config.id === 'models' || this.config.id === 'locations' || 
+                        this.config.id === 'floors' || this.config.id === 'areas' || this.config.id === 'rooms') {
+                        
+                        displayValue = displayValue.replace(/ > /g, ` <span style="color:#bbb; font-size:0.8em;">&#9654;</span> `);
+                        // Clean details separator also
+                        displayValue = displayValue.replace(/ - /g, ` <span style="color:#bbb; font-size:0.8em;">|</span> `);
+
+                        if(this.config.id === 'models') {
+                             const parts = item.value.split(' ');
+                             if(parts.length > 1) displayValue = `<b>${parts[0]}</b> ${parts.slice(1).join(' ')}`;
+                        }
+                    }
+                    
+                    let actions = '';
+                    if (!this.config.readOnly) {
+                        actions = `
+                            <button class="action-btn edit" onclick="app.dataModule.crudInstance.openModal('edit', ${item.id})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                            <button class="action-btn delete" onclick="app.dataModule.crudInstance.deleteItem(${item.id})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                        `;
+                    } else if (this.config.id === 'locations') {
+                        // Special: Only edit details
+                        actions = `
+                            <button class="action-btn edit" onclick="app.dataModule.crudInstance.openModal('edit', ${item.id})" title="Editar Detalles"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                            <button class="action-btn delete" onclick="app.dataModule.crudInstance.deleteItem(${item.id})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                        `;
+                    } else {
+                        actions = `<span class="text-muted" style="font-size:0.8rem;">Solo Lectura</span>`;
+                    }
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${displayValue}</td>
+                            <td class="actions-cell">${actions}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            updatePagination() {
+                const start = (this.state.page - 1) * this.state.limit + 1;
+                const end = Math.min(start + this.state.limit - 1, this.state.total);
+                document.getElementById('crud-page-info').textContent = this.state.total === 0 ? '0' : `${start} - ${end} de ${this.state.total}`;
+                document.getElementById('crud-prev').disabled = this.state.page <= 1;
+                document.getElementById('crud-next').disabled = end >= this.state.total;
+            }
+
+            changePage(delta) {
+                this.state.page += delta;
+                this.fetchData();
+            }
+
+            handleSearch(val) {
+                clearTimeout(this.debounceTimer);
+                this.debounceTimer = setTimeout(() => {
+                    this.state.search = val.trim();
+                    this.state.page = 1;
+                    this.fetchData();
+                }, 300);
+            }
+
+            async deleteItem(id) {
+                if(!confirm('¿Estás seguro de eliminar este registro?')) return;
+                try {
+                    const res = await app.fetchAPI(`/api/data/${this.config.endpoint}?id=${id}`, { method: 'DELETE' });
+                    if (res.status === 409) {
+                        const json = await res.json();
+                        alert("⚠️ " + (json.message || "Conflicto de integridad. El dato está en uso."));
+                        return;
+                    }
+                    if (res.ok) {
+                        this.fetchData();
+                        app.loadGlobalData(); // Sync filters
+                        // Force refresh filters in UI if they are open
+                        document.querySelectorAll('select[id$="-filter-type"], select[id$="-filter-brand"], select[id$="-filter-os"]').forEach(el => el.innerHTML = '<option value="">Cargando...</option>');
+                    }
+                } catch (e) { alert("Error al eliminar"); }
+            }
+
+            async openModal(action, id = null) {
+                const overlay = document.getElementById('modal-overlay');
+                const title = document.getElementById('modal-title');
+                const body = document.getElementById('modal-body-content');
+                const footer = document.getElementById('modal-footer-content');
+                
+                title.textContent = (action === 'add' ? 'Añadir ' : 'Editar ') + this.config.label;
+                let modalHTML = '';
+                
+                // --- CASE: EDIT LOCATION DETAILS (LINKS) ---
+                if (this.config.id === 'locations' && action === 'edit') {
+                    const item = this.state.data.find(i => i.id === id);
+                    // Extract details: "Edificio > ... > Sala - Detalle"
+                    let details = '';
+                    let mainInfo = item ? item.value : '';
+                    if(item && item.value.includes(' - ')) {
+                        const parts = item.value.split(' - ');
+                        details = parts[parts.length-1];
+                        mainInfo = parts.slice(0, parts.length-1).join(' - ');
+                    }
+                    
+                    modalHTML = `
+                        <div class="info-block">${mainInfo}</div>
+                        <div class="form-group"><label class="form-label">Detalles Adicionales</label>
+                            <input type="text" id="modal-value" value="${details}" placeholder="Ej: Cubículo 5, Pasillo Central">
+                        </div>
+                    `;
+                }
+                // --- CASE: CASCADING ROOMS/AREAS ---
+                else if (this.config.id === 'areas' || this.config.id === 'rooms') {
+                    if(!app.state.locations) await app.loadGlobalData();
+                    const locs = app.state.locations;
+                    let itemName = '';
+                    let bId = '', fId = '', aId = ''; // IDs for cascading
+
+                    if (action === 'edit' && id) {
+                        const item = this.state.data.find(i => i.id === id);
+                        if(item) {
+                            // Parse name from "Building > Floor > Area"
+                            const parts = item.value.split(' > '); 
+                            itemName = parts[parts.length-1];
+                            
+                            // Trace back parents
+                            if (this.config.id === 'areas') {
+                                fId = item.parent_id;
+                                const floorObj = locs.floors.find(f => f.id == fId);
+                                if(floorObj) bId = floorObj.parent_id;
+                            } else if (this.config.id === 'rooms') {
+                                aId = item.parent_id;
+                                const areaObj = locs.areas.find(a => a.id == aId);
+                                if(areaObj) {
+                                    fId = areaObj.parent_id;
+                                    const floorObj = locs.floors.find(f => f.id == fId);
+                                    if(floorObj) bId = floorObj.parent_id;
+                                }
+                            }
+                        }
+                    }
+
+                    // Cascading Selects Structure
+                    modalHTML = `
+                        <div class="form-group"><label class="form-label">Edificio</label>
+                            <select id="modal-building" class="w-full" onchange="app.dataModule.crudInstance.cascadeModalChange('building')">
+                                <option value="">Seleccione...</option>
+                                ${locs.buildings.map(b => `<option value="${b.id}" ${b.id == bId ? 'selected' : ''}>${b.value}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group"><label class="form-label">Piso</label>
+                            <select id="modal-floor" class="w-full" ${!bId ? 'disabled' : ''} onchange="app.dataModule.crudInstance.cascadeModalChange('floor')">
+                                <option value="">Seleccione Edificio...</option>
+                                ${bId ? locs.floors.filter(f => f.parent_id == bId).map(f => `<option value="${f.id}" ${f.id == fId ? 'selected' : ''}>${f.value}</option>`).join('') : ''}
+                            </select>
+                        </div>
+                    `;
+
+                    if (this.config.id === 'rooms') {
+                        modalHTML += `
+                        <div class="form-group"><label class="form-label">Área</label>
+                            <select id="modal-area" class="w-full" ${!fId ? 'disabled' : ''}>
+                                <option value="">Seleccione Piso...</option>
+                                ${fId ? locs.areas.filter(a => a.parent_id == fId).map(a => `<option value="${a.id}" ${a.id == aId ? 'selected' : ''}>${a.value}</option>`).join('') : ''}
+                            </select>
+                        </div>`;
+                    }
+
+                    modalHTML += `
+                        <div class="form-group"><label class="form-label">Nombre</label>
+                            <input type="text" id="modal-value" value="${itemName}" placeholder="Ingrese nombre">
+                        </div>
+                    `;
+                }
+                // --- CASE: OTHER HIERARCHICAL (MODELS, FLOORS) ---
+                else if (this.config.parentCollection) {
+                    const parentKey = this.config.parentCollection; 
+                    if(!app.state.locations) await app.loadGlobalData();
+                    if(!app.state.specs) await app.loadGlobalData();
+                    
+                    let parents = [];
+                    if(parentKey === 'brands') parents = app.state.specs.brands;
+                    else if(parentKey === 'buildings') parents = app.state.locations.buildings;
+                    else if(parentKey === 'floors') parents = app.state.locations.floors;
+
+                    let parentId = '', itemName = '';
+                    if (action === 'edit' && id) {
+                        const item = this.state.data.find(i => i.id === id);
+                        if(item) {
+                            parentId = item.parent_id; 
+                            const parts = item.value.split(' > '); 
+                            itemName = parts.length > 1 ? parts[parts.length-1] : item.value;
+                            if(this.config.id === 'models') {
+                                const mParts = item.value.split(' ');
+                                itemName = mParts.length > 1 ? mParts.slice(1).join(' ') : item.value;
+                            }
+                        }
+                    }
+                    
+                    const parentLabel = { 'brands': 'Marca', 'buildings': 'Edificio', 'floors': 'Piso' }[parentKey] || 'Padre';
+
+                    modalHTML = `
+                        <div class="form-group"><label class="form-label">${parentLabel}</label>
+                            <select id="modal-parent" class="w-full">
+                                <option value="">Seleccione...</option>
+                                ${parents.map(p => `<option value="${p.id}" ${p.id == parentId ? 'selected' : ''}>${p.value}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group"><label class="form-label">Nombre</label>
+                            <input type="text" id="modal-value" value="${itemName}" placeholder="Ingrese nombre">
+                        </div>
+                    `;
+                }
+                // --- CASE: SIMPLE ---
+                else {
+                    const val = action === 'edit' && id ? this.state.data.find(i => i.id === id)?.value || '' : '';
+                    modalHTML = `
+                        <div class="form-group"><label class="form-label">Nombre / Valor</label>
+                            <input type="text" id="modal-value" value="${val}" placeholder="Ingrese valor">
+                        </div>
+                    `;
+                }
+
+                body.innerHTML = modalHTML;
+                footer.innerHTML = `
+                    <button class="btn-secondary" onclick="app.closeModal()">Cancelar</button>
+                    <button class="btn-primary" onclick="app.dataModule.crudInstance.submitMasterData('${action}', ${id})">Guardar</button>
+                `;
+                
+                overlay.classList.add('open');
+            }
+
+            cascadeModalChange(level) {
+                const locs = app.state.locations;
+                if (level === 'building') {
+                    const bId = document.getElementById('modal-building').value;
+                    const selF = document.getElementById('modal-floor');
+                    selF.innerHTML = '<option value="">Seleccione...</option>';
+                    selF.disabled = true;
+                    if(document.getElementById('modal-area')) {
+                        document.getElementById('modal-area').innerHTML = '<option value="">Seleccione Piso...</option>';
+                        document.getElementById('modal-area').disabled = true;
+                    }
+                    if(bId) {
+                        const floors = locs.floors.filter(f => f.parent_id == bId);
+                        selF.innerHTML = '<option value="">Seleccione...</option>' + floors.map(f => `<option value="${f.id}">${f.value}</option>`).join('');
+                        selF.disabled = false;
+                    }
+                } else if (level === 'floor' && document.getElementById('modal-area')) {
+                    const fId = document.getElementById('modal-floor').value;
+                    const selA = document.getElementById('modal-area');
+                    selA.innerHTML = '<option value="">Seleccione...</option>';
+                    selA.disabled = true;
+                    if(fId) {
+                        const areas = locs.areas.filter(a => a.parent_id == fId);
+                        selA.innerHTML = '<option value="">Seleccione...</option>' + areas.map(a => `<option value="${a.id}">${a.value}</option>`).join('');
+                        selA.disabled = false;
+                    }
+                }
+            }
+
+            async submitMasterData(action, id) {
+                const table = this.config.id;
+                let payload = {};
+                
+                try {
+                    // --- CASE: LOCATION DETAILS ---
+                    if (table === 'locations') {
+                        payload.details = document.getElementById('modal-value').value;
+                        await this.sendRequest(action, id, payload);
+                    }
+                    // --- CASCADING ROOMS/AREAS ---
+                    else if (table === 'areas' || table === 'rooms') {
+                        payload.value = document.getElementById('modal-value').value;
+                        if(table === 'areas') payload.parent_id = parseInt(document.getElementById('modal-floor').value);
+                        if(table === 'rooms') payload.parent_id = parseInt(document.getElementById('modal-area').value);
+                        
+                        if (!payload.value || !payload.parent_id) { alert("Complete todos los campos jerárquicos"); return; }
+                        await this.sendRequest(action, id, payload);
+                    }
+                    // --- OTHER HIERARCHICAL ---
+                    else if (this.config.parentCollection) {
+                        payload.value = document.getElementById('modal-value').value;
+                        payload.parent_id = parseInt(document.getElementById('modal-parent').value);
+                        if (!payload.value || !payload.parent_id) { alert("Complete los campos"); return; }
+                        await this.sendRequest(action, id, payload);
+                    }
+                    // --- SIMPLE ---
+                    else {
+                        payload.value = document.getElementById('modal-value').value;
+                        if (!payload.value) { alert("Campo vacío"); return; }
+                        await this.sendRequest(action, id, payload);
+                    }
+                } catch(e) {
+                    console.error(e);
+                    alert("Error al procesar: " + e.message);
+                }
+            }
+
+            async sendRequest(action, id, payload) {
+                const method = action === 'add' ? 'POST' : 'PUT';
+                const qs = action === 'edit' ? `?id=${id}` : '';
+                const res = await app.fetchAPI(`/api/data/${this.config.endpoint}${qs}`, {
+                    method: method,
+                    body: JSON.stringify(payload)
+                });
+                
+                const json = await res.json();
+                
+                if (res.ok) {
+                    app.closeModal();
+                    this.fetchData();
+                    // SYNC FILTERS: Reload globals immediately after data change
+                    await app.loadGlobalData();
+                    // CLEAR FILTER CACHE: Force reloading of filters in views
+                    document.querySelectorAll('select[id$="-filter-type"], select[id$="-filter-brand"], select[id$="-filter-os"]').forEach(el => el.innerHTML = '');
+                } else {
+                    alert("⚠️ " + (json.message || "Operación fallida"));
+                }
+            }
+        }
+
         const app = {
             state: { 
-                user: null, 
-                token: null, 
-                currentPage: 'home', 
-                
-                // Paginación Genérica
-                page: 1, 
-                limit: 4, 
-                total: 0, 
-
-                // Cache Global
-                specs: null,
-                locations: null,
-                users: [], // Cache de usuarios para firmas
-                workshopData: [], // Cache para modales de taller
-                inventoryData: [], // Cache para modales de inventario
-                historyData: [], // Cache para modales de historial
-
-                // Estado Modales
-                currentTicketId: null,
-                currentDeviceId: null,
-                debounceTimer: null,
-                
-                // Estado Selectores Ubicación
+                user: null, token: null, currentPage: 'home', 
+                page: 1, limit: 4, total: 0, 
+                specs: null, locations: null, users: [], workshopData: [], inventoryData: [], historyData: [],
+                currentTicketId: null, currentDeviceId: null, debounceTimer: null,
                 selBuilding: 0, selFloor: 0, selArea: 0, selRoom: 0
             },
+            
+            dataModule: null, // Module Instance
 
             init() {
                 const storedUser = localStorage.getItem('sart_user');
@@ -681,13 +1103,10 @@
                     this.state.user = JSON.parse(storedUser);
                     this.state.token = storedToken;
                     this.showApp();
-                } else {
-                    this.showLogin();
-                }
+                } else { this.showLogin(); }
                 document.getElementById('login-form').addEventListener('submit', (e) => { e.preventDefault(); this.handleLogin(); });
             },
 
-            // --- NAVEGACIÓN ---
             navigate(pageId) {
                 this.state.currentPage = pageId;
                 document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
@@ -701,23 +1120,18 @@
                 const titles = { 'home': 'Inicio', 'workshop': 'Gestión de Taller', 'inventory': 'Inventario General', 'history': 'Historial de Servicios', 'data': 'Gestión de Datos', 'settings': 'Configuración' };
                 document.getElementById('page-title').textContent = titles[pageId] || 'SART';
 
-                if (pageId === 'inventory') {
-                    this.loadInventoryFilters();
-                    this.loadInventory(1);
-                }
-                if (pageId === 'workshop') {
-                    this.state.page = 1;
-                    this.loadWorkshopFilters();
-                    this.loadWorkshop(1);
-                }
-                if (pageId === 'history') {
-                    this.loadHistoryFilters();
-                    this.loadHistory(1);
-                }
+                if (pageId === 'inventory') { this.loadInventoryFilters(); this.loadInventory(1); }
+                if (pageId === 'workshop') { this.state.page = 1; this.loadWorkshopFilters(); this.loadWorkshop(1); }
+                if (pageId === 'history') { this.loadHistoryFilters(); this.loadHistory(1); }
                 if (pageId === 'home') this.loadDashboardData();
+                
+                // DATA MODULE INITIALIZATION
+                if (pageId === 'data') {
+                    if (!this.dataModule) this.dataModule = new DataManagementModule(document.getElementById('section-data'));
+                    this.dataModule.render();
+                }
             },
 
-            // --- API CORE ---
             async fetchAPI(url, options = {}) {
                 options.headers = { ...options.headers, 'Authorization': 'Bearer ' + this.state.token };
                 const res = await fetch(url, options);
@@ -727,65 +1141,47 @@
 
             async loadGlobalData() {
                 try {
-                    // Cargar Specs, Locations y Usuarios para firmas
                     const [resSpecs, resLocs, resUsers] = await Promise.all([
-                        this.fetchAPI('/api/specs'),
-                        this.fetchAPI('/api/locations'),
-                        this.fetchAPI('/api/users')
+                        this.fetchAPI('/api/specs'), this.fetchAPI('/api/locations'), this.fetchAPI('/api/users')
                     ]);
-                    
                     const jsonSpecs = await resSpecs.json();
                     const jsonLocs = await resLocs.json();
                     const jsonUsers = await resUsers.json();
-
                     if(jsonSpecs.success) this.state.specs = jsonSpecs.data;
                     if(jsonLocs.success) this.state.locations = jsonLocs.data;
                     if(jsonUsers.data) this.state.users = jsonUsers.data;
-
                 } catch(e) { console.error("Error cargando datos globales", e); }
             },
 
-            // Helper para obtener firmas
             getSignatures() {
-                // Busca un admin (Jefe) y un viewer (Coordinador) por defecto
                 const admin = this.state.users.find(u => u.role === 'admin') || { full_name: "NOMBRE NO DISPONIBLE", position: "CARGO NO DISPONIBLE" };
                 const viewer = this.state.users.find(u => u.role === 'viewer') || { full_name: "NOMBRE NO DISPONIBLE", position: "CARGO NO DISPONIBLE" };
-                return {
-                    leftName: admin.full_name.toUpperCase(),
-                    leftJob: admin.position.toUpperCase(),
-                    rightName: viewer.full_name.toUpperCase(),
-                    rightJob: viewer.position.toUpperCase()
-                };
+                return { leftName: admin.full_name.toUpperCase(), leftJob: admin.position.toUpperCase(), rightName: viewer.full_name.toUpperCase(), rightJob: viewer.position.toUpperCase() };
             },
 			
 			fmtDate(isoDate) { if(!isoDate) return ''; const [y,m,d] = isoDate.split('-'); return `${d}/${m}/${y}`; },
 			
-            // --- TALLER ---
             loadWorkshopFilters() {
-                if(document.getElementById('wk-filter-type').length > 0) return;
-                if(!this.state.specs) return;
-
-                const fill = (id, items) => {
-                    const sel = document.getElementById(id);
-                    sel.innerHTML = '<option value="">Todos</option>';
-                    if(items) items.forEach(i => sel.innerHTML += `<option value="${i.id}">${i.value}</option>`);
-                };
-
-                fill('wk-filter-type', this.state.specs.types);
-                fill('wk-filter-brand', this.state.specs.brands);
-                fill('wk-filter-os', this.state.specs.os);
-                fill('wk-filter-cpu', this.state.specs.processors);
-                fill('wk-filter-ram', this.state.specs.rams);
+                // FORCE RELOAD if empty (after CRUD)
+                if(document.getElementById('wk-filter-type').length <= 1) {
+                     if(!this.state.specs) return;
+                     const fill = (id, items) => {
+                        const sel = document.getElementById(id);
+                        sel.innerHTML = '<option value="">Todos</option>';
+                        if(items) items.forEach(i => sel.innerHTML += `<option value="${i.id}">${i.value}</option>`);
+                    };
+                    fill('wk-filter-type', this.state.specs.types);
+                    fill('wk-filter-brand', this.state.specs.brands);
+                    fill('wk-filter-os', this.state.specs.os);
+                    fill('wk-filter-cpu', this.state.specs.processors);
+                    fill('wk-filter-ram', this.state.specs.rams);
+                }
             },
 
-            debounceLoadWorkshop() {
-                clearTimeout(this.state.debounceTimer);
-                this.state.debounceTimer = setTimeout(() => this.loadWorkshop(1), 400);
-            },
+            debounceLoadWorkshop() { clearTimeout(this.state.debounceTimer); this.state.debounceTimer = setTimeout(() => this.loadWorkshop(1), 400); },
 
             async loadWorkshop(pageArg) {
                 if (pageArg) this.state.page = pageArg;
-                
                 const search = document.getElementById('wk-search').value;
                 const type = document.getElementById('wk-filter-type').value;
                 const brand = document.getElementById('wk-filter-brand').value;
@@ -795,30 +1191,25 @@
 
                 let qs = `status=pending&page=${this.state.page}&limit=${this.state.limit}`;
                 if(search) qs += `&search=${encodeURIComponent(search)}`;
-                
                 try {
                     const res = await this.fetchAPI('/api/tickets?' + qs);
                     if (!res) return;
                     const result = await res.json();
-                    
                     this.state.total = result.total || 0;
                     this.state.workshopData = result.data || [];
                     this.renderWorkshopTable(this.state.workshopData);
                     this.updatePaginationControls();
-
                 } catch (err) { console.error(err); }
             },
 
             renderWorkshopTable(data) {
                 const tbody = document.querySelector('#workshop-table tbody');
                 tbody.innerHTML = '';
-
                 if (!data || data.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="7" class="text-muted" style="text-align:center;">No se encontraron equipos.</td></tr>';
                     for(let i=0; i<3; i++) tbody.innerHTML += this.getEmptyRowHTML();
                     return;
                 }
-
                 data.forEach((t, index) => {
                     const realIndex = ((this.state.page - 1) * this.state.limit) + (index + 1);
                     const brandModel = `${t.device_brand || '-/-'} ${t.device_model || '-/-'}`.trim();
@@ -826,43 +1217,22 @@
 
                     tbody.innerHTML += `
                         <tr>
-                            <td>${realIndex}</td>
-                            <td>${this.fmtDate(t.date_in)}</td>
-                            <td>${t.device_type}</td>
-                            <td>
-                                <div class="cell-truncate" title="${brandModel}">
-                                    <strong>${t.device_brand || '-/-'}</strong><br>
-                                    <small class="text-secondary">${t.device_model || '-/-'}</small>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="cell-truncate" title="${codeSerial}">
-                                    <strong>${t.device_code || 'S/C'}</strong><br>
-                                    <small class="text-secondary">${t.device_serial || 'S/S'}</small>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="cell-multiline" title="${t.details_in}">
-                                    ${t.details_in}
-                                </div>
-                            </td>
-                            <td style="text-align:center;">
-                                <div class="actions-cell" style="justify-content:center;">
-                                    <button class="action-btn edit" onclick="app.openModal('edit', ${t.id})" title="Editar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
-                                    <button class="action-btn check" onclick="app.openModal('finalize', ${t.id})" title="Finalizar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></button>
-                                    <button class="action-btn delete" onclick="app.openModal('delete', ${t.id})" title="Eliminar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-                                </div>
-                            </td>
+                            <td>${realIndex}</td><td>${this.fmtDate(t.date_in)}</td><td>${t.device_type}</td>
+                            <td><div class="cell-truncate" title="${brandModel}"><strong>${t.device_brand || '-/-'}</strong><br><small class="text-secondary">${t.device_model || '-/-'}</small></div></td>
+                            <td><div class="cell-truncate" title="${codeSerial}"><strong>${t.device_code || 'S/C'}</strong><br><small class="text-secondary">${t.device_serial || 'S/S'}</small></div></td>
+                            <td><div class="cell-multiline" title="${t.details_in}">${t.details_in}</div></td>
+                            <td style="text-align:center;"><div class="actions-cell" style="justify-content:center;">
+                                <button class="action-btn edit" onclick="app.openModal('edit', ${t.id})" title="Editar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                                <button class="action-btn check" onclick="app.openModal('finalize', ${t.id})" title="Finalizar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></button>
+                                <button class="action-btn delete" onclick="app.openModal('delete', ${t.id})" title="Eliminar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                            </div></td>
                         </tr>`;
                 });
-
                 const missing = this.state.limit - data.length;
                 if(missing > 0) { for(let i=0; i<missing; i++) tbody.innerHTML += this.getEmptyRowHTML(); }
             },
 
-            getEmptyRowHTML() {
-                return '<tr style="pointer-events: none;"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>';
-            },
+            getEmptyRowHTML() { return '<tr style="pointer-events: none;"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>'; },
 
             updatePaginationControls() {
                 const totalPages = Math.ceil(this.state.total / this.state.limit) || 1;
@@ -872,40 +1242,28 @@
                 document.getElementById('wk-btn-next').disabled = this.state.page >= totalPages;
             },
             prevPage() { if (this.state.page > 1) this.loadWorkshop(this.state.page - 1); },
-            nextPage() { 
-                const totalPages = Math.ceil(this.state.total / this.state.limit) || 1;
-                if (this.state.page < totalPages) this.loadWorkshop(this.state.page + 1); 
-            },
-            inputPage(input) {
-                const val = parseInt(input.value);
-                const totalPages = Math.ceil(this.state.total / this.state.limit) || 1;
-                if (!isNaN(val) && val >= 1 && val <= totalPages) this.loadWorkshop(val);
-            },
+            nextPage() { const totalPages = Math.ceil(this.state.total / this.state.limit) || 1; if (this.state.page < totalPages) this.loadWorkshop(this.state.page + 1); },
+            inputPage(input) { const val = parseInt(input.value); const totalPages = Math.ceil(this.state.total / this.state.limit) || 1; if (!isNaN(val) && val >= 1 && val <= totalPages) this.loadWorkshop(val); },
 
-            // --- INVENTARIO ---
             loadInventoryFilters() {
-                if(document.getElementById('inv-filter-type').length > 0) return;
-                if(!this.state.specs) return;
-
-                const fill = (id, items) => {
-                    const sel = document.getElementById(id);
-                    sel.innerHTML = '<option value="">Todos</option>';
-                    if(items) items.forEach(i => sel.innerHTML += `<option value="${i.id}">${i.value}</option>`);
-                };
-
-                fill('inv-filter-type', this.state.specs.types);
-                fill('inv-filter-brand', this.state.specs.brands);
-                fill('inv-filter-os', this.state.specs.os);
+                // FORCE RELOAD if empty
+                if(document.getElementById('inv-filter-type').length <= 1) {
+                    if(!this.state.specs) return;
+                    const fill = (id, items) => {
+                        const sel = document.getElementById(id);
+                        sel.innerHTML = '<option value="">Todos</option>';
+                        if(items) items.forEach(i => sel.innerHTML += `<option value="${i.id}">${i.value}</option>`);
+                    };
+                    fill('inv-filter-type', this.state.specs.types);
+                    fill('inv-filter-brand', this.state.specs.brands);
+                    fill('inv-filter-os', this.state.specs.os);
+                }
             },
 
-            debounceLoadInventory() {
-                clearTimeout(this.state.debounceTimer);
-                this.state.debounceTimer = setTimeout(() => this.loadInventory(1), 400);
-            },
+            debounceLoadInventory() { clearTimeout(this.state.debounceTimer); this.state.debounceTimer = setTimeout(() => this.loadInventory(1), 400); },
 
             async loadInventory(pageArg) {
                 this.state.page = pageArg; 
-                
                 const search = document.getElementById('inv-search').value;
                 const type = document.getElementById('inv-filter-type').value;
                 const brand = document.getElementById('inv-filter-brand').value;
@@ -914,16 +1272,12 @@
 
                 let qs = `page=${this.state.page}&limit=${this.state.limit}`;
                 if(search) qs += `&search=${encodeURIComponent(search)}`;
-                if(type) qs += `&type=${type}`;
-                if(brand) qs += `&brand=${brand}`;
-                if(os) qs += `&os=${os}`;
-                if(status) qs += `&status=${status}`;
+                if(type) qs += `&type=${type}`; if(brand) qs += `&brand=${brand}`; if(os) qs += `&os=${os}`; if(status) qs += `&status=${status}`;
 
                 try {
                     const res = await this.fetchAPI('/api/devices?' + qs);
                     if (!res || !res.ok) return;
                     const result = await res.json();
-                    
                     this.state.total = result.total;
                     this.state.inventoryData = result.data || [];
                     this.renderInvTable(this.state.inventoryData);
@@ -934,35 +1288,27 @@
             renderInvTable(items) {
                 const tbody = document.querySelector('#inventory-table tbody');
                 tbody.innerHTML = '';
-                
                 if (!items || items.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="8" class="text-muted" style="text-align:center;">No hay dispositivos registrados.</td></tr>';
                     for(let i=0; i<3; i++) tbody.innerHTML += this.getEmptyRowHTML();
                     return;
                 }
-                
                 items.forEach((d, index) => {
                     const realIndex = ((this.state.page - 1) * this.state.limit) + (index + 1);
-
                     tbody.innerHTML += `
                         <tr>
-                            <td>${realIndex}</td>
-                            <td>${d.type}</td>
+                            <td>${realIndex}</td><td>${d.type}</td>
                             <td><strong>${d.brand || '-/-'}</strong><br><span style="font-size:0.8rem; color:#6b7280;">${d.model || '-/-'}</span></td>
                             <td><strong>${d.area || '-/-'}</strong><br><span style="font-size:0.8rem; color:#6b7280;">${d.room || '-/-'}</span></td>
-                            <td>${d.code || '-/-'}</td>
-                            <td>${d.serial || '-/-'}</td>
+                            <td>${d.code || '-/-'}</td><td>${d.serial || '-/-'}</td>
                             <td><span class="badge ${d.status === 'operational' ? 'operativo' : 'pending'}">${d.status_label || d.status}</span></td>
-                            <td style="text-align:center;">
-                                <div class="actions-cell">
-                                    <button class="action-btn edit" onclick="app.openModal('edit-device', ${d.id})" title="Editar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
-                                    <button class="action-btn view" onclick="app.openModal('view-device', ${d.id})" title="Ver Detalles"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
-                                    <button class="action-btn delete" onclick="app.openModal('delete-device', ${d.id})" title="Eliminar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-                                </div>
-                            </td>
+                            <td style="text-align:center;"><div class="actions-cell">
+                                <button class="action-btn edit" onclick="app.openModal('edit-device', ${d.id})" title="Editar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                                <button class="action-btn view" onclick="app.openModal('view-device', ${d.id})" title="Ver Detalles"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+                                <button class="action-btn delete" onclick="app.openModal('delete-device', ${d.id})" title="Eliminar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                            </div></td>
                         </tr>`;
                 });
-
                 const missing = this.state.limit - items.length;
                 if(missing > 0) { for(let i=0; i<missing; i++) tbody.innerHTML += this.getEmptyRowHTML(); }
             },
@@ -974,28 +1320,22 @@
                 document.getElementById('inv-btn-next').disabled = this.state.page >= totalPages || totalPages === 0;
             },
             prevPageLegacy() { if (this.state.page > 1) this.loadInventory(this.state.page - 1); },
-            nextPageLegacy() { 
-                const totalPages = Math.ceil(this.state.total / this.state.limit);
-                if (this.state.page < totalPages) this.loadInventory(this.state.page + 1); 
-            },
+            nextPageLegacy() { const totalPages = Math.ceil(this.state.total / this.state.limit); if (this.state.page < totalPages) this.loadInventory(this.state.page + 1); },
             
-            // --- HISTORIAL ---
             loadHistoryFilters() {
-                if(document.getElementById('hist-filter-type').length > 0) return;
-                if(!this.state.specs) return;
-                const fill = (id, items) => {
-                    const sel = document.getElementById(id);
-                    sel.innerHTML = '<option value="">Todos</option>';
-                    if(items) items.forEach(i => sel.innerHTML += `<option value="${i.id}">${i.value}</option>`);
-                };
-                fill('hist-filter-type', this.state.specs.types);
-                fill('hist-filter-brand', this.state.specs.brands);
+                if(document.getElementById('hist-filter-type').length <= 1) {
+                    if(!this.state.specs) return;
+                    const fill = (id, items) => {
+                        const sel = document.getElementById(id);
+                        sel.innerHTML = '<option value="">Todos</option>';
+                        if(items) items.forEach(i => sel.innerHTML += `<option value="${i.id}">${i.value}</option>`);
+                    };
+                    fill('hist-filter-type', this.state.specs.types);
+                    fill('hist-filter-brand', this.state.specs.brands);
+                }
             },
             
-            debounceLoadHistory() {
-                clearTimeout(this.state.debounceTimer);
-                this.state.debounceTimer = setTimeout(() => this.loadHistory(1), 400);
-            },
+            debounceLoadHistory() { clearTimeout(this.state.debounceTimer); this.state.debounceTimer = setTimeout(() => this.loadHistory(1), 400); },
             
             validateDates() {
                 const after = document.getElementById('hist-date-after');
@@ -1005,12 +1345,7 @@
             },
 
             clearHistoryFilters() {
-                document.getElementById('hist-search').value = "";
-                document.getElementById('hist-filter-type').value = "";
-                document.getElementById('hist-filter-brand').value = "";
-                document.getElementById('hist-filter-status').value = "";
-                document.getElementById('hist-date-after').value = "";
-                document.getElementById('hist-date-before').value = "";
+                document.getElementById('hist-search').value = ""; document.getElementById('hist-filter-type').value = ""; document.getElementById('hist-filter-brand').value = ""; document.getElementById('hist-filter-status').value = ""; document.getElementById('hist-date-after').value = ""; document.getElementById('hist-date-before').value = "";
                 this.loadHistory(1);
             },
 
@@ -1024,15 +1359,8 @@
                 const before = document.getElementById('hist-date-before').value;
 
                 let qs = `page=${this.state.page}&limit=${this.state.limit}`;
-                // Default status to 'history' (repaired/unrepaired) if user selects 'Todos' or nothing
-                if(status) qs += `&status=${status}`;
-                else qs += `&status=history`; 
-
-                if(search) qs += `&search=${encodeURIComponent(search)}`;
-                if(type) qs += `&type=${type}`;
-                if(brand) qs += `&brand=${brand}`;
-                if(after) qs += `&after=${after}`;
-                if(before) qs += `&before=${before}`;
+                if(status) qs += `&status=${status}`; else qs += `&status=history`; 
+                if(search) qs += `&search=${encodeURIComponent(search)}`; if(type) qs += `&type=${type}`; if(brand) qs += `&brand=${brand}`; if(after) qs += `&after=${after}`; if(before) qs += `&before=${before}`;
 
                 try {
                     const res = await this.fetchAPI('/api/tickets?' + qs);
@@ -1057,23 +1385,18 @@
                     const realIndex = ((this.state.page - 1) * this.state.limit) + (index + 1);
                     const statusClass = t.status === 'repaired' ? 'operativo' : 'unrepaired';
                     const statusLabel = t.status === 'repaired' ? 'Reparado' : 'No Reparado';
-					
-                    tbody.innerHTML += `
+					tbody.innerHTML += `
                         <tr>
-                            <td>${realIndex}</td>
-                            <td>${this.fmtDate(t.date_out) || '-/-'}</td>
-                            <td>${t.device_type}</td>
+                            <td>${realIndex}</td><td>${this.fmtDate(t.date_out) || '-/-'}</td><td>${t.device_type}</td>
 							<td><strong>${t.device_brand || '-/-'}</strong><br><small class="text-secondary">${t.device_model || '-/-'}</small></td>
 							<td><strong>${t.device_code || '-/-'}</strong><br><small class="text-secondary">${t.device_serial || '-/-'}</small></td>
                             <td><div class="cell-multiline" title="${t.details_out}">${t.details_out || '-/-'}</div></td>
                             <td><span class="badge ${statusClass}">${statusLabel}</span></td>
-                            <td style="text-align:center;">
-                                <div class="actions-cell" style="justify-content:center;">
-                                    <button class="action-btn view" onclick="app.openModal('view-ticket', ${t.id})" title="Ver Detalles"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
-                                    <button class="action-btn" title="Exportar PDF" onclick="app.printReport('single', ${t.id})"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></button>
-                                    <button class="action-btn delete" onclick="app.openModal('delete-ticket', ${t.id})" title="Eliminar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-                                </div>
-                            </td>
+                            <td style="text-align:center;"><div class="actions-cell" style="justify-content:center;">
+                                <button class="action-btn view" onclick="app.openModal('view-ticket', ${t.id})" title="Ver Detalles"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+                                <button class="action-btn" title="Exportar PDF" onclick="app.printReport('single', ${t.id})"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></button>
+                                <button class="action-btn delete" onclick="app.openModal('delete-ticket', ${t.id})" title="Eliminar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                            </div></td>
                         </tr>`;
                 });
                 const missing = this.state.limit - data.length;
@@ -1087,12 +1410,8 @@
                 document.getElementById('hist-btn-next').disabled = this.state.page >= totalPages || totalPages === 0;
             },
             prevPageHistory() { if (this.state.page > 1) this.loadHistory(this.state.page - 1); },
-            nextPageHistory() { 
-                const totalPages = Math.ceil(this.state.total / this.state.limit);
-                if (this.state.page < totalPages) this.loadHistory(this.state.page + 1); 
-            },
+            nextPageHistory() { const totalPages = Math.ceil(this.state.total / this.state.limit); if (this.state.page < totalPages) this.loadHistory(this.state.page + 1); },
 
-            // --- MODALES ---
             async openModal(type, id = null) {
                 const overlay = document.getElementById('modal-overlay');
                 const title = document.getElementById('modal-title');
@@ -1164,7 +1483,6 @@
                     setTxt('vt-status', data.status === 'repaired' ? 'Reparado' : 'No Reparado');
                     setTxt('vt-details-in', data.details_in);
                     setTxt('vt-details-out', data.details_out);
-
                 } else if (type === 'add-device' || type === 'edit-device') {
                     const isEdit = type === 'edit-device';
                     this.state.currentDeviceId = isEdit ? id : null;
@@ -1195,13 +1513,24 @@
                             this.setSelectByText('dev-cpu', data.cpu);
                             this.setSelectByText('dev-ram', data.ram);
                             this.setSelectByText('dev-storage', data.storage);
-                            this.setSelectByText('sel-building', data.building);
-                            this.handleBuildingChange(document.getElementById('sel-building').value);
-                            this.setSelectByText('sel-floor', data.floor);
-                            this.handleFloorChange(document.getElementById('sel-floor').value);
-                            this.setSelectByText('sel-area', data.area);
-                            this.handleAreaChange(document.getElementById('sel-area').value);
-                            this.setSelectByText('sel-room', data.room);
+                            
+                            // --- AUTO-FILL FIX START (Using IDs) ---
+                            if (data.id_building) {
+                                document.getElementById('sel-building').value = data.id_building;
+                                app.handleBuildingChange(data.id_building);
+                            }
+                            if (data.id_floor) {
+                                document.getElementById('sel-floor').value = data.id_floor;
+                                app.handleFloorChange(data.id_floor);
+                            }
+                            if (data.id_area) {
+                                document.getElementById('sel-area').value = data.id_area;
+                                app.handleAreaChange(data.id_area);
+                            }
+                            if (data.id_room) {
+                                document.getElementById('sel-room').value = data.id_room;
+                            }
+                            // --- AUTO-FILL FIX END ---
                         }
                     }
                 } else if (type === 'view-device') {
@@ -1216,9 +1545,7 @@
                     setTxt('view-model', data.model);
                     setTxt('view-code', data.code);
                     setTxt('view-serial', data.serial);
-                    
                     const loc = [data.building, data.floor, data.area, data.room].filter(Boolean).join(" > ");
-                    
                     setTxt('view-location', loc);
                     setTxt('view-os', data.os);
                     setTxt('view-cpu', data.cpu);
@@ -1238,12 +1565,7 @@
             setSelectByText(id, text) {
                 const sel = document.getElementById(id);
                 if (!text || !sel) return;
-                for (let i = 0; i < sel.options.length; i++) {
-                    if (sel.options[i].text === text) {
-                        sel.selectedIndex = i;
-                        break;
-                    }
-                }
+                for (let i = 0; i < sel.options.length; i++) { if (sel.options[i].text === text) { sel.selectedIndex = i; break; } }
             },
             
             filterModels(brandId) {
@@ -1252,35 +1574,19 @@
                 sel.disabled = true;
                 if(!brandId) return;
                 const models = this.state.specs.models.filter(m => m.parent_id == brandId);
-                if(models.length > 0) {
-                    models.forEach(m => sel.innerHTML += `<option value="${m.id}">${m.value}</option>`);
-                    sel.disabled = false;
-                } else {
-                    sel.innerHTML = '<option value="">Sin modelos registrados</option>';
-                }
+                if(models.length > 0) { models.forEach(m => sel.innerHTML += `<option value="${m.id}">${m.value}</option>`); sel.disabled = false; } else { sel.innerHTML = '<option value="">Sin modelos registrados</option>'; }
             },
             
             async submitDevice() {
                 const getVal = (id) => document.getElementById(id).value;
                 const payload = {
-                    code: getVal('dev-code'),
-                    serial: getVal('dev-serial'),
-                    id_type: parseInt(getVal('dev-type')),
-                    id_brand: parseInt(getVal('dev-brand')) || null,
-                    id_model: parseInt(getVal('dev-model')) || null,
-                    id_os: parseInt(getVal('dev-os')) || null,
-                    id_ram: parseInt(getVal('dev-ram')) || null,
-                    id_storage: parseInt(getVal('dev-storage')) || null,
-                    id_processor: parseInt(getVal('dev-cpu')) || null,
-                    arch: getVal('dev-arch') || null,
-                    details: getVal('dev-details')
+                    code: getVal('dev-code'), serial: getVal('dev-serial'), id_type: parseInt(getVal('dev-type')),
+                    id_brand: parseInt(getVal('dev-brand')) || null, id_model: parseInt(getVal('dev-model')) || null, id_os: parseInt(getVal('dev-os')) || null, id_ram: parseInt(getVal('dev-ram')) || null, id_storage: parseInt(getVal('dev-storage')) || null, id_processor: parseInt(getVal('dev-cpu')) || null, arch: getVal('dev-arch') || null, details: getVal('dev-details')
                 };
                 if(!payload.id_type) { document.getElementById('dev-form-error').textContent = 'El Tipo es obligatorio.'; return; }
-                const areaId = getVal('sel-area');
-                const roomId = getVal('sel-room');
+                const areaId = getVal('sel-area'); const roomId = getVal('sel-room');
                 if(!areaId) { document.getElementById('dev-form-error').textContent = 'La ubicación (Área) es obligatoria.'; return; }
-                payload.id_area = parseInt(areaId);
-                payload.id_room = parseInt(roomId) || null;
+                payload.id_area = parseInt(areaId); payload.id_room = parseInt(roomId) || null;
                 try {
                     const res = await this.fetchAPI('/api/devices', { method: 'POST', body: JSON.stringify(payload) });
                     if(res && res.ok) { this.closeModal(); this.loadInventory(1); } else { document.getElementById('dev-form-error').textContent = 'Error al registrar el equipo.'; }
@@ -1291,24 +1597,12 @@
                 const id = this.state.currentDeviceId;
                 const getVal = (id) => document.getElementById(id).value;
                 const payload = {
-                    code: getVal('dev-code'),
-                    serial: getVal('dev-serial'),
-                    id_type: parseInt(getVal('dev-type')),
-                    id_brand: parseInt(getVal('dev-brand')) || null,
-                    id_model: parseInt(getVal('dev-model')) || null,
-                    id_os: parseInt(getVal('dev-os')) || null,
-                    id_ram: parseInt(getVal('dev-ram')) || null,
-                    id_storage: parseInt(getVal('dev-storage')) || null,
-                    id_processor: parseInt(getVal('dev-cpu')) || null,
-                    arch: getVal('dev-arch') || null,
-                    details: getVal('dev-details')
+                    code: getVal('dev-code'), serial: getVal('dev-serial'), id_type: parseInt(getVal('dev-type')), id_brand: parseInt(getVal('dev-brand')) || null, id_model: parseInt(getVal('dev-model')) || null, id_os: parseInt(getVal('dev-os')) || null, id_ram: parseInt(getVal('dev-ram')) || null, id_storage: parseInt(getVal('dev-storage')) || null, id_processor: parseInt(getVal('dev-cpu')) || null, arch: getVal('dev-arch') || null, details: getVal('dev-details')
                 };
                 if(!payload.id_type) { document.getElementById('dev-form-error').textContent = 'El Tipo es obligatorio.'; return; }
-                const areaId = getVal('sel-area');
-                const roomId = getVal('sel-room');
+                const areaId = getVal('sel-area'); const roomId = getVal('sel-room');
                 if(!areaId) { document.getElementById('dev-form-error').textContent = 'La ubicación (Área) es obligatoria.'; return; }
-                payload.id_area = parseInt(areaId);
-                payload.id_room = parseInt(roomId) || null;
+                payload.id_area = parseInt(areaId); payload.id_room = parseInt(roomId) || null;
                 try {
                     const res = await this.fetchAPI(`/api/devices?id=${id}`, { method: 'PUT', body: JSON.stringify(payload) });
                     if(res && res.ok) { this.closeModal(); this.loadInventory(this.state.page || 1); } else { document.getElementById('dev-form-error').textContent = 'Error al actualizar.'; }
@@ -1327,48 +1621,17 @@
                 if(res && res.ok) { this.closeModal(); this.loadHistory(1); } else { alert("Error al eliminar el historial."); }
             },
 
-            // --- LÓGICA DE CASCADA ---
             populateSelect(id, items) {
                 const sel = document.getElementById(id);
                 sel.innerHTML = '<option value="">Seleccione...</option>';
                 if(items) items.forEach(i => sel.innerHTML += `<option value="${i.id}">${i.value}</option>`);
                 sel.disabled = false;
             },
-            handleBuildingChange(val) {
-                this.state.selBuilding = val;
-                this.resetSelects(['sel-floor', 'sel-area', 'sel-room', 'sel-device']);
-                if(!val) return;
-                const floors = this.state.locations.floors.filter(f => f.parent_id == val);
-                this.populateSelect('sel-floor', floors);
-            },
-            handleFloorChange(val) {
-                this.state.selFloor = val;
-                this.resetSelects(['sel-area', 'sel-room', 'sel-device']);
-                if(!val) return;
-                const areas = this.state.locations.areas.filter(a => a.parent_id == val);
-                this.populateSelect('sel-area', areas);
-            },
-            handleAreaChange(val) {
-                this.state.selArea = val;
-                this.resetSelects(['sel-room', 'sel-device']);
-                if(!val) return;
-                const rooms = this.state.locations.rooms.filter(r => r.parent_id == val);
-                this.populateSelect('sel-room', rooms);
-                if(document.getElementById('sel-device')) this.loadDevicesForTicket(val, null);
-            },
-            handleRoomChange(val) {
-                this.state.selRoom = val;
-                if(document.getElementById('sel-device')) this.loadDevicesForTicket(this.state.selArea, val);
-            },
-            resetSelects(ids) {
-                ids.forEach(id => {
-                    const sel = document.getElementById(id);
-                    if(sel) {
-                        sel.innerHTML = '<option value="">Seleccione...</option>';
-                        sel.disabled = true;
-                    }
-                });
-            },
+            handleBuildingChange(val) { this.state.selBuilding = val; this.resetSelects(['sel-floor', 'sel-area', 'sel-room', 'sel-device']); if(!val) return; const floors = this.state.locations.floors.filter(f => f.parent_id == val); this.populateSelect('sel-floor', floors); },
+            handleFloorChange(val) { this.state.selFloor = val; this.resetSelects(['sel-area', 'sel-room', 'sel-device']); if(!val) return; const areas = this.state.locations.areas.filter(a => a.parent_id == val); this.populateSelect('sel-area', areas); },
+            handleAreaChange(val) { this.state.selArea = val; this.resetSelects(['sel-room', 'sel-device']); if(!val) return; const rooms = this.state.locations.rooms.filter(r => r.parent_id == val); this.populateSelect('sel-room', rooms); if(document.getElementById('sel-device')) this.loadDevicesForTicket(val, null); },
+            handleRoomChange(val) { this.state.selRoom = val; if(document.getElementById('sel-device')) this.loadDevicesForTicket(this.state.selArea, val); },
+            resetSelects(ids) { ids.forEach(id => { const sel = document.getElementById(id); if(sel) { sel.innerHTML = '<option value="">Seleccione...</option>'; sel.disabled = true; } }); },
 
             async loadDevicesForTicket(areaId, roomId) {
                 const sel = document.getElementById('sel-device');
@@ -1382,332 +1645,123 @@
                     const json = await res.json();
                     if(json.data && json.data.length > 0) {
                         sel.innerHTML = '<option value="">Seleccione Dispositivo...</option>';
-                        json.data.forEach(d => {
-                            const label = `${d.type} - ${d.code || '-/-'} - ${d.brand || '-/-'} ${d.model || '-/-'}`;
-                            sel.innerHTML += `<option value="${d.id}">${label}</option>`;
-                        });
+                        json.data.forEach(d => { const label = `${d.type} - ${d.code || '-/-'} - ${d.brand || '-/-'} ${d.model || '-/-'}`; sel.innerHTML += `<option value="${d.id}">${label}</option>`; });
                         sel.disabled = false;
-                    } else {
-                        sel.innerHTML = '<option value="">No hay equipos operativos aquí</option>';
-                    }
+                    } else { sel.innerHTML = '<option value="">No hay equipos operativos aquí</option>'; }
                 } catch(e) { console.error(e); }
             },
 
-            // --- ACCIONES SUBMITS TALLER ---
             async submitTicket() {
-                const devId = document.getElementById('sel-device').value;
-                const date = document.getElementById('date-in').value;
-                const det = document.getElementById('details-in').value;
-                if(!devId || !date || !det.trim()) {
-                    document.getElementById('form-error').textContent = 'Complete los campos obligatorios';
-                    return;
-                }
-                const res = await this.fetchAPI('/api/tickets', {
-                    method: 'POST',
-                    body: JSON.stringify({ id_device: parseInt(devId), date_in: date, details_in: det })
-                });
-                if(res && res.ok) {
-                    this.closeModal();
-                    this.navigate('workshop');
-                } else {
-                    document.getElementById('form-error').textContent = 'Error al guardar';
-                }
+                const devId = document.getElementById('sel-device').value; const date = document.getElementById('date-in').value; const det = document.getElementById('details-in').value;
+                if(!devId || !date || !det.trim()) { document.getElementById('form-error').textContent = 'Complete los campos obligatorios'; return; }
+                const res = await this.fetchAPI('/api/tickets', { method: 'POST', body: JSON.stringify({ id_device: parseInt(devId), date_in: date, details_in: det }) });
+                if(res && res.ok) { this.closeModal(); this.navigate('workshop'); } else { document.getElementById('form-error').textContent = 'Error al guardar'; }
             },
             
             async submitEdit() {
-                const id = this.state.currentTicketId;
-                const date = document.getElementById('edit-date-in').value;
-                const det = document.getElementById('edit-details-in').value;
-                const res = await this.fetchAPI(`/api/tickets?id=${id}`, {
-                    method: 'PUT',
-                    body: JSON.stringify({ date_in: date, details_in: det })
-                });
-                if(res && res.ok) {
-                    this.closeModal();
-                    this.loadWorkshop();
-                }
+                const id = this.state.currentTicketId; const date = document.getElementById('edit-date-in').value; const det = document.getElementById('edit-details-in').value;
+                const res = await this.fetchAPI(`/api/tickets?id=${id}`, { method: 'PUT', body: JSON.stringify({ date_in: date, details_in: det }) });
+                if(res && res.ok) { this.closeModal(); this.loadWorkshop(); }
             },
             
             async submitFinalize() {
-                const id = this.state.currentTicketId;
-                const status = document.getElementById('fin-status').value;
-                const dateOut = document.getElementById('fin-date-out').value;
-                const detailsOut = document.getElementById('fin-details-out').value;
-                if(!dateOut || !detailsOut.trim()) {
-                    document.getElementById('fin-error').textContent = 'Complete fecha y detalles de salida';
-                    return;
-                }
-                const res = await this.fetchAPI(`/api/tickets?id=${id}`, {
-                    method: 'PUT',
-                    body: JSON.stringify({ status: status, date_out: dateOut, details_out: detailsOut })
-                });
-                if(res && res.ok) {
-                    this.closeModal();
-                    this.loadWorkshop();
-                    this.loadDashboardData();
-                }
+                const id = this.state.currentTicketId; const status = document.getElementById('fin-status').value; const dateOut = document.getElementById('fin-date-out').value; const detailsOut = document.getElementById('fin-details-out').value;
+                if(!dateOut || !detailsOut.trim()) { document.getElementById('fin-error').textContent = 'Complete fecha y detalles de salida'; return; }
+                const res = await this.fetchAPI(`/api/tickets?id=${id}`, { method: 'PUT', body: JSON.stringify({ status: status, date_out: dateOut, details_out: detailsOut }) });
+                if(res && res.ok) { this.closeModal(); this.loadWorkshop(); this.loadDashboardData(); }
             },
             
             async confirmDelete() {
                 const id = this.state.currentTicketId;
                 const res = await this.fetchAPI(`/api/tickets?id=${id}`, { method: 'DELETE' });
-                if(res && res.ok) {
-                    this.closeModal();
-                    this.loadWorkshop();
-                }
+                if(res && res.ok) { this.closeModal(); this.loadWorkshop(); }
             },
 
-            initCharCounter(id) {
-                const el = document.getElementById(id);
-                if(!el) return;
-                const ctr = el.nextElementSibling;
-                el.oninput = () => ctr.textContent = `${el.value.length}/300`;
-            },
-            
-            closeModal() {
-                document.getElementById('modal-overlay').classList.remove('open');
-            },
+            initCharCounter(id) { const el = document.getElementById(id); if(!el) return; const ctr = el.nextElementSibling; el.oninput = () => ctr.textContent = `${el.value.length}/300`; },
+            closeModal() { document.getElementById('modal-overlay').classList.remove('open'); },
             
             async handleLogin() {
-                const u = document.getElementById('username').value;
-                const p = document.getElementById('password').value;
-                const r = document.getElementById('role').value;
+                const u = document.getElementById('username').value; const p = document.getElementById('password').value; const r = document.getElementById('role').value;
                 try {
-                    const res = await fetch('/api/login', {
-                        method: 'POST',
-                        body: JSON.stringify({ username: u, password: p, role: r })
-                    });
+                    const res = await fetch('/api/login', { method: 'POST', body: JSON.stringify({ username: u, password: p, role: r }) });
                     const json = await res.json();
                     if(json.token) {
-                        this.state.user = { username: json.username, full_name: json.full_name, role: json.role };
-                        this.state.token = json.token;
-                        localStorage.setItem('sart_user', JSON.stringify(this.state.user));
-                        localStorage.setItem('sart_token', this.state.token);
-                        this.showApp();
-                    } else {
-                        document.getElementById('login-error').textContent = 'Credenciales inválidas';
-                    }
-                } catch(e) {
-                    document.getElementById('login-error').textContent = 'Error de conexión';
-                }
+                        this.state.user = { username: json.username, full_name: json.full_name, role: json.role }; this.state.token = json.token;
+                        localStorage.setItem('sart_user', JSON.stringify(this.state.user)); localStorage.setItem('sart_token', this.state.token); this.showApp();
+                    } else { document.getElementById('login-error').textContent = 'Credenciales inválidas'; }
+                } catch(e) { document.getElementById('login-error').textContent = 'Error de conexión'; }
             },
             
-            showLogin() {
-                document.getElementById('login-view').classList.remove('hidden');
-                document.getElementById('app-view').classList.add('hidden');
-            },
-            
+            showLogin() { document.getElementById('login-view').classList.remove('hidden'); document.getElementById('app-view').classList.add('hidden'); },
             showApp() {
-                document.getElementById('login-view').classList.add('hidden');
-                document.getElementById('app-view').classList.remove('hidden');
+                document.getElementById('login-view').classList.add('hidden'); document.getElementById('app-view').classList.remove('hidden');
                 if (this.state.user) {
                     document.getElementById('user-display-name').textContent = this.state.user.full_name;
                     document.getElementById('user-display-role').textContent = this.state.user.role === 'admin' ? 'ADMINISTRADOR' : 'CONSULTOR';
                     const restrictedItems = document.querySelectorAll('[data-role-restricted="admin"]');
-                    restrictedItems.forEach(item => {
-                        if (this.state.user.role !== 'admin') item.classList.add('hidden');
-                        else item.classList.remove('hidden');
-                    });
+                    restrictedItems.forEach(item => { if (this.state.user.role !== 'admin') item.classList.add('hidden'); else item.classList.remove('hidden'); });
                 }
                 this.loadGlobalData().then(() => this.navigate('home'));
             },
-            
-            logout() {
-                localStorage.clear();
-                this.state.user = null;
-                this.state.token = null;
-                window.location.reload();
-            },
+            logout() { localStorage.clear(); this.state.user = null; this.state.token = null; window.location.reload(); },
             
             async loadDashboardData() {
                 try {
-                    const res = await this.fetchAPI('/api/stats');
-                    const json = await res.json();
-                    if(json) {
-                        document.getElementById('kpi-workshop').textContent = json.in_workshop;
-                        document.getElementById('kpi-repaired').textContent = json.repaired;
-                        document.getElementById('kpi-month').textContent = json.total_month;
-                    }
+                    const res = await this.fetchAPI('/api/stats'); const json = await res.json();
+                    if(json) { document.getElementById('kpi-workshop').textContent = json.in_workshop; document.getElementById('kpi-repaired').textContent = json.repaired; document.getElementById('kpi-month').textContent = json.total_month; }
                 } catch (err) { console.error(err); }
             },
             
             async printReport(mode, singleId) {
                 let data = [];
-                if (mode === 'single') {
-                    const found = this.state.historyData.find(t => t.id === singleId);
-                    data = found ? [found] : [];
-                } else {
-                    // Fetch full or filtered dataset for report
-                    const search = document.getElementById('hist-search').value;
-                    const type = document.getElementById('hist-filter-type').value;
-                    const brand = document.getElementById('hist-filter-brand').value;
-                    const status = document.getElementById('hist-filter-status').value;
-                    const after = document.getElementById('hist-date-after').value;
-                    const before = document.getElementById('hist-date-before').value;
-
-                    let qs = `page=1&limit=10000`; // Fetch large dataset
-                    if(mode === 'filtered') {
-                        if(status) qs += `&status=${status}`; else qs += `&status=history`;
-                        if(search) qs += `&search=${encodeURIComponent(search)}`;
-                        if(type) qs += `&type=${type}`; if(brand) qs += `&brand=${brand}`; 
-                        if(after) qs += `&after=${after}`; if(before) qs += `&before=${before}`;
-                    } else {
-                         // Full report (history context)
-                         qs += `&status=history`;
-                    }
-
-                    try {
-                        const res = await this.fetchAPI('/api/tickets?' + qs);
-                        const json = await res.json();
-                        data = json.data || [];
-                    } catch(e) { alert("Error generando reporte"); return; }
+                if (mode === 'single') { const found = this.state.historyData.find(t => t.id === singleId); data = found ? [found] : []; } else {
+                    const search = document.getElementById('hist-search').value; const type = document.getElementById('hist-filter-type').value; const brand = document.getElementById('hist-filter-brand').value; const status = document.getElementById('hist-filter-status').value; const after = document.getElementById('hist-date-after').value; const before = document.getElementById('hist-date-before').value;
+                    let qs = `page=1&limit=10000`;
+                    if(mode === 'filtered') { if(status) qs += `&status=${status}`; else qs += `&status=history`; if(search) qs += `&search=${encodeURIComponent(search)}`; if(type) qs += `&type=${type}`; if(brand) qs += `&brand=${brand}`; if(after) qs += `&after=${after}`; if(before) qs += `&before=${before}`; } else { qs += `&status=history`; }
+                    try { const res = await this.fetchAPI('/api/tickets?' + qs); const json = await res.json(); data = json.data || []; } catch(e) { alert("Error generando reporte"); return; }
                 }
-
                 if (!data || data.length === 0) { alert("No hay datos para generar el reporte."); return; }
-                
-                // Obtener datos de firmas dinámicamente
                 const { leftName, leftJob, rightName, rightJob } = this.getSignatures();
-                
-                const URL_LOGO_IZQUIERDO = '/static/public/logo-fuerzas-armadas.avif'; 
-                const URL_LOGO_DERECHO = '/static/public/logo-unefa.avif';
+                const URL_LOGO_IZQUIERDO = '/static/public/logo-fuerzas-armadas.avif'; const URL_LOGO_DERECHO = '/static/public/logo-unefa.avif';
                 
                 if (mode === 'single' && data.length === 1) {
-                    const t = data[0];
-                    const fullDate = new Date().toLocaleDateString('es-VE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                    
+                    const t = data[0]; const fullDate = new Date().toLocaleDateString('es-VE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
                     const reportContent = `
                         <div class="page">
-                            <div class="header-container">
-                                <div class="logo-box"><img src="${URL_LOGO_IZQUIERDO}" alt="Logo Izq"></div>
-                                <div class="header-text">MINISTERIO DEL PODER POPULAR PARA LA DEFENSA<br>UNIVERSIDAD NACIONAL EXPERIMENTAL POLITÉCNICA DE LA FUERZA ARMADA<br>NÚCLEO MIRANDA - SEDE LOS TEQUES<br>COORDINACIÓN DE TECNOLOGÍA Y SOPORTE<br>TECNOLOGÍA, INFORMACIÓN Y COMUNICACIÓN<br>SOPORTE TÉCNICO</div>
-                                <div class="logo-box"><img src="${URL_LOGO_DERECHO}" alt="Logo Der"></div>
-                            </div>
-                            
-                            <div class="section-title">COMPROBANTE DE SERVICIO TÉCNICO</div>
-                            <div style="text-align:right; font-size:9pt; margin-bottom:15px;">Fecha de Impresión: ${fullDate}</div>
-
+                            <div class="header-container"><div class="logo-box"><img src="${URL_LOGO_IZQUIERDO}" alt="Logo Izq"></div><div class="header-text">MINISTERIO DEL PODER POPULAR PARA LA DEFENSA<br>UNIVERSIDAD NACIONAL EXPERIMENTAL POLITÉCNICA DE LA FUERZA ARMADA<br>NÚCLEO MIRANDA - SEDE LOS TEQUES<br>COORDINACIÓN DE TECNOLOGÍA Y SOPORTE<br>TECNOLOGÍA, INFORMACIÓN Y COMUNICACIÓN<br>SOPORTE TÉCNICO</div><div class="logo-box"><img src="${URL_LOGO_DERECHO}" alt="Logo Der"></div></div>
+                            <div class="section-title">COMPROBANTE DE SERVICIO TÉCNICO</div><div style="text-align:right; font-size:9pt; margin-bottom:15px;">Fecha de Impresión: ${fullDate}</div>
                             <div class="section-header">1. Datos del Equipo</div>
-                            <table class="info-table">
-                                <tr>
-                                    <td class="label">Tipo:</td><td>${t.device_type}</td>
-                                    <td class="label">Marca:</td><td>${t.device_brand || '-/-'}</td>
-                                </tr>
-                                <tr>
-                                    <td class="label">Modelo:</td><td>${t.device_model || '-/-'}</td>
-                                    <td class="label">Código Bien:</td><td>${t.device_code || '-/-'}</td>
-                                </tr>
-                                <tr>
-                                    <td class="label">Serial:</td><td>${t.device_serial || '-/-'}</td>
-                                    <td class="label">Procesador:</td><td>${t.device_cpu || '-/-'}</td>
-                                </tr>
-                                <tr>
-                                    <td class="label">RAM:</td><td>${t.device_ram || '-/-'}</td>
-                                    <td class="label">Almacenamiento:</td><td>${t.device_storage || '-/-'}</td>
-                                </tr>
-                            </table>
-
-                            <div class="section-header" style="margin-top:10px;">2. Ubicación de Origen</div>
-                            <table class="info-table">
-                                <tr>
-                                    <td class="label">Edificio:</td><td>${t.building || '-/-'}</td>
-                                    <td class="label">Piso:</td><td>${t.floor || '-/-'}</td>
-                                </tr>
-                                <tr>
-                                    <td class="label">Área:</td><td>${t.area || '-/-'}</td>
-                                    <td class="label">Habitación:</td><td>${t.room || '-/-'}</td>
-                                </tr>
-                            </table>
-
-                            <div class="section-header" style="margin-top:10px;">3. Detalles del Servicio</div>
-                            <table class="info-table">
-                                <tr>
-                                    <td class="label">Fecha Ingreso:</td><td>${this.fmtDate(t.date_in)}</td>
-                                    <td class="label">Fecha Salida:</td><td>${t.date_out ? this.fmtDate(t.date_out) : 'PENDIENTE'}</td>
-                                </tr>
-                                <tr>
-                                    <td class="label">Estado Final:</td><td colspan="3">${t.status === 'repaired' ? 'REPARADO' : (t.status === 'unrepaired' ? 'NO REPARADO' : 'EN TALLER')}</td>
-                                </tr>
-                            </table>
-
-                            <div class="section-header" style="margin-top:10px;">4. Motivo de Ingreso / Falla Reportada</div>
-                            <div class="text-block">
-                                ${t.details_in || 'Sin detalles registrados.'}
-                            </div>
-
-                            <div class="section-header" style="margin-top:10px;">5. Informe Técnico de Salida / Solución</div>
-                            <div class="text-block" style="min-height:80px;">
-                                ${t.details_out || 'Sin informe de salida.'}
-                            </div>
-							
-							<div class="signatures">
-								<div class="sign-box">
-									<div style="margin-top:5px; margin-bottom:2px; font-weight:normal;">
-										${leftName}
-									</div>
-									${leftJob}<br>
-									<span style="font-weight:normal;font-size:8pt;">FIRMA Y SELLO</span>
-								</div>
-								<div class="sign-box">
-									<div style="margin-top:5px; margin-bottom:2px; font-weight:normal;">
-										${rightName}
-									</div>
-									${rightJob}<br>
-									<span style="font-weight:normal;font-size:8pt;">FIRMA Y SELLO</span>
-								</div>
-							</div>
-                            
-                            <div class="footer-info">
-                                <span>Sistema S.A.R.T. - Comprobante Digital</span>
-                                <span>Ticket #${t.id}</span>
-                            </div>
-                        </div>
-                    `;
-                    
+                            <table class="info-table"><tr><td class="label">Tipo:</td><td>${t.device_type}</td><td class="label">Marca:</td><td>${t.device_brand || '-/-'}</td></tr><tr><td class="label">Modelo:</td><td>${t.device_model || '-/-'}</td><td class="label">Código Bien:</td><td>${t.device_code || '-/-'}</td></tr><tr><td class="label">Serial:</td><td>${t.device_serial || '-/-'}</td><td class="label">Procesador:</td><td>${t.device_cpu || '-/-'}</td></tr><tr><td class="label">RAM:</td><td>${t.device_ram || '-/-'}</td><td class="label">Almacenamiento:</td><td>${t.device_storage || '-/-'}</td></tr></table>
+                            <div class="section-header" style="margin-top:10px;">2. Ubicación de Origen</div><table class="info-table"><tr><td class="label">Edificio:</td><td>${t.building || '-/-'}</td><td class="label">Piso:</td><td>${t.floor || '-/-'}</td></tr><tr><td class="label">Área:</td><td>${t.area || '-/-'}</td><td class="label">Habitación:</td><td>${t.room || '-/-'}</td></tr></table>
+                            <div class="section-header" style="margin-top:10px;">3. Detalles del Servicio</div><table class="info-table"><tr><td class="label">Fecha Ingreso:</td><td>${this.fmtDate(t.date_in)}</td><td class="label">Fecha Salida:</td><td>${t.date_out ? this.fmtDate(t.date_out) : 'PENDIENTE'}</td></tr><tr><td class="label">Estado Final:</td><td colspan="3">${t.status === 'repaired' ? 'REPARADO' : (t.status === 'unrepaired' ? 'NO REPARADO' : 'EN TALLER')}</td></tr></table>
+                            <div class="section-header" style="margin-top:10px;">4. Motivo de Ingreso / Falla Reportada</div><div class="text-block">${t.details_in || 'Sin detalles registrados.'}</div>
+                            <div class="section-header" style="margin-top:10px;">5. Informe Técnico de Salida / Solución</div><div class="text-block" style="min-height:80px;">${t.details_out || 'Sin informe de salida.'}</div>
+							<div class="signatures"><div class="sign-box"><div style="margin-top:5px; margin-bottom:2px; font-weight:normal;">${leftName}</div>${leftJob}<br><span style="font-weight:normal;font-size:8pt;">FIRMA Y SELLO</span></div><div class="sign-box"><div style="margin-top:5px; margin-bottom:2px; font-weight:normal;">${rightName}</div>${rightJob}<br><span style="font-weight:normal;font-size:8pt;">FIRMA Y SELLO</span></div></div>
+                            <div class="footer-info"><span>Sistema S.A.R.T. - Comprobante Digital</span><span>Ticket #${t.id}</span></div>
+                        </div>`;
                     const iframe = document.createElement('iframe'); iframe.style.position = 'absolute'; iframe.style.width = '0px'; iframe.style.height = '0px'; iframe.style.border = 'none'; document.body.appendChild(iframe);
                     const doc = iframe.contentWindow.document; doc.open();
                     doc.write(`<!DOCTYPE html><html><head><title>Comprobante SART</title><style>@page { size: letter; margin: 0; } body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #ccc; } .page { width: 215.9mm; height: 279.4mm; background: white; margin: 0 auto; padding: 15mm; position: relative; page-break-after: always; box-sizing: border-box; } .header-container { display: flex; justify-content: space-between; align-items: center; height: 100px; margin-bottom: 20px; padding-bottom: 10px; } .logo-box { width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; } .logo-box img { width: 100%; height: 100%; object-fit: contain; } .header-text { flex: 1; text-align: center; font-weight: bold; font-size: 8pt; line-height: 1.2; } .section-title { font-weight: bold; margin-bottom: 15px; font-size: 12pt; text-align: center; text-decoration: underline; text-transform: uppercase; } .section-header { background: #eee; padding: 5px; font-weight: bold; font-size: 9pt; border: 1px solid #000; border-bottom: none; margin-top: 5px; } .info-table { width: 100%; border-collapse: collapse; font-size: 9pt; margin-bottom: 10px; } .info-table td { border: 1px solid black; padding: 4px 8px; } .info-table .label { background: #f9f9f9; font-weight: bold; width: 15%; } .text-block { border: 1px solid black; padding: 8px; font-size: 9pt; min-height: 40px; margin-bottom: 10px; text-align: justify; } .signatures { margin-top: 50px; display: flex; justify-content: space-around; } .sign-box { width: 40%; text-align: center; border-top: 1px solid black; font-weight: bold; font-size: 9pt; } .footer-info { position: absolute; bottom: 15mm; left: 15mm; right: 15mm; display: flex; justify-content: space-between; font-size: 8pt; border-top: 1px solid #ccc; padding-top: 5px; color: #666; } </style></head><body>${reportContent}</body></html>`);
-                    doc.close();
-                    iframe.contentWindow.focus(); setTimeout(() => { iframe.contentWindow.print(); document.body.removeChild(iframe); }, 500);
+                    doc.close(); iframe.contentWindow.focus(); setTimeout(() => { iframe.contentWindow.print(); document.body.removeChild(iframe); }, 500);
                     return;
                 }
-
-                // ... (Lógica de reporte masivo existente se mantiene en el else)
                 
-                let reportContent = '';
-                const ROWS_PER_PAGE = 12;
-                const totalPages = Math.ceil(data.length / ROWS_PER_PAGE);
-                
+                let reportContent = ''; const ROWS_PER_PAGE = 12; const totalPages = Math.ceil(data.length / ROWS_PER_PAGE);
                 for (let i = 0; i < totalPages; i++) {
                     const pageData = data.slice(i * ROWS_PER_PAGE, (i + 1) * ROWS_PER_PAGE);
                     const headerHTML = `<div class="header-container"><div class="logo-box"><img src="${URL_LOGO_IZQUIERDO}" alt="Logo Izq"></div><div class="header-text">MINISTERIO DEL PODER POPULAR PARA LA DEFENSA<br>UNIVERSIDAD NACIONAL EXPERIMENTAL POLITÉCNICA DE LA FUERZA ARMADA<br>NÚCLEO MIRANDA - SEDE LOS TEQUES<br>COORDINACIÓN DE TECNOLOGÍA Y SOPORTE<br>TECNOLOGÍA, INFORMACIÓN Y COMUNICACIÓN<br>SOPORTE TÉCNICO</div><div class="logo-box"><img src="${URL_LOGO_DERECHO}" alt="Logo Der"></div></div><div class="section-title">REPORTE DE GESTIÓN DE SOPORTE TÉCNICO</div>`;
                     let rowsHTML = '';
                     pageData.forEach((t, idx) => { 
-                        const num = (i * ROWS_PER_PAGE) + idx + 1; 
-                        
-                        // Formato Ubicación: Area arriba, Room abajo
-                        const location = `<strong>${t.area}</strong><br>${t.room || ''}`;
-                        
-                        // Formato Equipo: Tipo, Marca/Modelo, Serial/Código
-                        const codeSerial = [t.device_code, t.device_serial].filter(Boolean).join(" - ");
-                        const equipo = `<b>${t.device_type}</b><br>${t.device_brand || '-/-'} ${t.device_model || '-/-'}<br><small>${codeSerial}</small>`;
-
-                        const statusLabel = t.status === 'repaired' ? 'REPARADO' : (t.status === 'unrepaired' ? 'NO REPARADO' : 'PENDIENTE');
-                        
+                        const num = (i * ROWS_PER_PAGE) + idx + 1; const location = `<strong>${t.area}</strong><br>${t.room || ''}`; const codeSerial = [t.device_code, t.device_serial].filter(Boolean).join(" - "); const equipo = `<b>${t.device_type}</b><br>${t.device_brand || '-/-'} ${t.device_model || '-/-'}<br><small>${codeSerial}</small>`; const statusLabel = t.status === 'repaired' ? 'REPARADO' : (t.status === 'unrepaired' ? 'NO REPARADO' : 'PENDIENTE');
                         rowsHTML += `<tr><td class="col-center">${num}</td><td class="col-center">${this.fmtDate(t.date_in)}</td><td class="col-center">${t.date_out ? this.fmtDate(t.date_out) : '-'}</td><td class="col-center">${equipo}</td><td class="col-center">${location}</td><td class="col-left" style="font-size:8pt;">${t.details_out || t.details_in || '-'}</td><td class="col-center" style="font-size:8pt;">${statusLabel}</td></tr>`; 
                     });
-                    
-                    let signaturesHTML = '';
-                    if (i === totalPages - 1) { signaturesHTML = `<div class="signatures"><div class="sign-box"><div style="margin-top:5px; margin-bottom:2px; font-weight:normal;">${leftName}</div>${leftJob}<br><span style="font-weight:normal;font-size:8pt;">FIRMA Y SELLO</span></div><div class="sign-box"><div style="margin-top:5px; margin-bottom:2px; font-weight:normal;">${rightName}</div>${rightJob}<br><span style="font-weight:normal;font-size:8pt;">FIRMA Y SELLO</span></div></div>`; }
-                    
-                    // Columnas actualizadas
+                    let signaturesHTML = ''; if (i === totalPages - 1) { signaturesHTML = `<div class="signatures"><div class="sign-box"><div style="margin-top:5px; margin-bottom:2px; font-weight:normal;">${leftName}</div>${leftJob}<br><span style="font-weight:normal;font-size:8pt;">FIRMA Y SELLO</span></div><div class="sign-box"><div style="margin-top:5px; margin-bottom:2px; font-weight:normal;">${rightName}</div>${rightJob}<br><span style="font-weight:normal;font-size:8pt;">FIRMA Y SELLO</span></div></div>`; }
                     reportContent += `<div class="page">${headerHTML}<table><thead><tr><th style="width:5%">N°</th><th style="width:10%">INGRESO</th><th style="width:10%">SALIDA</th><th style="width:20%">EQUIPO</th><th style="width:15%">UBICACIÓN</th><th style="width:30%">DETALLE / SOLUCIÓN</th><th style="width:10%">ESTADO</th></tr></thead><tbody>${rowsHTML}</tbody></table>${signaturesHTML}<div class="footer-info"><span>Sistema S.A.R.T.</span><span>Página ${i + 1} de ${totalPages}</span></div></div>`;
                 }
                 const iframe = document.createElement('iframe'); iframe.style.position = 'absolute'; iframe.style.width = '0px'; iframe.style.height = '0px'; iframe.style.border = 'none'; document.body.appendChild(iframe);
                 const doc = iframe.contentWindow.document; doc.open(); 
-                // Actualizado CSS para quitar border-bottom del header
                 doc.write(`<!DOCTYPE html><html><head><title>Reporte SART</title><style>@page { size: letter; margin: 0; } body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #ccc; } .page { width: 215.9mm; height: 279.4mm; background: white; margin: 0 auto; padding: 15mm; position: relative; page-break-after: always; overflow: hidden; } .header-container { display: flex; justify-content: space-between; align-items: center; height: 110px; margin-bottom: 20px; padding-bottom: 10px; overflow: hidden; } .logo-box { width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; } .logo-box img { width: 100%; height: 100%; object-fit: contain; } .header-text { flex: 1; text-align: center; font-weight: bold; font-size: 8pt; line-height: 1.2; padding: 0 10px; } .section-title { font-weight: bold; margin-bottom: 10px; font-size: 11pt; text-align: center; text-decoration: underline; } table { width: 100%; border-collapse: collapse; font-size: 9pt; } th, td { border: 1px solid black; padding: 4px; vertical-align: middle; } th { background: #f0f0f0; text-align: center; font-weight: bold; } .col-center { text-align: center; } .col-left { text-align: left; } .signatures { margin-top: 50px; display: flex; justify-content: space-around; } .sign-box { width: 40%; text-align: center; border-top: 1px solid black; padding-top: 5px; font-weight: bold; font-size: 9pt; } .footer-info { position: absolute; bottom: 15mm; left: 15mm; right: 15mm; display: flex; justify-content: space-between; font-size: 8pt; border-top: 1px solid #ccc; padding-top: 5px; } </style></head><body>${reportContent}</body></html>`); 
-                doc.close();
-                iframe.contentWindow.focus(); setTimeout(() => { iframe.contentWindow.print(); document.body.removeChild(iframe); }, 500);
+                doc.close(); iframe.contentWindow.focus(); setTimeout(() => { iframe.contentWindow.print(); document.body.removeChild(iframe); }, 500);
             }
         };
         document.addEventListener('DOMContentLoaded', () => { app.init(); });
