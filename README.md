@@ -1,7 +1,9 @@
 SART (Sistema Administrativo de Reporte y Soporte Tecnológico)
 
 DOCUMENTACIÓN TÉCNICA Y FUNCIONAL
-Fecha de Actualización: 06/02/2026
+Fecha de Actualización: 11/02/2026
+
+[!] IMPORTANTE: SI SE DESEA HACER UN RESPALDO DE LA BASE DE DATOS, EL SISTEMA DEBE ESTAR COMPLETAMENTE CERRADO.
 
 1. DESCRIPCIÓN GENERAL DEL SISTEMA
 El Sistema Administrativo de Reporte y Soporte Tecnológico (SART) es una plataforma integral diseñada para la gestión, control, trazabilidad y mantenimiento del inventario tecnológico de la organización. Su propósito es centralizar la información de activos (hardware y redes) y gestionar su ciclo de vida completo, desde la asignación física hasta el soporte técnico.
