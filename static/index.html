@@ -163,6 +163,11 @@
             overflow-wrap: break-word;  /* Rompe palabras largas (Estándar) */
             word-break: break-word;     /* Compatibilidad extra */
         }
+        
+        /* Botones de reporte en header */
+        .header-actions { display: flex; gap: 10px; align-items: center; }
+        .btn-report-filter { background-color: var(--color-secondary); color: white; padding: 0.4rem 0.8rem; font-size: 0.85rem; border-radius: 4px; border:none; cursor: pointer; font-weight: bold; }
+        .btn-report-full { background-color: var(--color-danger); color: white; padding: 0.4rem 0.8rem; font-size: 0.85rem; border-radius: 4px; border:none; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -300,7 +305,7 @@
                                 <thead>
                                     <tr>
                                         <th>N°</th>
-                                        <th>Fecha</th>
+                                        <th>Ingreso</th>
                                         <th>Tipo</th>
                                         <th>Marca / Modelo</th>
                                         <th>Código / Serial</th>
@@ -407,9 +412,15 @@
                 <!-- SECCIÓN 4: HISTORIAL (ANTES REPORTES) -->
                 <div id="section-history" class="section-view hidden">
                     <div class="filter-panel">
-                        <!-- FILA 1: Búsqueda Global -->
+                        <!-- FILA 1: Búsqueda Global y Botones Exportar -->
                         <div class="search-box" style="flex-basis: 100%; margin-bottom: 0.5rem;">
-                            <label class="form-label">Búsqueda Global (Serial, Código, Marca, Falla)</label>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.25rem;">
+                                <label class="form-label" style="margin-bottom:0;">Búsqueda Global (Serial, Código, Marca, Falla)</label>
+                                <div class="header-actions">
+                                    <button class="btn-report-filter" onclick="app.printReport('filtered')">Exportar reporte con filtros</button>
+                                    <button class="btn-report-full" onclick="app.printReport('full')">Exportar reporte completo</button>
+                                </div>
+                            </div>
                             <input type="text" id="hist-search" placeholder="Escriba para buscar..." onkeyup="app.debounceLoadHistory()">
                         </div>
 
@@ -455,8 +466,8 @@
                                     <col style="width: 13%;"> <!-- Marca/Modelo -->
                                     <col style="width: 13%;"> <!-- Código/Serial -->
                                     <col style="width: auto;"> <!-- Detalles -->
-                                    <col style="width: 135px;"> <!-- Estado -->
-                                    <col style="width: 140px;"> <!-- Acciones -->
+                                    <col style="width: 140px;"> <!-- Estado -->
+                                    <col style="width: 130px;"> <!-- Acciones -->
                                 </colgroup>
                                 <thead>
                                     <tr>
@@ -541,7 +552,7 @@
         <div class="section-title">2. Equipo en Taller</div><div class="info-block" id="edit-device-info"></div>
         <div class="section-title">3. Detalles del Ingreso</div>
         <div class="grid-2"><div class="form-group"><label class="form-label">Fecha Ingreso</label><input type="date" id="edit-date-in" required></div><div></div></div>
-        <div class="form-group"><label class="form-label">Falla Reportada</label><textarea id="edit-details-in" placeholder="Describa la falla o motivo del ingreso..." rows="3" required style="resize: none;" maxlength="300"></textarea><div class="char-counter">0/300</div></div>
+        <div class="form-group"><label class="form-label">Falla Reportada</label><textarea id="edit-details-in" rows="3" placeholder="Describa la falla o motivo del ingreso..." required style="resize: none;" maxlength="300"></textarea><div class="char-counter">0/300</div></div>
         <div id="edit-form-error" class="error-msg"></div>
     </template>
 
@@ -572,9 +583,9 @@
         <div class="grid-2"><div class="form-group"><label class="form-label">Edificio *</label><select id="sel-building" onchange="app.handleBuildingChange(this.value)" required><option value="">Seleccione...</option></select></div><div class="form-group"><label class="form-label">Piso *</label><select id="sel-floor" onchange="app.handleFloorChange(this.value)" disabled required><option value="">Seleccione...</option></select></div></div>
         <div class="grid-2"><div class="form-group"><label class="form-label">Área *</label><select id="sel-area" onchange="app.handleAreaChange(this.value)" disabled required><option value="">Seleccione...</option></select></div><div class="form-group"><label class="form-label">Habitación</label><select id="sel-room" disabled><option value="">Seleccione...</option></select></div></div>
         <div class="section-title">Especificaciones Técnicas</div>
-        <div class="grid-2"><div class="form-group"><label class="form-label">SO</label><select id="dev-os"><option value="">N/A</option></select></div><div class="form-group"><label class="form-label">Arquitectura</label><select id="dev-arch"><option value="">N/A</option></select></div></div>
-        <div class="grid-2"><div class="form-group"><label class="form-label">CPU</label><select id="dev-cpu"><option value="">N/A</option></select></div><div class="form-group"><label class="form-label">RAM</label><select id="dev-ram"><option value="">N/A</option></select></div></div>
-        <div class="form-group"><label class="form-label">Almacenamiento</label><select id="dev-storage"><option value="">N/A</option></select></div>
+        <div class="grid-2"><div class="form-group"><label class="form-label">SO</label><select id="dev-os"><option value=""></option></select></div><div class="form-group"><label class="form-label">Arquitectura</label><select id="dev-arch"><option value=""></option></select></div></div>
+        <div class="grid-2"><div class="form-group"><label class="form-label">CPU</label><select id="dev-cpu"><option value=""></option></select></div><div class="form-group"><label class="form-label">RAM</label><select id="dev-ram"><option value=""></option></select></div></div>
+        <div class="form-group"><label class="form-label">Almacenamiento</label><select id="dev-storage"><option value=""></option></select></div>
         <div class="form-group"><label class="form-label">Detalles</label><textarea id="dev-details" rows="2" placeholder="Detalles adicionales..." style="resize: none;" maxlength="200"></textarea></div>
         <div id="dev-form-error" class="error-msg"></div>
     </template>
@@ -589,7 +600,6 @@
                 <div class="detail-item"><span class="detail-label">Modelo</span><span class="detail-value" id="view-model"></span></div>
                 <div class="detail-item"><span class="detail-label">Código</span><span class="detail-value" id="view-code"></span></div>
                 <div class="detail-item"><span class="detail-label">Serial</span><span class="detail-value" id="view-serial"></span></div>
-                 <div class="detail-item detail-full"><span class="detail-label">Ubicación Actual</span><span class="detail-value" id="view-location" style="color:var(--color-primary); font-weight:600;"></span></div>
             </div>
             <div class="section-title">Especificaciones Técnicas</div>
             <div class="details-grid">
@@ -650,6 +660,7 @@
                 // Cache Global
                 specs: null,
                 locations: null,
+                users: [], // Cache de usuarios para firmas
                 workshopData: [], // Cache para modales de taller
                 inventoryData: [], // Cache para modales de inventario
                 historyData: [], // Cache para modales de historial
@@ -716,20 +727,39 @@
 
             async loadGlobalData() {
                 try {
-                    const [resSpecs, resLocs] = await Promise.all([
+                    // Cargar Specs, Locations y Usuarios para firmas
+                    const [resSpecs, resLocs, resUsers] = await Promise.all([
                         this.fetchAPI('/api/specs'),
-                        this.fetchAPI('/api/locations')
+                        this.fetchAPI('/api/locations'),
+                        this.fetchAPI('/api/users')
                     ]);
                     
                     const jsonSpecs = await resSpecs.json();
                     const jsonLocs = await resLocs.json();
+                    const jsonUsers = await resUsers.json();
 
                     if(jsonSpecs.success) this.state.specs = jsonSpecs.data;
                     if(jsonLocs.success) this.state.locations = jsonLocs.data;
+                    if(jsonUsers.data) this.state.users = jsonUsers.data;
 
                 } catch(e) { console.error("Error cargando datos globales", e); }
             },
 
+            // Helper para obtener firmas
+            getSignatures() {
+                // Busca un admin (Jefe) y un viewer (Coordinador) por defecto
+                const admin = this.state.users.find(u => u.role === 'admin') || { full_name: "NOMBRE NO DISPONIBLE", position: "CARGO NO DISPONIBLE" };
+                const viewer = this.state.users.find(u => u.role === 'viewer') || { full_name: "NOMBRE NO DISPONIBLE", position: "CARGO NO DISPONIBLE" };
+                return {
+                    leftName: admin.full_name.toUpperCase(),
+                    leftJob: admin.position.toUpperCase(),
+                    rightName: viewer.full_name.toUpperCase(),
+                    rightJob: viewer.position.toUpperCase()
+                };
+            },
+			
+			fmtDate(isoDate) { if(!isoDate) return ''; const [y,m,d] = isoDate.split('-'); return `${d}/${m}/${y}`; },
+			
             // --- TALLER ---
             loadWorkshopFilters() {
                 if(document.getElementById('wk-filter-type').length > 0) return;
@@ -791,18 +821,18 @@
 
                 data.forEach((t, index) => {
                     const realIndex = ((this.state.page - 1) * this.state.limit) + (index + 1);
-                    const brandModel = `${t.device_brand || ''} ${t.device_model || ''}`.trim();
-                    const codeSerial = `${t.device_code || ''} / ${t.device_serial || ''}`.trim();
+                    const brandModel = `${t.device_brand || '-/-'} ${t.device_model || '-/-'}`.trim();
+                    const codeSerial = `${t.device_code || '-/-'} / ${t.device_serial || '-/-'}`.trim();
 
                     tbody.innerHTML += `
                         <tr>
                             <td>${realIndex}</td>
-                            <td>${t.date_in}</td>
+                            <td>${this.fmtDate(t.date_in)}</td>
                             <td>${t.device_type}</td>
                             <td>
                                 <div class="cell-truncate" title="${brandModel}">
-                                    <strong>${t.device_brand || '-'}</strong><br>
-                                    <small class="text-secondary">${t.device_model || '-'}</small>
+                                    <strong>${t.device_brand || '-/-'}</strong><br>
+                                    <small class="text-secondary">${t.device_model || '-/-'}</small>
                                 </div>
                             </td>
                             <td>
@@ -918,10 +948,10 @@
                         <tr>
                             <td>${realIndex}</td>
                             <td>${d.type}</td>
-                            <td><strong>${d.brand || ''}</strong><br><span style="font-size:0.8rem; color:#6b7280;">${d.model || ''}</span></td>
-                            <td><strong>${d.area || ''}</strong><br><span style="font-size:0.8rem; color:#6b7280;">${d.room || ''}</span></td>
-                            <td>${d.code || '-'}</td>
-                            <td>${d.serial || ''}</td>
+                            <td><strong>${d.brand || '-/-'}</strong><br><span style="font-size:0.8rem; color:#6b7280;">${d.model || '-/-'}</span></td>
+                            <td><strong>${d.area || '-/-'}</strong><br><span style="font-size:0.8rem; color:#6b7280;">${d.room || '-/-'}</span></td>
+                            <td>${d.code || '-/-'}</td>
+                            <td>${d.serial || '-/-'}</td>
                             <td><span class="badge ${d.status === 'operational' ? 'operativo' : 'pending'}">${d.status_label || d.status}</span></td>
                             <td style="text-align:center;">
                                 <div class="actions-cell">
@@ -932,7 +962,7 @@
                             </td>
                         </tr>`;
                 });
-                
+
                 const missing = this.state.limit - items.length;
                 if(missing > 0) { for(let i=0; i<missing; i++) tbody.innerHTML += this.getEmptyRowHTML(); }
             },
@@ -1027,20 +1057,20 @@
                     const realIndex = ((this.state.page - 1) * this.state.limit) + (index + 1);
                     const statusClass = t.status === 'repaired' ? 'operativo' : 'unrepaired';
                     const statusLabel = t.status === 'repaired' ? 'Reparado' : 'No Reparado';
-
+					
                     tbody.innerHTML += `
                         <tr>
                             <td>${realIndex}</td>
-                            <td>${t.date_out || '-'}</td>
+                            <td>${this.fmtDate(t.date_out) || '-/-'}</td>
                             <td>${t.device_type}</td>
-                            <td><strong>${t.device_brand || ''}</strong><br><span style="font-size:0.8rem; color:#6b7280;">${t.device_model || ''}</span></td>
-                            <td><strong>${t.device_code || ''}</strong><br><span style="font-size:0.8rem; color:#6b7280;">${t.device_serial || ''}</span></td>
-                            <td><div class="cell-multiline" title="${t.details_out}">${t.details_out || '-'}</div></td>
+							<td><strong>${t.device_brand || '-/-'}</strong><br><small class="text-secondary">${t.device_model || '-/-'}</small></td>
+							<td><strong>${t.device_code || '-/-'}</strong><br><small class="text-secondary">${t.device_serial || '-/-'}</small></td>
+                            <td><div class="cell-multiline" title="${t.details_out}">${t.details_out || '-/-'}</div></td>
                             <td><span class="badge ${statusClass}">${statusLabel}</span></td>
                             <td style="text-align:center;">
                                 <div class="actions-cell" style="justify-content:center;">
                                     <button class="action-btn view" onclick="app.openModal('view-ticket', ${t.id})" title="Ver Detalles"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
-                                    <button class="action-btn" title="Exportar PDF" onclick="alert('Exportar PDF: Pendiente')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></button>
+                                    <button class="action-btn" title="Exportar PDF" onclick="app.printReport('single', ${t.id})"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></button>
                                     <button class="action-btn delete" onclick="app.openModal('delete-ticket', ${t.id})" title="Eliminar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
                                 </div>
                             </td>
@@ -1083,10 +1113,10 @@
                     this.state.currentTicketId = id;
                     title.textContent = 'Editar Ingreso';
                     body.innerHTML = document.getElementById('tmpl-edit-ticket').innerHTML;
-                    document.getElementById('edit-building').value = data.building || '';
-                    document.getElementById('edit-floor').value = data.floor || '';
-                    document.getElementById('edit-area').value = data.area || '';
-                    document.getElementById('edit-room').value = data.room || '';
+                    document.getElementById('edit-building').value = data.building || '-/-';
+                    document.getElementById('edit-floor').value = data.floor || '-/-';
+                    document.getElementById('edit-area').value = data.area || '-/-';
+                    document.getElementById('edit-room').value = data.room || '-/-';
                     const devInfo = [data.device_brand, data.device_model, data.device_os, data.device_cpu, data.device_arch, data.device_serial].filter(Boolean).join(" - ");
                     document.getElementById('edit-device-info').innerHTML = `<strong>${data.device_type}</strong><br>${devInfo}`;
                     document.getElementById('edit-date-in').value = data.date_in;
@@ -1123,14 +1153,14 @@
                     title.textContent = 'Detalles del Servicio';
                     body.innerHTML = document.getElementById('tmpl-view-ticket').innerHTML;
                     footer.innerHTML = `<button class="btn-secondary" onclick="app.closeModal()">Cerrar</button>`;
-                    const setTxt = (id, val) => document.getElementById(id).textContent = val || '-';
+                    const setTxt = (id, val) => document.getElementById(id).textContent = val || '-/-';
                     setTxt('vt-type', data.device_type);
-                    setTxt('vt-brand-model', `${data.device_brand || ''} ${data.device_model || ''}`);
+                    setTxt('vt-brand-model', `${data.device_brand || '-/-'} ${data.device_model || '-/-'}`);
                     setTxt('vt-code', data.device_code);
                     setTxt('vt-serial', data.device_serial);
                     setTxt('vt-location', [data.building, data.floor, data.area, data.room].filter(Boolean).join(" > "));
-                    setTxt('vt-date-in', data.date_in);
-                    setTxt('vt-date-out', data.date_out);
+                    setTxt('vt-date-in', this.fmtDate(data.date_in));
+                    setTxt('vt-date-out', this.fmtDate(data.date_out));
                     setTxt('vt-status', data.status === 'repaired' ? 'Reparado' : 'No Reparado');
                     setTxt('vt-details-in', data.details_in);
                     setTxt('vt-details-out', data.details_out);
@@ -1153,9 +1183,9 @@
                     if (isEdit) {
                         const data = this.state.inventoryData.find(d => d.id === id);
                         if(data) {
-                            document.getElementById('dev-code').value = data.code || '';
-                            document.getElementById('dev-serial').value = data.serial || '';
-                            document.getElementById('dev-details').value = data.details || '';
+                            document.getElementById('dev-code').value = data.code || '-/-';
+                            document.getElementById('dev-serial').value = data.serial || '-/-';
+                            document.getElementById('dev-details').value = data.details || '-/-';
                             this.setSelectByText('dev-type', data.type);
                             this.setSelectByText('dev-brand', data.brand);
                             this.filterModels(document.getElementById('dev-brand').value);
@@ -1180,13 +1210,15 @@
                     title.textContent = 'Detalles del Equipo';
                     body.innerHTML = document.getElementById('tmpl-view-device').innerHTML;
                     footer.innerHTML = `<button class="btn-secondary" onclick="app.closeModal()">Cerrar</button>`;
-                    const setTxt = (id, val) => document.getElementById(id).textContent = val || 'N/A';
+                    const setTxt = (id, val) => document.getElementById(id).textContent = val || '-/-';
                     setTxt('view-type', data.type);
                     setTxt('view-brand', data.brand);
                     setTxt('view-model', data.model);
                     setTxt('view-code', data.code);
                     setTxt('view-serial', data.serial);
+                    
                     const loc = [data.building, data.floor, data.area, data.room].filter(Boolean).join(" > ");
+                    
                     setTxt('view-location', loc);
                     setTxt('view-os', data.os);
                     setTxt('view-cpu', data.cpu);
@@ -1351,7 +1383,7 @@
                     if(json.data && json.data.length > 0) {
                         sel.innerHTML = '<option value="">Seleccione Dispositivo...</option>';
                         json.data.forEach(d => {
-                            const label = `${d.type} - ${d.code || '-'} - ${d.brand || ''} ${d.model || ''}`;
+                            const label = `${d.type} - ${d.code || '-/-'} - ${d.brand || '-/-'} ${d.model || '-/-'}`;
                             sel.innerHTML += `<option value="${d.id}">${label}</option>`;
                         });
                         sel.disabled = false;
@@ -1499,7 +1531,184 @@
                 } catch (err) { console.error(err); }
             },
             
-            printReport(type) { alert("Generando reporte PDF... (Pronto)"); }
+            async printReport(mode, singleId) {
+                let data = [];
+                if (mode === 'single') {
+                    const found = this.state.historyData.find(t => t.id === singleId);
+                    data = found ? [found] : [];
+                } else {
+                    // Fetch full or filtered dataset for report
+                    const search = document.getElementById('hist-search').value;
+                    const type = document.getElementById('hist-filter-type').value;
+                    const brand = document.getElementById('hist-filter-brand').value;
+                    const status = document.getElementById('hist-filter-status').value;
+                    const after = document.getElementById('hist-date-after').value;
+                    const before = document.getElementById('hist-date-before').value;
+
+                    let qs = `page=1&limit=10000`; // Fetch large dataset
+                    if(mode === 'filtered') {
+                        if(status) qs += `&status=${status}`; else qs += `&status=history`;
+                        if(search) qs += `&search=${encodeURIComponent(search)}`;
+                        if(type) qs += `&type=${type}`; if(brand) qs += `&brand=${brand}`; 
+                        if(after) qs += `&after=${after}`; if(before) qs += `&before=${before}`;
+                    } else {
+                         // Full report (history context)
+                         qs += `&status=history`;
+                    }
+
+                    try {
+                        const res = await this.fetchAPI('/api/tickets?' + qs);
+                        const json = await res.json();
+                        data = json.data || [];
+                    } catch(e) { alert("Error generando reporte"); return; }
+                }
+
+                if (!data || data.length === 0) { alert("No hay datos para generar el reporte."); return; }
+                
+                // Obtener datos de firmas dinámicamente
+                const { leftName, leftJob, rightName, rightJob } = this.getSignatures();
+                
+                const URL_LOGO_IZQUIERDO = '/static/public/logo-fuerzas-armadas.avif'; 
+                const URL_LOGO_DERECHO = '/static/public/logo-unefa.avif';
+                
+                if (mode === 'single' && data.length === 1) {
+                    const t = data[0];
+                    const fullDate = new Date().toLocaleDateString('es-VE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                    
+                    const reportContent = `
+                        <div class="page">
+                            <div class="header-container">
+                                <div class="logo-box"><img src="${URL_LOGO_IZQUIERDO}" alt="Logo Izq"></div>
+                                <div class="header-text">MINISTERIO DEL PODER POPULAR PARA LA DEFENSA<br>UNIVERSIDAD NACIONAL EXPERIMENTAL POLITÉCNICA DE LA FUERZA ARMADA<br>NÚCLEO MIRANDA - SEDE LOS TEQUES<br>COORDINACIÓN DE TECNOLOGÍA Y SOPORTE<br>TECNOLOGÍA, INFORMACIÓN Y COMUNICACIÓN<br>SOPORTE TÉCNICO</div>
+                                <div class="logo-box"><img src="${URL_LOGO_DERECHO}" alt="Logo Der"></div>
+                            </div>
+                            
+                            <div class="section-title">COMPROBANTE DE SERVICIO TÉCNICO</div>
+                            <div style="text-align:right; font-size:9pt; margin-bottom:15px;">Fecha de Impresión: ${fullDate}</div>
+
+                            <div class="section-header">1. Datos del Equipo</div>
+                            <table class="info-table">
+                                <tr>
+                                    <td class="label">Tipo:</td><td>${t.device_type}</td>
+                                    <td class="label">Marca:</td><td>${t.device_brand || '-/-'}</td>
+                                </tr>
+                                <tr>
+                                    <td class="label">Modelo:</td><td>${t.device_model || '-/-'}</td>
+                                    <td class="label">Código Bien:</td><td>${t.device_code || '-/-'}</td>
+                                </tr>
+                                <tr>
+                                    <td class="label">Serial:</td><td>${t.device_serial || '-/-'}</td>
+                                    <td class="label">Procesador:</td><td>${t.device_cpu || '-/-'}</td>
+                                </tr>
+                                <tr>
+                                    <td class="label">RAM:</td><td>${t.device_ram || '-/-'}</td>
+                                    <td class="label">Almacenamiento:</td><td>${t.device_storage || '-/-'}</td>
+                                </tr>
+                            </table>
+
+                            <div class="section-header" style="margin-top:10px;">2. Ubicación de Origen</div>
+                            <table class="info-table">
+                                <tr>
+                                    <td class="label">Edificio:</td><td>${t.building || '-/-'}</td>
+                                    <td class="label">Piso:</td><td>${t.floor || '-/-'}</td>
+                                </tr>
+                                <tr>
+                                    <td class="label">Área:</td><td>${t.area || '-/-'}</td>
+                                    <td class="label">Habitación:</td><td>${t.room || '-/-'}</td>
+                                </tr>
+                            </table>
+
+                            <div class="section-header" style="margin-top:10px;">3. Detalles del Servicio</div>
+                            <table class="info-table">
+                                <tr>
+                                    <td class="label">Fecha Ingreso:</td><td>${this.fmtDate(t.date_in)}</td>
+                                    <td class="label">Fecha Salida:</td><td>${t.date_out ? this.fmtDate(t.date_out) : 'PENDIENTE'}</td>
+                                </tr>
+                                <tr>
+                                    <td class="label">Estado Final:</td><td colspan="3">${t.status === 'repaired' ? 'REPARADO' : (t.status === 'unrepaired' ? 'NO REPARADO' : 'EN TALLER')}</td>
+                                </tr>
+                            </table>
+
+                            <div class="section-header" style="margin-top:10px;">4. Motivo de Ingreso / Falla Reportada</div>
+                            <div class="text-block">
+                                ${t.details_in || 'Sin detalles registrados.'}
+                            </div>
+
+                            <div class="section-header" style="margin-top:10px;">5. Informe Técnico de Salida / Solución</div>
+                            <div class="text-block" style="min-height:80px;">
+                                ${t.details_out || 'Sin informe de salida.'}
+                            </div>
+							
+							<div class="signatures">
+								<div class="sign-box">
+									<div style="margin-top:5px; margin-bottom:2px; font-weight:normal;">
+										${leftName}
+									</div>
+									${leftJob}<br>
+									<span style="font-weight:normal;font-size:8pt;">FIRMA Y SELLO</span>
+								</div>
+								<div class="sign-box">
+									<div style="margin-top:5px; margin-bottom:2px; font-weight:normal;">
+										${rightName}
+									</div>
+									${rightJob}<br>
+									<span style="font-weight:normal;font-size:8pt;">FIRMA Y SELLO</span>
+								</div>
+							</div>
+                            
+                            <div class="footer-info">
+                                <span>Sistema S.A.R.T. - Comprobante Digital</span>
+                                <span>Ticket #${t.id}</span>
+                            </div>
+                        </div>
+                    `;
+                    
+                    const iframe = document.createElement('iframe'); iframe.style.position = 'absolute'; iframe.style.width = '0px'; iframe.style.height = '0px'; iframe.style.border = 'none'; document.body.appendChild(iframe);
+                    const doc = iframe.contentWindow.document; doc.open();
+                    doc.write(`<!DOCTYPE html><html><head><title>Comprobante SART</title><style>@page { size: letter; margin: 0; } body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #ccc; } .page { width: 215.9mm; height: 279.4mm; background: white; margin: 0 auto; padding: 15mm; position: relative; page-break-after: always; box-sizing: border-box; } .header-container { display: flex; justify-content: space-between; align-items: center; height: 100px; margin-bottom: 20px; padding-bottom: 10px; } .logo-box { width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; } .logo-box img { width: 100%; height: 100%; object-fit: contain; } .header-text { flex: 1; text-align: center; font-weight: bold; font-size: 8pt; line-height: 1.2; } .section-title { font-weight: bold; margin-bottom: 15px; font-size: 12pt; text-align: center; text-decoration: underline; text-transform: uppercase; } .section-header { background: #eee; padding: 5px; font-weight: bold; font-size: 9pt; border: 1px solid #000; border-bottom: none; margin-top: 5px; } .info-table { width: 100%; border-collapse: collapse; font-size: 9pt; margin-bottom: 10px; } .info-table td { border: 1px solid black; padding: 4px 8px; } .info-table .label { background: #f9f9f9; font-weight: bold; width: 15%; } .text-block { border: 1px solid black; padding: 8px; font-size: 9pt; min-height: 40px; margin-bottom: 10px; text-align: justify; } .signatures { margin-top: 50px; display: flex; justify-content: space-around; } .sign-box { width: 40%; text-align: center; border-top: 1px solid black; font-weight: bold; font-size: 9pt; } .footer-info { position: absolute; bottom: 15mm; left: 15mm; right: 15mm; display: flex; justify-content: space-between; font-size: 8pt; border-top: 1px solid #ccc; padding-top: 5px; color: #666; } </style></head><body>${reportContent}</body></html>`);
+                    doc.close();
+                    iframe.contentWindow.focus(); setTimeout(() => { iframe.contentWindow.print(); document.body.removeChild(iframe); }, 500);
+                    return;
+                }
+
+                // ... (Lógica de reporte masivo existente se mantiene en el else)
+                
+                let reportContent = '';
+                const ROWS_PER_PAGE = 12;
+                const totalPages = Math.ceil(data.length / ROWS_PER_PAGE);
+                
+                for (let i = 0; i < totalPages; i++) {
+                    const pageData = data.slice(i * ROWS_PER_PAGE, (i + 1) * ROWS_PER_PAGE);
+                    const headerHTML = `<div class="header-container"><div class="logo-box"><img src="${URL_LOGO_IZQUIERDO}" alt="Logo Izq"></div><div class="header-text">MINISTERIO DEL PODER POPULAR PARA LA DEFENSA<br>UNIVERSIDAD NACIONAL EXPERIMENTAL POLITÉCNICA DE LA FUERZA ARMADA<br>NÚCLEO MIRANDA - SEDE LOS TEQUES<br>COORDINACIÓN DE TECNOLOGÍA Y SOPORTE<br>TECNOLOGÍA, INFORMACIÓN Y COMUNICACIÓN<br>SOPORTE TÉCNICO</div><div class="logo-box"><img src="${URL_LOGO_DERECHO}" alt="Logo Der"></div></div><div class="section-title">REPORTE DE GESTIÓN DE SOPORTE TÉCNICO</div>`;
+                    let rowsHTML = '';
+                    pageData.forEach((t, idx) => { 
+                        const num = (i * ROWS_PER_PAGE) + idx + 1; 
+                        
+                        // Formato Ubicación: Area arriba, Room abajo
+                        const location = `<strong>${t.area}</strong><br>${t.room || ''}`;
+                        
+                        // Formato Equipo: Tipo, Marca/Modelo, Serial/Código
+                        const codeSerial = [t.device_code, t.device_serial].filter(Boolean).join(" - ");
+                        const equipo = `<b>${t.device_type}</b><br>${t.device_brand || '-/-'} ${t.device_model || '-/-'}<br><small>${codeSerial}</small>`;
+
+                        const statusLabel = t.status === 'repaired' ? 'REPARADO' : (t.status === 'unrepaired' ? 'NO REPARADO' : 'PENDIENTE');
+                        
+                        rowsHTML += `<tr><td class="col-center">${num}</td><td class="col-center">${this.fmtDate(t.date_in)}</td><td class="col-center">${t.date_out ? this.fmtDate(t.date_out) : '-'}</td><td class="col-center">${equipo}</td><td class="col-center">${location}</td><td class="col-left" style="font-size:8pt;">${t.details_out || t.details_in || '-'}</td><td class="col-center" style="font-size:8pt;">${statusLabel}</td></tr>`; 
+                    });
+                    
+                    let signaturesHTML = '';
+                    if (i === totalPages - 1) { signaturesHTML = `<div class="signatures"><div class="sign-box"><div style="margin-top:5px; margin-bottom:2px; font-weight:normal;">${leftName}</div>${leftJob}<br><span style="font-weight:normal;font-size:8pt;">FIRMA Y SELLO</span></div><div class="sign-box"><div style="margin-top:5px; margin-bottom:2px; font-weight:normal;">${rightName}</div>${rightJob}<br><span style="font-weight:normal;font-size:8pt;">FIRMA Y SELLO</span></div></div>`; }
+                    
+                    // Columnas actualizadas
+                    reportContent += `<div class="page">${headerHTML}<table><thead><tr><th style="width:5%">N°</th><th style="width:10%">INGRESO</th><th style="width:10%">SALIDA</th><th style="width:20%">EQUIPO</th><th style="width:15%">UBICACIÓN</th><th style="width:30%">DETALLE / SOLUCIÓN</th><th style="width:10%">ESTADO</th></tr></thead><tbody>${rowsHTML}</tbody></table>${signaturesHTML}<div class="footer-info"><span>Sistema S.A.R.T.</span><span>Página ${i + 1} de ${totalPages}</span></div></div>`;
+                }
+                const iframe = document.createElement('iframe'); iframe.style.position = 'absolute'; iframe.style.width = '0px'; iframe.style.height = '0px'; iframe.style.border = 'none'; document.body.appendChild(iframe);
+                const doc = iframe.contentWindow.document; doc.open(); 
+                // Actualizado CSS para quitar border-bottom del header
+                doc.write(`<!DOCTYPE html><html><head><title>Reporte SART</title><style>@page { size: letter; margin: 0; } body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #ccc; } .page { width: 215.9mm; height: 279.4mm; background: white; margin: 0 auto; padding: 15mm; position: relative; page-break-after: always; overflow: hidden; } .header-container { display: flex; justify-content: space-between; align-items: center; height: 110px; margin-bottom: 20px; padding-bottom: 10px; overflow: hidden; } .logo-box { width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; } .logo-box img { width: 100%; height: 100%; object-fit: contain; } .header-text { flex: 1; text-align: center; font-weight: bold; font-size: 8pt; line-height: 1.2; padding: 0 10px; } .section-title { font-weight: bold; margin-bottom: 10px; font-size: 11pt; text-align: center; text-decoration: underline; } table { width: 100%; border-collapse: collapse; font-size: 9pt; } th, td { border: 1px solid black; padding: 4px; vertical-align: middle; } th { background: #f0f0f0; text-align: center; font-weight: bold; } .col-center { text-align: center; } .col-left { text-align: left; } .signatures { margin-top: 50px; display: flex; justify-content: space-around; } .sign-box { width: 40%; text-align: center; border-top: 1px solid black; padding-top: 5px; font-weight: bold; font-size: 9pt; } .footer-info { position: absolute; bottom: 15mm; left: 15mm; right: 15mm; display: flex; justify-content: space-between; font-size: 8pt; border-top: 1px solid #ccc; padding-top: 5px; } </style></head><body>${reportContent}</body></html>`); 
+                doc.close();
+                iframe.contentWindow.focus(); setTimeout(() => { iframe.contentWindow.print(); document.body.removeChild(iframe); }, 500);
+            }
         };
         document.addEventListener('DOMContentLoaded', () => { app.init(); });
     </script>
