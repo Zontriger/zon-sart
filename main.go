@@ -16,7 +16,7 @@ import (
 	"strings"
 	"time"
 
-	_ "modernc.org/sqlite"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 
@@ -185,9 +185,6 @@ func main() {
 	
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(staticFS))))
 
-	// Latido de vida del sistema
-	http.HandleFunc("/api/heartbeat", handleHeartbeat)
-	
 	// Auth & Core
 	http.HandleFunc("/api/login", handleLogin)
 	http.HandleFunc("/api/stats", middlewareAuth(handleStats))
@@ -234,17 +231,6 @@ func main() {
 		time.Sleep(1 * time.Second)
 		fmt.Printf("Sistema SART v1.0 iniciado en: %s\n", URL)
 		openBrowser(URL)
-	}()
-	
-	// Si no hay respuesta de parte del cliente, se cierra el servidor
-	go func() {
-		for {
-			time.Sleep(5 * time.Second)
-			if time.Since(lastHeartbeat) > 15*time.Second {
-				fmt.Println("No se detecta interfaz activa. Cerrando SART...")
-				os.Exit(0)
-			}
-		}
 	}()
 	
 	log.Fatal(http.ListenAndServe(PORT, nil))
@@ -309,7 +295,7 @@ func initDB() {
 
 	// 4. Abrir SQLite usando la ruta absoluta
 	var err error
-	db, err = sql.Open("sqlite", dbPath)
+	db, err = sql.Open("sqlite3", dbPath)
 	if err != nil {
 		log.Fatal("Error fatal abriendo DB:", err)
 	}
@@ -1693,13 +1679,4 @@ func respondError(w http.ResponseWriter, code int, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	json.NewEncoder(w).Encode(map[string]string{"message": message})
-}
-
-func handleHeartbeat(w http.ResponseWriter, r *http.Request) {
-    if r.Method != http.MethodPost {
-        http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
-        return
-    }
-    lastHeartbeat = time.Now()
-    w.WriteHeader(http.StatusOK)
 }

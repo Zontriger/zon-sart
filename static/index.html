@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="icon" type="image/x-icon" href="favicon.ico">
+	<link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <title>SART - Sistema de Soporte y Reporte Tecnológico UNEFA</title>
     <style>
         /* --- VARIABLES --- */
@@ -1933,26 +1933,10 @@
                 const doc = iframe.contentWindow.document; doc.open(); 
                 doc.write(`<!DOCTYPE html><html><head><title>Reporte SART</title><style>@page { size: letter; margin: 0; } body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #ccc; } .page { width: 215.9mm; height: 279.4mm; background: white; margin: 0 auto; padding: 15mm; position: relative; page-break-after: always; overflow: hidden; } .header-container { display: flex; justify-content: space-between; align-items: center; height: 110px; margin-bottom: 20px; padding-bottom: 10px; overflow: hidden; } .logo-box { width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; } .logo-box img { width: 100%; height: 100%; object-fit: contain; } .header-text { flex: 1; text-align: center; font-weight: bold; font-size: 8pt; line-height: 1.2; padding: 0 10px; } .section-title { font-weight: bold; margin-bottom: 10px; font-size: 11pt; text-align: center; text-decoration: underline; } table { width: 100%; border-collapse: collapse; font-size: 9pt; } th, td { border: 1px solid black; padding: 4px; vertical-align: middle; } th { background: #f0f0f0; text-align: center; font-weight: bold; } .col-center { text-align: center; } .col-left { text-align: left; } .signatures { margin-top: 50px; display: flex; justify-content: space-around; } .sign-box { width: 40%; text-align: center; border-top: 1px solid black; padding-top: 5px; font-weight: bold; font-size: 9pt; } .footer-info { position: absolute; bottom: 15mm; left: 15mm; right: 15mm; display: flex; justify-content: space-between; font-size: 8pt; border-top: 1px solid #ccc; padding-top: 5px; } </style></head><body>${reportContent}</body></html>`); 
                 doc.close(); iframe.contentWindow.focus(); setTimeout(() => { iframe.contentWindow.print(); document.body.removeChild(iframe); }, 500);
-            },
-			startHeartbeat() {
-				// Latido inicial inmediato al cargar la página
-				fetch('/api/heartbeat', { method: 'POST' }).catch(() => {});
-
-				// Ciclo de latidos cada 5 segundos (proactivo)
-				setInterval(() => {
-					fetch('/api/heartbeat', { 
-						method: 'POST',
-						// 'keepalive' permite que la petición sobreviva al cierre de la página
-						keepalive: true 
-					}).catch(err => {
-						console.warn("SART: Conexión perdida con el servidor local.");
-					});
-				}, 5000);
-			},
+            }
         };
         document.addEventListener('DOMContentLoaded', () => { 
 			app.init();
-			app.startHeartbeat();
 		});
     </script>
 </body>
