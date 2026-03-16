@@ -549,7 +549,7 @@
         </div>
         <div class="grid-2">
             <div class="form-group"><label class="form-label">Área</label><select id="sel-area" onchange="app.handleAreaChange(this.value)" disabled><option value="">Seleccione...</option></select></div>
-            <div class="form-group"><label class="form-label">Habitación (Opcional)</label><select id="sel-room" onchange="app.handleRoomChange(this.value)" disabled><option value="">Seleccione...</option></select></div>
+            <div class="form-group"><label class="form-label">Departamento (Opcional)</label><select id="sel-room" onchange="app.handleRoomChange(this.value)" disabled><option value="">Seleccione...</option></select></div>
         </div>
         <div class="section-title">2. Selección del Dispositivo</div>
         <div class="form-group"><label class="form-label">Dispositivo</label><select id="sel-device" disabled><option value="">Seleccione Ubicación Primero...</option></select></div>
@@ -562,7 +562,7 @@
     <template id="tmpl-edit-ticket">
         <div class="section-title">1. Ubicación del Equipo</div>
         <div class="grid-2"><div class="form-group"><label class="form-label">Edificio</label><input type="text" id="edit-building" disabled></div><div class="form-group"><label class="form-label">Piso</label><input type="text" id="edit-floor" disabled></div></div>
-        <div class="grid-2"><div class="form-group"><label class="form-label">Área</label><input type="text" id="edit-area" disabled></div><div class="form-group"><label class="form-label">Habitación</label><input type="text" id="edit-room" disabled></div></div>
+        <div class="grid-2"><div class="form-group"><label class="form-label">Área</label><input type="text" id="edit-area" disabled></div><div class="form-group"><label class="form-label">Departamento</label><input type="text" id="edit-room" disabled></div></div>
         <div class="section-title">2. Equipo en Taller</div><div class="info-block" id="edit-device-info"></div>
         <div class="section-title">3. Detalles del Ingreso</div>
         <div class="grid-2"><div class="form-group"><label class="form-label">Fecha Ingreso</label><input type="date" id="edit-date-in" required></div><div></div></div>
@@ -595,7 +595,7 @@
         <div class="form-group"><label class="form-label">Código del Bien</label><input type="text" id="dev-code" placeholder="Ej: 4030"></div>
         <div class="section-title">Ubicación Física</div>
         <div class="grid-2"><div class="form-group"><label class="form-label">Edificio *</label><select id="sel-building" onchange="app.handleBuildingChange(this.value)" required><option value="">Seleccione...</option></select></div><div class="form-group"><label class="form-label">Piso *</label><select id="sel-floor" onchange="app.handleFloorChange(this.value)" disabled required><option value="">Seleccione...</option></select></div></div>
-        <div class="grid-2"><div class="form-group"><label class="form-label">Área *</label><select id="sel-area" onchange="app.handleAreaChange(this.value)" disabled required><option value="">Seleccione...</option></select></div><div class="form-group"><label class="form-label">Habitación</label><select id="sel-room" disabled><option value="">Seleccione...</option></select></div></div>
+        <div class="grid-2"><div class="form-group"><label class="form-label">Área *</label><select id="sel-area" onchange="app.handleAreaChange(this.value)" disabled required><option value="">Seleccione...</option></select></div><div class="form-group"><label class="form-label">Departamento</label><select id="sel-room" disabled><option value="">Seleccione...</option></select></div></div>
         <div class="section-title">Especificaciones Técnicas</div>
         <div class="grid-2"><div class="form-group"><label class="form-label">SO</label><select id="dev-os"><option value=""></option></select></div><div class="form-group"><label class="form-label">Arquitectura</label><select id="dev-arch"><option value=""></option></select></div></div>
         <div class="grid-2"><div class="form-group"><label class="form-label">CPU</label><select id="dev-cpu"><option value=""></option></select></div><div class="form-group"><label class="form-label">RAM</label><select id="dev-ram"><option value=""></option></select></div></div>
@@ -675,7 +675,7 @@
                     { id: 'buildings_infra', label: 'Edificios', endpoint: 'buildings_infra' },
                     { id: 'floors', label: 'Pisos', endpoint: 'floors', parentCollection: 'buildings' },
                     { id: 'areas', label: 'Áreas', endpoint: 'areas', parentCollection: 'floors' },
-                    { id: 'rooms', label: 'Habitaciones', endpoint: 'rooms', parentCollection: 'areas' },
+                    { id: 'rooms', label: 'Departamentos', endpoint: 'rooms', parentCollection: 'areas' },
                     { id: 'brands', label: 'Marcas', endpoint: 'brands' },
                     { id: 'models', label: 'Modelos', endpoint: 'models', parentCollection: 'brands' },
                     { id: 'types', label: 'Tipos de Equipo', endpoint: 'types' },
@@ -1903,7 +1903,7 @@
                             <div class="section-title">COMPROBANTE DE SERVICIO TÉCNICO</div><div style="text-align:right; font-size:9pt; margin-bottom:15px;">Fecha de Impresión: ${fullDate}</div>
                             <div class="section-header">1. Datos del Equipo</div>
                             <table class="info-table"><tr><td class="label">Tipo:</td><td>${t.device_type}</td><td class="label">Marca:</td><td>${t.device_brand || '-/-'}</td></tr><tr><td class="label">Modelo:</td><td>${t.device_model || '-/-'}</td><td class="label">Código Bien:</td><td>${t.device_code || '-/-'}</td></tr><tr><td class="label">Serial:</td><td>${t.device_serial || '-/-'}</td><td class="label">Procesador:</td><td>${t.device_cpu || '-/-'}</td></tr><tr><td class="label">RAM:</td><td>${t.device_ram || '-/-'}</td><td class="label">Almacenamiento:</td><td>${t.device_storage || '-/-'}</td></tr></table>
-                            <div class="section-header" style="margin-top:10px;">2. Ubicación de Origen</div><table class="info-table"><tr><td class="label">Edificio:</td><td>${t.building || '-/-'}</td><td class="label">Piso:</td><td>${t.floor || '-/-'}</td></tr><tr><td class="label">Área:</td><td>${t.area || '-/-'}</td><td class="label">Habitación:</td><td>${t.room || '-/-'}</td></tr></table>
+                            <div class="section-header" style="margin-top:10px;">2. Ubicación de Origen</div><table class="info-table"><tr><td class="label">Edificio:</td><td>${t.building || '-/-'}</td><td class="label">Piso:</td><td>${t.floor || '-/-'}</td></tr><tr><td class="label">Área:</td><td>${t.area || '-/-'}</td><td class="label">Departamento:</td><td>${t.room || '-/-'}</td></tr></table>
                             <div class="section-header" style="margin-top:10px;">3. Detalles del Servicio</div><table class="info-table"><tr><td class="label">Fecha Ingreso:</td><td>${this.fmtDate(t.date_in)}</td><td class="label">Fecha Salida:</td><td>${t.date_out ? this.fmtDate(t.date_out) : 'PENDIENTE'}</td></tr><tr><td class="label">Estado Final:</td><td colspan="3">${t.status === 'repaired' ? 'REPARADO' : (t.status === 'unrepaired' ? 'NO REPARADO' : 'EN TALLER')}</td></tr></table>
                             <div class="section-header" style="margin-top:10px;">4. Motivo de Ingreso / Falla Reportada</div><div class="text-block">${t.details_in || 'Sin detalles registrados.'}</div>
                             <div class="section-header" style="margin-top:10px;">5. Informe Técnico de Salida / Solución</div><div class="text-block" style="min-height:80px;">${t.details_out || 'Sin informe de salida.'}</div>

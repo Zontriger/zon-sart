@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS Area (
 		ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS Habitacion (
+CREATE TABLE IF NOT EXISTS Departamento (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	id_area INTEGER NOT NULL,
 	room TEXT NOT NULL, -- Ej: Jefe de Área
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS Ubicacion (
 	
 	FOREIGN KEY (id_area) REFERENCES Area(id)
 		ON DELETE RESTRICT ON UPDATE CASCADE,
-	FOREIGN KEY (id_room) REFERENCES Habitacion(id)
+	FOREIGN KEY (id_room) REFERENCES Departamento(id)
 		ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
@@ -187,7 +187,7 @@ CREATE TRIGGER IF NOT EXISTS validate_fk_room_belongs_area_ins
 	WHEN NEW.id_room IS NOT NULL
 	BEGIN
 		SELECT CASE 
-			WHEN (SELECT id_area FROM Habitacion WHERE id = NEW.id_room) != NEW.id_area
+			WHEN (SELECT id_area FROM Departamento WHERE id = NEW.id_room) != NEW.id_area
 			THEN RAISE(ABORT, 'Conflicto: La habitación no pertenece al área indicada.')
 		END;
 	END;
@@ -198,7 +198,7 @@ CREATE TRIGGER IF NOT EXISTS validate_fk_room_belongs_area_upd
 	WHEN NEW.id_room IS NOT NULL
 	BEGIN
 		SELECT CASE 
-			WHEN (SELECT id_area FROM Habitacion WHERE id = NEW.id_room) != NEW.id_area
+			WHEN (SELECT id_area FROM Departamento WHERE id = NEW.id_room) != NEW.id_area
 			THEN RAISE(ABORT, 'Conflicto: La habitación no pertenece al área indicada.')
 		END;
 	END;
@@ -215,7 +215,7 @@ CREATE VIEW IF NOT EXISTS Vista_Ubicacion_Completa AS
 	JOIN Area a ON ubi.id_area = a.id
 	JOIN Piso p ON a.id_floor = p.id
 	JOIN Edificio edf ON p.id_building = edf.id
-	LEFT JOIN Habitacion hab ON ubi.id_room = hab.id;
+	LEFT JOIN Departamento hab ON ubi.id_room = hab.id;
 	
 CREATE VIEW IF NOT EXISTS Vista_Datos_Dispositivo_Completo AS
     SELECT 
@@ -299,8 +299,8 @@ INSERT OR IGNORE INTO Area (id_floor, area) VALUES
 ((SELECT id FROM Piso WHERE floor='Piso 01' AND id_building=(SELECT id FROM Edificio WHERE building='Edificio 01')), 'Coordinación'),
 ((SELECT id FROM Piso WHERE floor='Piso 01' AND id_building=(SELECT id FROM Edificio WHERE building='Edificio 02')), 'Archivo');
 
--- Habitaciones
-INSERT OR IGNORE INTO Habitacion (id_area, room) VALUES 
+-- Departamentos
+INSERT OR IGNORE INTO Departamento (id_area, room) VALUES 
 ((SELECT id FROM Area WHERE area='Control de Estudios'), 'Jefe de Área'),
 ((SELECT id FROM Area WHERE area='Control de Estudios'), 'Analista de Ingreso'),
 ((SELECT id FROM Area WHERE area='Área TIC'), 'Soporte Técnico'),
@@ -309,26 +309,26 @@ INSERT OR IGNORE INTO Habitacion (id_area, room) VALUES
 ((SELECT id FROM Area WHERE area='Archivo'), 'Jefe de Área'), -- Nota: Hay otro Jefe de Área pero en distinta Area
 ((SELECT id FROM Area WHERE area='Área TIC'), 'Cuarto de Redes');
 
--- Creación de UBICACIONES (Combinaciones Área-Habitación)
+-- Creación de UBICACIONES (Combinaciones Área-Departamento)
 -- Ubicación 1: Control de Estudios - Jefe de Área
 INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
     (SELECT id FROM Area WHERE area='Control de Estudios'),
-    (SELECT id FROM Habitacion WHERE room='Jefe de Área' AND id_area=(SELECT id FROM Area WHERE area='Control de Estudios'))
+    (SELECT id FROM Departamento WHERE room='Jefe de Área' AND id_area=(SELECT id FROM Area WHERE area='Control de Estudios'))
 );
 -- Ubicación 2: Control de Estudios - Analista de Ingreso
 INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
     (SELECT id FROM Area WHERE area='Control de Estudios'),
-    (SELECT id FROM Habitacion WHERE room='Analista de Ingreso' AND id_area=(SELECT id FROM Area WHERE area='Control de Estudios'))
+    (SELECT id FROM Departamento WHERE room='Analista de Ingreso' AND id_area=(SELECT id FROM Area WHERE area='Control de Estudios'))
 );
 -- Ubicación 3: Área TIC - Soporte Técnico
 INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
     (SELECT id FROM Area WHERE area='Área TIC'),
-    (SELECT id FROM Habitacion WHERE room='Soporte Técnico' AND id_area=(SELECT id FROM Area WHERE area='Área TIC'))
+    (SELECT id FROM Departamento WHERE room='Soporte Técnico' AND id_area=(SELECT id FROM Area WHERE area='Área TIC'))
 );
 -- Ubicación 4: Coordinación - Asistente
 INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
     (SELECT id FROM Area WHERE area='Coordinación'),
-    (SELECT id FROM Habitacion WHERE room='Asistente' AND id_area=(SELECT id FROM Area WHERE area='Coordinación'))
+    (SELECT id FROM Departamento WHERE room='Asistente' AND id_area=(SELECT id FROM Area WHERE area='Coordinación'))
 );
 -- Ubicación 5: Archivo - (SIN HABITACIÓN / PASILLO GENERAL)
 INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
@@ -338,17 +338,17 @@ INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
 -- Ubicación 6: Archivo - Acta y Publicaciones
 INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
     (SELECT id FROM Area WHERE area='Archivo'),
-    (SELECT id FROM Habitacion WHERE room='Acta y Publicaciones' AND id_area=(SELECT id FROM Area WHERE area='Archivo'))
+    (SELECT id FROM Departamento WHERE room='Acta y Publicaciones' AND id_area=(SELECT id FROM Area WHERE area='Archivo'))
 );
 -- Ubicación 7: Archivo - Jefe de Área
 INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
     (SELECT id FROM Area WHERE area='Archivo'),
-    (SELECT id FROM Habitacion WHERE room='Jefe de Área' AND id_area=(SELECT id FROM Area WHERE area='Archivo'))
+    (SELECT id FROM Departamento WHERE room='Jefe de Área' AND id_area=(SELECT id FROM Area WHERE area='Archivo'))
 );
 -- Ubicación 8: Área TIC - Cuarto de Redes
 INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
     (SELECT id FROM Area WHERE area='Área TIC'),
-    (SELECT id FROM Habitacion WHERE room='Cuarto de Redes' AND id_area=(SELECT id FROM Area WHERE area='Área TIC'))
+    (SELECT id FROM Departamento WHERE room='Cuarto de Redes' AND id_area=(SELECT id FROM Area WHERE area='Área TIC'))
 );
 
 -- ==========================================
@@ -358,7 +358,7 @@ INSERT OR IGNORE INTO Ubicacion (id_area, id_room) VALUES (
 -- 1. PC | Control de Estudios | Jefe de Área | 802MXWE0B993
 INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, id_processor, serial) VALUES (
     (SELECT id FROM Tipo WHERE type='PC'),
-    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Control de Estudios' AND h.room='Jefe de Área'),
+    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Departamento h ON u.id_room=h.id WHERE a.area='Control de Estudios' AND h.room='Jefe de Área'),
     (SELECT id FROM Sistema_Operativo WHERE os='Win 7'),
     (SELECT id FROM RAM WHERE ram='4 GB'),
     '64 bits',
@@ -370,7 +370,7 @@ INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, 
 -- 2. PC | Control de Estudios | Analista de Ingreso | CN9352W80
 INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, id_processor, serial) VALUES (
     (SELECT id FROM Tipo WHERE type='PC'),
-    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Control de Estudios' AND h.room='Analista de Ingreso'),
+    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Departamento h ON u.id_room=h.id WHERE a.area='Control de Estudios' AND h.room='Analista de Ingreso'),
     (SELECT id FROM Sistema_Operativo WHERE os='Win 10'),
     (SELECT id FROM RAM WHERE ram='2 GB'),
     '64 bits',
@@ -382,7 +382,7 @@ INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, 
 -- 3. PC | Control de Estudios | Analista de Ingreso | C18D7BA005546
 INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, id_processor, serial) VALUES (
     (SELECT id FROM Tipo WHERE type='PC'),
-    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Control de Estudios' AND h.room='Analista de Ingreso'),
+    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Departamento h ON u.id_room=h.id WHERE a.area='Control de Estudios' AND h.room='Analista de Ingreso'),
     (SELECT id FROM Sistema_Operativo WHERE os='Win 11'),
     (SELECT id FROM RAM WHERE ram='2 GB'),
     '32 bits',
@@ -395,7 +395,7 @@ INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, 
 INSERT INTO Dispositivo (code, id_type, id_location, id_brand, id_os, id_ram, arch, id_storage, id_processor, serial) VALUES (
     '4073',
     (SELECT id FROM Tipo WHERE type='PC'),
-    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Área TIC' AND h.room='Soporte Técnico'),
+    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Departamento h ON u.id_room=h.id WHERE a.area='Área TIC' AND h.room='Soporte Técnico'),
     (SELECT id FROM Marca WHERE brand='Dell'),
     (SELECT id FROM Sistema_Operativo WHERE os='Linux'),
     (SELECT id FROM RAM WHERE ram='1 GB'),
@@ -408,7 +408,7 @@ INSERT INTO Dispositivo (code, id_type, id_location, id_brand, id_os, id_ram, ar
 -- 5. PC | Coordinación | Asistente | CNC141QNT2
 INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, id_processor, serial) VALUES (
     (SELECT id FROM Tipo WHERE type='PC'),
-    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Coordinación' AND h.room='Asistente'),
+    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Departamento h ON u.id_room=h.id WHERE a.area='Coordinación' AND h.room='Asistente'),
     (SELECT id FROM Sistema_Operativo WHERE os='Win 10'),
     (SELECT id FROM RAM WHERE ram='2 GB'),
     '32 bits',
@@ -417,7 +417,7 @@ INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, 
     'CNC141QNT2'
 );
 
--- 6. PC | Archivo | (Sin Habitación) | (Sin Serial)
+-- 6. PC | Archivo | (Sin Departamento) | (Sin Serial)
 INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage) VALUES (
     (SELECT id FROM Tipo WHERE type='PC'),
     (SELECT id FROM Ubicacion WHERE id_area=(SELECT id FROM Area WHERE area='Archivo') AND id_room IS NULL),
@@ -430,7 +430,7 @@ INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage) 
 -- 7. PC | Archivo | Acta y Publicaciones | (Sin Serial)
 INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, id_processor) VALUES (
     (SELECT id FROM Tipo WHERE type='PC'),
-    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Archivo' AND h.room='Acta y Publicaciones'),
+    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Departamento h ON u.id_room=h.id WHERE a.area='Archivo' AND h.room='Acta y Publicaciones'),
     (SELECT id FROM Sistema_Operativo WHERE os='Win 10'),
     (SELECT id FROM RAM WHERE ram='2 GB'),
     '64 bits',
@@ -441,7 +441,7 @@ INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, 
 -- 8. PC | Archivo | Acta y Publicaciones | (Sin Serial, diferente RAM/CPU)
 INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, id_processor) VALUES (
     (SELECT id FROM Tipo WHERE type='PC'),
-    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Archivo' AND h.room='Acta y Publicaciones'),
+    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Departamento h ON u.id_room=h.id WHERE a.area='Archivo' AND h.room='Acta y Publicaciones'),
     (SELECT id FROM Sistema_Operativo WHERE os='Win 7'),
     (SELECT id FROM RAM WHERE ram='1.5 GB'),
     '32 bits',
@@ -452,7 +452,7 @@ INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, 
 -- 9. PC | Archivo | Jefe de Área | P/NMW9BBK
 INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, id_processor, serial) VALUES (
     (SELECT id FROM Tipo WHERE type='PC'),
-    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Archivo' AND h.room='Jefe de Área'),
+    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Departamento h ON u.id_room=h.id WHERE a.area='Archivo' AND h.room='Jefe de Área'),
     (SELECT id FROM Sistema_Operativo WHERE os='Win 7'),
     (SELECT id FROM RAM WHERE ram='2 GB'),
     '32 bits',
@@ -465,7 +465,7 @@ INSERT INTO Dispositivo (id_type, id_location, id_os, id_ram, arch, id_storage, 
 INSERT INTO Dispositivo (code, id_type, id_location, id_brand, id_model, serial) VALUES (
     '708',
     (SELECT id FROM Tipo WHERE type='Modem'),
-    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Área TIC' AND h.room='Soporte Técnico'),
+    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Departamento h ON u.id_room=h.id WHERE a.area='Área TIC' AND h.room='Soporte Técnico'),
     (SELECT id FROM Marca WHERE brand='Huawei'),
     (SELECT id FROM Modelo WHERE model='AR 157'),
     '210235384810'
@@ -474,7 +474,7 @@ INSERT INTO Dispositivo (code, id_type, id_location, id_brand, id_model, serial)
 -- 11. Modem | Área TIC | Soporte Técnico | CANTV | (Sin Modelo, Sin Serial)
 INSERT INTO Dispositivo (id_type, id_location, id_brand) VALUES (
     (SELECT id FROM Tipo WHERE type='Modem'),
-    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Área TIC' AND h.room='Soporte Técnico'),
+    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Departamento h ON u.id_room=h.id WHERE a.area='Área TIC' AND h.room='Soporte Técnico'),
     (SELECT id FROM Marca WHERE brand='CANTV')
 );
 
@@ -482,7 +482,7 @@ INSERT INTO Dispositivo (id_type, id_location, id_brand) VALUES (
 INSERT INTO Dispositivo (code, id_type, id_location, id_brand, id_model, serial) VALUES (
     '725',
     (SELECT id FROM Tipo WHERE type='Switch'),
-    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Habitacion h ON u.id_room=h.id WHERE a.area='Área TIC' AND h.room='Cuarto de Redes'),
+    (SELECT u.id FROM Ubicacion u JOIN Area a ON u.id_area=a.id JOIN Departamento h ON u.id_room=h.id WHERE a.area='Área TIC' AND h.room='Cuarto de Redes'),
     (SELECT id FROM Marca WHERE brand='TP-Link'),
     (SELECT id FROM Modelo WHERE model='SF1016D'),
     'Y21CO30000672'
