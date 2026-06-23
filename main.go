@@ -16,7 +16,7 @@ import (
 	"strings"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 
@@ -295,7 +295,7 @@ func initDB() {
 
 	// 4. Abrir SQLite usando la ruta absoluta
 	var err error
-	db, err = sql.Open("sqlite3", dbPath)
+	db, err = sql.Open("sqlite", dbPath)
 	if err != nil {
 		log.Fatal("Error fatal abriendo DB:", err)
 	}
@@ -941,7 +941,7 @@ func handleSpecs(w http.ResponseWriter, r *http.Request) {
 		RAMs:          getSelectItems("RAM", "ram"),
 		Storages:      getSelectItems("Almacenamiento", "storage"),
 		Processors:    getSelectItems("Procesador", "processor"),
-		Architectures: []SelectItem{{ID: 1, Value: "32 bits"}, {ID: 2, Value: "64 bits"}},
+		Architectures: []SelectItem{{ID: "32 bits", Value: "32 bits"}, {ID: "64 bits", Value: "64 bits"}},
 	}
 	respondJSON(w, map[string]interface{}{"success": true, "data": resp})
 }
