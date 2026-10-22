@@ -16,7 +16,7 @@ import (
 	"strings"
 	"time"
 
-	_ "modernc.org/sqlite"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 
@@ -295,7 +295,7 @@ func initDB() {
 
 	// 4. Abrir SQLite usando la ruta absoluta
 	var err error
-	db, err = sql.Open("sqlite", dbPath)
+	db, err = sql.Open("sqlite3", dbPath)
 	if err != nil {
 		log.Fatal("Error fatal abriendo DB:", err)
 	}
